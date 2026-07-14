@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://dj2qvdmc3lcmv"]
+
+[ext_resource type="PackedScene" uid="uid://dil4wgp7t3ybo" path="res://Asset/character/mouse01/mouse01.glb" id="1_bibxf"]
+[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_yhtvq"]
+[ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Asset/character/mouse01/mouse01.gd" id="3_os0wa"]
+[ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Asset/character/mouse01/mouse01_damage_receiver.gd" id="4_dqao1"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_mti6b"]
+radius = 0.7260242
+
+[node name="mouse01" type="Node3D" unique_id=1987770555]
+script = ExtResource("3_os0wa")
+max_health = 5
+
+[node name="mouse01" parent="." unique_id=914325302 instance=ExtResource("1_bibxf")]
+
+[node name="Skeleton3D" parent="mouse01/Armature" parent_id_path=PackedInt32Array(914325302, 830782115) index="0" unique_id=1513107063]
+bones/2/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
+bones/3/rotation = Quaternion(-0.7071065, 0, 0.7071072, 0)
+bones/4/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
+
+[node name="body" parent="mouse01/Armature/Skeleton3D" index="0" unique_id=917554978]
+surface_material_override/0 = ExtResource("2_yhtvq")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1079959090]
+script = ExtResource("4_dqao1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1333617331]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7253816, 0)
+shape = SubResource("SphereShape3D_mti6b")
+
+[editable path="mouse01"]

@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://gy2nqvfermwd"]
+
+[ext_resource type="PackedScene" uid="uid://bd27d4xox12df" path="res://Asset/environment/environment_prototype01.tscn" id="1_jin3s"]
+[ext_resource type="PackedScene" uid="uid://bcicy8ebmq0jo" path="res://Asset/character/chicken01/chicken01.tscn" id="2_4fa47"]
+[ext_resource type="Script" uid="uid://bbcc5d0litwvb" path="res://Asset/GameplayCamera.gd" id="3_nhh1a"]
+[ext_resource type="PackedScene" uid="uid://dj2qvdmc3lcmv" path="res://Asset/character/mouse01/mouse01.tscn" id="4_fklpt"]
+
+[sub_resource type="Environment" id="Environment_4kxuq"]
+ambient_light_source = 2
+ambient_light_color = Color(0.47538245, 0.7244997, 0.983267, 1)
+
+[node name="Node3D" type="Node3D" unique_id=129724868]
+
+[node name="world" type="Node3D" parent="." unique_id=580497908]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="world" unique_id=171121612]
+environment = SubResource("Environment_4kxuq")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="world" unique_id=1416725517]
+transform = Transform3D(0.8660254, -0.24999999, -0.43301272, 0.5, 0.43301266, 0.75, 0, -0.86602545, 0.49999997, 0, 6.4843073, 0)
+shadow_enabled = true
+shadow_opacity = 0.6
+
+[node name="Camera3D" type="Camera3D" parent="world" unique_id=1915048110]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.70710677, 0, 26.15118, 25.622486)
+fov = 25.0
+script = ExtResource("3_nhh1a")
+target_path = NodePath("../../chicken01")
+follow_offset = Vector3(0, 35, 35)
+spring_strength = 20.0
+
+[node name="environment_prototype01" parent="." unique_id=1106640842 instance=ExtResource("1_jin3s")]
+
+[node name="chicken01" parent="." unique_id=291576543 instance=ExtResource("2_4fa47")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.030096292, 0)
+
+[node name="mouse01" parent="." instance=ExtResource("4_fklpt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)

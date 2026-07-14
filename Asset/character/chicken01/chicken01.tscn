@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://bcicy8ebmq0jo"]
+
+[ext_resource type="PackedScene" uid="uid://cbfpl8xeg1u5h" path="res://Asset/character/chicken01/chicken01.glb" id="1_vu6b7"]
+[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="3_ht5rd"]
+[ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Asset/character/chicken01/chicken01.gd" id="3_pwh2x"]
+[ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust.tscn" id="4_6w3vu"]
+[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark01.tscn" id="5_r1bvn"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jin3s"]
+radius = 0.6303711
+height = 1.7294922
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_attack_hitbox"]
+size = Vector3(1.2, 1, 1.2)
+
+[node name="chicken01" type="Node3D" unique_id=291576543]
+script = ExtResource("3_pwh2x")
+move_speed = 6.0
+turn_speed = 8.0
+step_height = 0.2
+slide_duration = 0.15
+dash_duration = 0.5
+dash_distance = 6.0
+dash_slowdown_power = 2.0
+hit_spark_scene = ExtResource("5_r1bvn")
+
+[node name="chicken01" parent="." unique_id=1857688968 instance=ExtResource("1_vu6b7")]
+
+[node name="body" parent="chicken01/Armature/Skeleton3D" parent_id_path=PackedInt32Array(1857688968, 224210054) index="0" unique_id=1561601933]
+surface_material_override/0 = ExtResource("3_ht5rd")
+
+[node name="DashDust" parent="." unique_id=1507512813 instance=ExtResource("4_6w3vu")]
+
+[node name="AttackHitbox" type="Area3D" parent="." unique_id=837682195]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0.95)
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackHitbox" unique_id=1853703053]
+shape = SubResource("BoxShape3D_attack_hitbox")
+disabled = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=65161421]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7300399, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=670380530]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1352539, 0)
+shape = SubResource("CapsuleShape3D_jin3s")
+
+[editable path="chicken01"]

@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://c2j70j25dh160"]
+
+[ext_resource type="Material" uid="uid://xarggrfvbum" path="res://Asset/sfx/dust01.material" id="1_p8p5a"]
+[ext_resource type="Mesh" path="res://Asset/sfx/dust.res" id="2_h3fgs"]
+
+[sub_resource type="Curve" id="Curve_tegp5"]
+_data = [Vector2(0, 0), 0.0, 9.357823, 0, 0, Vector2(0.31615123, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.0805688, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_5wvvk"]
+curve = SubResource("Curve_tegp5")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_5wvvk"]
+emission_shape = 1
+emission_sphere_radius = 0.7
+direction = Vector3(0, -1, 0)
+spread = 90.0
+initial_velocity_min = 0.01
+initial_velocity_max = 0.02
+gravity = Vector3(0, 0.5, 0)
+scale_min = 1.4
+scale_curve = SubResource("CurveTexture_5wvvk")
+
+[node name="Dust" type="Node3D" unique_id=1495796045]
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=1432838648]
+material_override = ExtResource("1_p8p5a")
+emitting = false
+amount = 30
+lifetime = 0.8
+one_shot = false
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_5wvvk")
+draw_pass_1 = ExtResource("2_h3fgs")
