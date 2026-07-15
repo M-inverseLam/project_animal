@@ -1,4 +1,4 @@
-extends Node3D
+extends CharacterBody3D
 
 @export var move_speed: float = 4.0
 @export var turn_speed: float = 12.0
@@ -15,7 +15,14 @@ extends Node3D
 @export var dash_animation_name: String = "dash"
 @export var dash_duration: float = 1.0
 @export var dash_distance: float = 5.0
+@export var dash_damage: int = 1
 @export var dash_slowdown_power: float = 4.0
+@export var dash_bounce_back_distance: float = 1.4
+@export var dash_bounce_back_duration: float = 0.25
+@export var dash_bounce_back_slowdown_power: float = 2.5
+@export var dash_cooldown: float = 0.5
+@export var dash_hit_camera_shake_duration: float = 0.5
+@export var dash_hit_camera_shake_strength: float = 0.45
 @export var hit_spark_scene: PackedScene
 @export var hit_spark_height: float = 0.8
 
@@ -24,6 +31,8 @@ extends Node3D
 @onready var dash_dust := get_node_or_null("DashDust/GPUParticles3D") as GPUParticles3D
 @onready var attack_hitbox := get_node_or_null("AttackHitbox") as Area3D
 @onready var attack_hitbox_shape := get_node_or_null("AttackHitbox/CollisionShape3D") as CollisionShape3D
+@onready var dash_hitbox := get_node_or_null("DashHitbox") as Area3D
+@onready var dash_hitbox_shape := get_node_or_null("DashHitbox/CollisionShape3D") as CollisionShape3D
 
 var _current_animation := ""
 var _visual_start_position := Vector3.ZERO
@@ -40,7 +49,12 @@ var _dash_time_left := 0.0
 var _dash_elapsed := 0.0
 var _dash_distance_ratio := 0.0
 var _dash_direction := Vector3.ZERO
+var _is_dash_bouncing_back := false
+var _dash_bounce_elapsed := 0.0
+var _dash_bounce_distance_ratio := 0.0
+var _dash_cooldown_time_left := 0.0
 var _attack_hit_targets: Array[Node] = []
+var _dash_hit_targets: Array[Node] = []
 
 
 func _ready() -> void:
@@ -52,12 +66,17 @@ func _ready() -> void:
 	if attack_hitbox != null:
 		attack_hitbox.body_entered.connect(_on_attack_hitbox_body_entered)
 		attack_hitbox.area_entered.connect(_on_attack_hitbox_area_entered)
+	if dash_hitbox != null:
+		dash_hitbox.body_entered.connect(_on_dash_hitbox_body_entered)
+		dash_hitbox.area_entered.connect(_on_dash_hitbox_area_entered)
 	_set_attack_hitbox_enabled(false)
+	_set_dash_hitbox_enabled(false)
 	_stop_dash_dust()
 	_play_animation("idle")
 
 
 func _physics_process(delta: float) -> void:
+	_update_dash_cooldown(delta)
 	_update_attack_input()
 	_update_dash_input()
 	_update_attack_hitbox(delta)
@@ -81,7 +100,7 @@ func _physics_process(delta: float) -> void:
 		_last_movement = Vector3.ZERO
 
 	if movement != Vector3.ZERO:
-		global_position += movement * move_speed * delta
+		_move_with_collision(movement * move_speed * delta, delta)
 		if not is_sliding:
 			_face_direction(movement, delta)
 			_animate_walk(delta)
@@ -130,6 +149,11 @@ func _update_dash_input() -> void:
 	_dash_key_was_pressed = dash_key_is_pressed
 
 
+func _update_dash_cooldown(delta: float) -> void:
+	if _dash_cooldown_time_left > 0.0:
+		_dash_cooldown_time_left = maxf(_dash_cooldown_time_left - delta, 0.0)
+
+
 func _start_attack() -> void:
 	if _is_dashing:
 		return
@@ -146,6 +170,8 @@ func _start_attack() -> void:
 func _start_dash() -> void:
 	if _is_dashing:
 		return
+	if _dash_cooldown_time_left > 0.0:
+		return
 
 	_stop_attack()
 	_is_dashing = true
@@ -153,15 +179,24 @@ func _start_dash() -> void:
 	_dash_elapsed = 0.0
 	_dash_distance_ratio = 0.0
 	_dash_direction = _get_dash_direction()
+	_is_dash_bouncing_back = false
+	_dash_bounce_elapsed = 0.0
+	_dash_bounce_distance_ratio = 0.0
 	_last_movement = _dash_direction
 	_slide_time_left = 0.0
+	_dash_hit_targets.clear()
 
 	_reset_walk_pose(get_physics_process_delta_time())
+	_set_dash_hitbox_enabled(true)
 	_start_dash_dust()
 	_play_animation(dash_animation_name, true)
 
 
 func _process_dash(delta: float) -> void:
+	if _is_dash_bouncing_back:
+		_process_dash_bounce_back(delta)
+		return
+
 	if dash_duration <= 0.0 or dash_distance <= 0.0:
 		_stop_dash()
 		return
@@ -172,11 +207,30 @@ func _process_dash(delta: float) -> void:
 	var distance_ratio := 1.0 - pow(1.0 - progress, slowdown_power)
 	var frame_distance := (distance_ratio - _dash_distance_ratio) * dash_distance
 
-	global_position += _dash_direction * frame_distance
+	_move_with_collision(_dash_direction * frame_distance, delta)
 	_dash_distance_ratio = distance_ratio
 	_dash_time_left = maxf(_dash_time_left - delta, 0.0)
+	_apply_current_dash_overlaps()
 
 	if _dash_time_left <= 0.0:
+		_stop_dash()
+
+
+func _process_dash_bounce_back(delta: float) -> void:
+	if dash_bounce_back_duration <= 0.0 or dash_bounce_back_distance <= 0.0:
+		_stop_dash()
+		return
+
+	_dash_bounce_elapsed = minf(_dash_bounce_elapsed + delta, dash_bounce_back_duration)
+	var progress := _dash_bounce_elapsed / dash_bounce_back_duration
+	var slowdown_power := maxf(dash_bounce_back_slowdown_power, 1.0)
+	var distance_ratio := 1.0 - pow(1.0 - progress, slowdown_power)
+	var frame_distance := (distance_ratio - _dash_bounce_distance_ratio) * dash_bounce_back_distance
+
+	_move_with_collision(-_dash_direction * frame_distance, delta)
+	_dash_bounce_distance_ratio = distance_ratio
+
+	if _dash_bounce_elapsed >= dash_bounce_back_duration:
 		_stop_dash()
 
 
@@ -185,12 +239,28 @@ func _stop_dash() -> void:
 	_dash_time_left = 0.0
 	_dash_elapsed = 0.0
 	_dash_distance_ratio = 0.0
+	_is_dash_bouncing_back = false
+	_dash_bounce_elapsed = 0.0
+	_dash_bounce_distance_ratio = 0.0
+	_dash_hit_targets.clear()
+	_set_dash_hitbox_enabled(false)
 	_stop_dash_dust()
+	_dash_cooldown_time_left = dash_cooldown
 	_current_animation = ""
 
 
 func _get_dash_direction() -> Vector3:
 	return global_transform.basis.z.normalized()
+
+
+func _move_with_collision(displacement: Vector3, delta: float) -> void:
+	if delta <= 0.0:
+		return
+
+	velocity = displacement / delta
+	velocity.y = 0.0
+	move_and_slide()
+	velocity = Vector3.ZERO
 
 
 func _update_attack_hitbox(delta: float) -> void:
@@ -226,13 +296,22 @@ func _stop_attack() -> void:
 
 func _set_attack_hitbox_enabled(is_enabled: bool) -> void:
 	if attack_hitbox != null:
-		attack_hitbox.monitoring = is_enabled
+		attack_hitbox.set_deferred("monitoring", is_enabled)
 	if attack_hitbox_shape != null:
-		attack_hitbox_shape.disabled = not is_enabled
+		attack_hitbox_shape.set_deferred("disabled", not is_enabled)
+
+
+func _set_dash_hitbox_enabled(is_enabled: bool) -> void:
+	if dash_hitbox != null:
+		dash_hitbox.set_deferred("monitoring", is_enabled)
+	if dash_hitbox_shape != null:
+		dash_hitbox_shape.set_deferred("disabled", not is_enabled)
 
 
 func _apply_current_attack_overlaps() -> void:
 	if attack_hitbox == null:
+		return
+	if not attack_hitbox.monitoring:
 		return
 
 	for body in attack_hitbox.get_overlapping_bodies():
@@ -261,6 +340,66 @@ func _apply_attack_hit(target: Node) -> void:
 	if target.has_method("take_damage"):
 		target.call("take_damage", attack_damage)
 		_spawn_hit_spark(target)
+
+
+func _apply_current_dash_overlaps() -> void:
+	if dash_hitbox == null:
+		return
+	if not dash_hitbox.monitoring:
+		return
+	if _is_dash_bouncing_back:
+		return
+
+	for body in dash_hitbox.get_overlapping_bodies():
+		_apply_dash_hit(body)
+	for area in dash_hitbox.get_overlapping_areas():
+		_apply_dash_hit(area)
+
+
+func _on_dash_hitbox_body_entered(body: Node3D) -> void:
+	_apply_dash_hit(body)
+
+
+func _on_dash_hitbox_area_entered(area: Area3D) -> void:
+	_apply_dash_hit(area)
+
+
+func _apply_dash_hit(target: Node) -> void:
+	if not _is_dashing:
+		return
+	if target == self or is_ancestor_of(target) or target.is_ancestor_of(self):
+		return
+	if _dash_hit_targets.has(target):
+		return
+
+	_dash_hit_targets.append(target)
+	if target.has_method("take_dash_hit"):
+		target.call("take_dash_hit", _dash_direction, dash_damage)
+		_spawn_hit_spark(target)
+		_shake_camera_on_dash_hit()
+		_start_dash_bounce_back()
+	elif target.has_method("take_damage"):
+		target.call("take_damage", dash_damage)
+		_spawn_hit_spark(target)
+		_shake_camera_on_dash_hit()
+		_start_dash_bounce_back()
+
+
+func _start_dash_bounce_back() -> void:
+	if _is_dash_bouncing_back:
+		return
+
+	_is_dash_bouncing_back = true
+	_dash_bounce_elapsed = 0.0
+	_dash_bounce_distance_ratio = 0.0
+	_dash_time_left = 0.0
+	_set_dash_hitbox_enabled(false)
+
+
+func _shake_camera_on_dash_hit() -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera != null and camera.has_method("shake"):
+		camera.call("shake", dash_hit_camera_shake_duration, dash_hit_camera_shake_strength)
 
 
 func _spawn_hit_spark(target: Node) -> void:

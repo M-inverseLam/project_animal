@@ -16,7 +16,7 @@ shader_parameter/y_scale = 0.2
 shader_parameter/z_scale = 1.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_4kxuq"]
-size = Vector2(50, 50)
+size = Vector2(100, 100)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4kxuq"]
 size = Vector3(50.388733, 2.0299072, 50.08557)

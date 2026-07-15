@@ -8,3 +8,8 @@ extends StaticBody3D
 func take_damage(damage: int) -> void:
 	if damage_target != null and damage_target.has_method("take_damage"):
 		damage_target.call("take_damage", damage)
+
+
+func take_dash_hit(direction: Vector3, damage: int) -> void:
+	if damage_target != null and damage_target.has_method("take_dash_hit"):
+		damage_target.call("take_dash_hit", direction, damage)

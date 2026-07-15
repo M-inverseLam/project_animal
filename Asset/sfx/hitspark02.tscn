@@ -1,0 +1,106 @@
+[gd_scene format=3 uid="uid://b4t37gb6ddnns"]
+
+[ext_resource type="Texture2D" uid="uid://dfwb0iddwh3q" path="res://Asset/sfx/hitspark02a.tga" id="1_1nql6"]
+[ext_resource type="Texture2D" uid="uid://dw1ayc068weov" path="res://Asset/sfx/hitspark02b.tga" id="2_wabce"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e5obg"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+no_depth_test = true
+vertex_color_use_as_albedo = true
+albedo_color = Color(2, 2, 2, 1)
+albedo_texture = ExtResource("1_1nql6")
+billboard_mode = 1
+billboard_keep_scale = true
+
+[sub_resource type="Curve" id="Curve_wabce"]
+_data = [Vector2(0, 0), 0.0, 27.683617, 0, 0, Vector2(0.09278351, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.4715546, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_e5obg"]
+curve = SubResource("Curve_wabce")
+
+[sub_resource type="Curve" id="Curve_yy7o3"]
+_data = [Vector2(0, 0), 0.0, 5.1504407, 0, 0, Vector2(0.24398626, 0.7345132), 1.0925188, 1.0925188, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_ocwqu"]
+curve = SubResource("Curve_yy7o3")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_1jkma"]
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("CurveTexture_ocwqu")
+alpha_curve = SubResource("CurveTexture_e5obg")
+
+[sub_resource type="QuadMesh" id="QuadMesh_wabce"]
+size = Vector2(3, 3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mtrak"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+no_depth_test = true
+vertex_color_use_as_albedo = true
+albedo_color = Color(2, 2, 2, 1)
+albedo_texture = ExtResource("2_wabce")
+billboard_mode = 1
+billboard_keep_scale = true
+
+[sub_resource type="Curve" id="Curve_pvq37"]
+_data = [Vector2(0, 0), 0.0, 10.860287, 0, 0, Vector2(0.10996564, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.042106, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_hjok4"]
+curve = SubResource("Curve_pvq37")
+
+[sub_resource type="Curve" id="Curve_e5obg"]
+_limits = [-360.0, 360.0, 0.0, 1.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_wabce"]
+curve = SubResource("Curve_e5obg")
+
+[sub_resource type="Curve" id="Curve_bmp2w"]
+_data = [Vector2(0, 0), 0.0, 5.1504407, 0, 0, Vector2(0.20274915, 0.8141593), 0.5568043, 0.5568043, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_svfu8"]
+curve = SubResource("Curve_bmp2w")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_1nql6"]
+angle_min = -180.0
+angle_max = 180.0
+angle_curve = SubResource("CurveTexture_wabce")
+use_rotation_3d = true
+rotation_3d_min = Vector3(0, 0, -180)
+rotation_3d_max = Vector3(0, 0, 180)
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("CurveTexture_svfu8")
+alpha_curve = SubResource("CurveTexture_hjok4")
+
+[sub_resource type="QuadMesh" id="QuadMesh_svfu8"]
+size = Vector2(6, 6)
+
+[node name="Node3D" type="Node3D" unique_id=822129534]
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=293211926]
+sorting_offset = 5.0
+material_override = SubResource("StandardMaterial3D_e5obg")
+emitting = false
+amount = 1
+lifetime = 0.45
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_1jkma")
+draw_pass_1 = SubResource("QuadMesh_wabce")
+
+[node name="GPUParticles3D2" type="GPUParticles3D" parent="." unique_id=1351460448]
+sorting_offset = 5.0
+material_override = SubResource("StandardMaterial3D_mtrak")
+emitting = false
+amount = 1
+one_shot = true
+randomness = 1.0
+process_material = SubResource("ParticleProcessMaterial_1nql6")
+draw_pass_1 = SubResource("QuadMesh_svfu8")

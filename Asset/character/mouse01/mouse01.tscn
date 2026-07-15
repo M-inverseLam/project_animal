@@ -1,25 +1,41 @@
 [gd_scene format=3 uid="uid://dj2qvdmc3lcmv"]
 
 [ext_resource type="PackedScene" uid="uid://dil4wgp7t3ybo" path="res://Asset/character/mouse01/mouse01.glb" id="1_bibxf"]
+[ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_j6xua"]
 [ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_yhtvq"]
 [ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Asset/character/mouse01/mouse01.gd" id="3_os0wa"]
 [ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Asset/character/mouse01/mouse01_damage_receiver.gd" id="4_dqao1"]
+[ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark02.tscn" id="5_d8v3k"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_mti6b"]
 radius = 0.7260242
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_4kxuq"]
+height = 3.9692383
+radius = 8.82959
+
 [node name="mouse01" type="Node3D" unique_id=1987770555]
 script = ExtResource("3_os0wa")
 max_health = 5
+walk_speed = 1.5
+dash_hit_push_distance = 5.0
+dash_hit_push_duration = 1.0
+dash_hit_push_slowdown_power = 5.0
+damage_number_rise = 2.0
+damage_number_duration = 1.0
+damage_number_font = ExtResource("2_j6xua")
+damage_number_font_size = 120
+damage_number_color = Color(1, 1, 1, 1)
+death_spark_scene = ExtResource("5_d8v3k")
 
 [node name="mouse01" parent="." unique_id=914325302 instance=ExtResource("1_bibxf")]
 
-[node name="Skeleton3D" parent="mouse01/Armature" parent_id_path=PackedInt32Array(914325302, 830782115) index="0" unique_id=1513107063]
+[node name="Skeleton3D" parent="mouse01/Armature" parent_id_path=PackedInt32Array(914325302, 1104114350) index="0" unique_id=1398691041]
 bones/2/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
 bones/3/rotation = Quaternion(-0.7071065, 0, 0.7071072, 0)
 bones/4/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
 
-[node name="body" parent="mouse01/Armature/Skeleton3D" index="0" unique_id=917554978]
+[node name="body" parent="mouse01/Armature/Skeleton3D" index="0" unique_id=331200278]
 surface_material_override/0 = ExtResource("2_yhtvq")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1079959090]
@@ -28,5 +44,12 @@ script = ExtResource("4_dqao1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1333617331]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7253816, 0)
 shape = SubResource("SphereShape3D_mti6b")
+
+[node name="playerdetection" type="Area3D" parent="." unique_id=50861510]
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="playerdetection" unique_id=1561753347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98461914, 0)
+shape = SubResource("CylinderShape3D_4kxuq")
 
 [editable path="mouse01"]
