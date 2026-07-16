@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://27dbmplqek24"]
+
+[ext_resource type="PackedScene" uid="uid://cbovseo1e5dyf" path="res://Asset/stage/castle/floor01.glb" id="1_3pvqf"]
+[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_ew6ol"]
+
+[node name="floor01" type="Node3D" unique_id=1187278167]
+
+[node name="floor01" parent="." unique_id=1987132927 instance=ExtResource("1_3pvqf")]
+
+[node name="floor01" parent="floor01" index="0" unique_id=268069798]
+surface_material_override/0 = ExtResource("2_ew6ol")
+
+[node name="floor01-col" parent="floor01" index="1" unique_id=1476292313]
+visible = false
+
+[editable path="floor01"]

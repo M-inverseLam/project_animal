@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://8v2e68i4lfde"]
+
+[ext_resource type="PackedScene" uid="uid://dxyqa1su6dc00" path="res://Asset/stage/castle/wall_pillar01.glb" id="1_kgp0q"]
+[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_3u4im"]
+
+[node name="wall_pillar01" type="Node3D" unique_id=748420639]
+
+[node name="wall_pillar01" parent="." unique_id=905752463 instance=ExtResource("1_kgp0q")]
+
+[node name="wall_pillar01" parent="wall_pillar01" index="0" unique_id=1064312643]
+surface_material_override/0 = ExtResource("2_3u4im")
+
+[node name="wall_pillar01-col" parent="wall_pillar01" index="1" unique_id=20030596]
+visible = false
+
+[editable path="wall_pillar01"]

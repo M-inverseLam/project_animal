@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Asset/character/mouse01/mouse01.gd" id="3_os0wa"]
 [ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Asset/character/mouse01/mouse01_damage_receiver.gd" id="4_dqao1"]
 [ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark02.tscn" id="5_d8v3k"]
+[ext_resource type="PackedScene" uid="uid://c5svw8lgdf8um" path="res://Asset/item/gems01.tscn" id="6_own4y"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_mti6b"]
 radius = 0.7260242
@@ -18,6 +19,10 @@ radius = 8.82959
 script = ExtResource("3_os0wa")
 max_health = 5
 walk_speed = 1.5
+idle_time_min = 1.0
+idle_time_max = 1.5
+attack_hit_push_distance = 1.5
+attack_hit_push_slowdown_power = 3.0
 dash_hit_push_distance = 5.0
 dash_hit_push_duration = 1.0
 dash_hit_push_slowdown_power = 5.0
@@ -27,15 +32,16 @@ damage_number_font = ExtResource("2_j6xua")
 damage_number_font_size = 120
 damage_number_color = Color(1, 1, 1, 1)
 death_spark_scene = ExtResource("5_d8v3k")
+death_drop_scene = ExtResource("6_own4y")
 
 [node name="mouse01" parent="." unique_id=914325302 instance=ExtResource("1_bibxf")]
 
-[node name="Skeleton3D" parent="mouse01/Armature" parent_id_path=PackedInt32Array(914325302, 1104114350) index="0" unique_id=1398691041]
+[node name="Skeleton3D" parent="mouse01/Armature" parent_id_path=PackedInt32Array(914325302, 1374255771) index="0" unique_id=1496087432]
 bones/2/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
 bones/3/rotation = Quaternion(-0.7071065, 0, 0.7071072, 0)
 bones/4/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
 
-[node name="body" parent="mouse01/Armature/Skeleton3D" index="0" unique_id=331200278]
+[node name="body" parent="mouse01/Armature/Skeleton3D" index="0" unique_id=447228997]
 surface_material_override/0 = ExtResource("2_yhtvq")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1079959090]

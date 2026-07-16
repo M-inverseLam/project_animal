@@ -13,7 +13,7 @@ billboard_mode = 1
 billboard_keep_scale = true
 
 [sub_resource type="Curve" id="Curve_pvq37"]
-_data = [Vector2(0, 0), 0.0, 8.68631, 0, 0, Vector2(0.21122113, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.3057365, 0.0, 0, 0]
+_data = [Vector2(0, 0), 0.0, 8.68631, 0, 0, Vector2(0.21122113, 1), -1.339804, -1.339804, 0, 0, Vector2(1, 0), -0.19021758, 0.0, 0, 0]
 point_count = 3
 
 [sub_resource type="CurveTexture" id="CurveTexture_hjok4"]

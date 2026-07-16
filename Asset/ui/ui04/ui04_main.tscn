@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://qvtqchh8es53"]
+
+[ext_resource type="Texture2D" uid="uid://c1iwbrf4dtc4b" path="res://Asset/ui/ui04/ui04_main_icon_heath.tga" id="1_ycw01"]
+[ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_bx36w"]
+
+[sub_resource type="Theme" id="Theme_ycw01"]
+default_font = ExtResource("2_bx36w")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bx36w"]
+bg_color = Color(0.87629503, 0.4869402, 5.7756904e-07, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="ui04_main" type="Control" unique_id=619611884]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1668673301]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = -81.0
+offset_right = 1082.0
+offset_bottom = -41.0
+grow_vertical = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=2078210733]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=260229048]
+custom_minimum_size = Vector2(42, 40)
+layout_mode = 2
+size_flags_vertical = 4
+offset_transform_enabled = true
+texture = ExtResource("1_ycw01")
+stretch_mode = 3
+
+[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/HBoxContainer" unique_id=562068422]
+custom_minimum_size = Vector2(560, 20)
+layout_mode = 2
+size_flags_vertical = 4
+theme = SubResource("Theme_ycw01")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_styles/fill = SubResource("StyleBoxFlat_bx36w")
+value = 50.0
+rounded = true

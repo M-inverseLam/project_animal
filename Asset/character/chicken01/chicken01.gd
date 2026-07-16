@@ -337,7 +337,10 @@ func _apply_attack_hit(target: Node) -> void:
 		return
 
 	_attack_hit_targets.append(target)
-	if target.has_method("take_damage"):
+	if target.has_method("take_attack_hit"):
+		target.call("take_attack_hit", global_transform.basis.z.normalized(), attack_damage)
+		_spawn_hit_spark(target)
+	elif target.has_method("take_damage"):
 		target.call("take_damage", attack_damage)
 		_spawn_hit_spark(target)
 

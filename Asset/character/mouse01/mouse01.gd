@@ -8,6 +8,10 @@ extends Node3D
 @export var walk_time_min: float = 2.0
 @export var walk_time_max: float = 4.0
 @export var run_away_speed: float = 5.0
+@export var attack_hit_push_distance: float = 1.0
+@export var attack_hit_push_duration: float = 0.25
+@export var attack_hit_push_slowdown_power: float = 2.0
+@export var attack_hit_damage_duration: float = 0.35
 @export var dash_hit_push_distance: float = 3.0
 @export var dash_hit_push_duration: float = 0.5
 @export var dash_hit_push_slowdown_power: float = 3.0
@@ -24,6 +28,8 @@ extends Node3D
 @export var damage_number_color := Color(1.0, 0.18, 0.08, 1.0)
 @export var death_spark_scene: PackedScene
 @export var death_spark_height: float = 0.8
+@export var death_drop_scene: PackedScene
+@export var death_drop_ground_offset: float = 0.0
 
 @onready var visual_root := get_node_or_null("mouse01") as Node3D
 @onready var animation_player := find_child("AnimationPlayer", true, false) as AnimationPlayer
@@ -42,6 +48,10 @@ var _damage_state_time_left := 0.0
 var _damage_push_direction := Vector3.ZERO
 var _damage_push_elapsed := 0.0
 var _damage_push_distance_ratio := 0.0
+var _damage_push_distance := 0.0
+var _damage_push_duration := 0.0
+var _damage_push_slowdown_power := 1.0
+var _damage_hold_duration := 0.0
 var _is_dead := false
 
 
@@ -114,29 +124,33 @@ func _stop_run_away(player: Node3D) -> void:
 	_resume_idle_or_run_away()
 
 
-func _start_dash_damage(push_direction: Vector3) -> void:
+func _start_hit_damage(push_direction: Vector3, push_distance: float, push_duration: float, slowdown_power: float, hold_duration: float) -> void:
 	if push_direction == Vector3.ZERO:
 		push_direction = global_transform.basis.z
 
 	_detected_player = null
 	_state = "dash_damage_push"
-	_damage_state_time_left = dash_hit_push_duration
+	_damage_state_time_left = push_duration
 	_damage_push_direction = push_direction.normalized()
 	_damage_push_elapsed = 0.0
 	_damage_push_distance_ratio = 0.0
+	_damage_push_distance = push_distance
+	_damage_push_duration = push_duration
+	_damage_push_slowdown_power = slowdown_power
+	_damage_hold_duration = hold_duration
 	_play_animation(damage_animation_name, true)
 
 
 func _process_dash_damage_push(delta: float) -> void:
-	if dash_hit_push_duration <= 0.0 or dash_hit_push_distance <= 0.0:
+	if _damage_push_duration <= 0.0 or _damage_push_distance <= 0.0:
 		_start_dash_damage_hold()
 		return
 
-	_damage_push_elapsed = minf(_damage_push_elapsed + delta, dash_hit_push_duration)
-	var progress := _damage_push_elapsed / dash_hit_push_duration
-	var slowdown_power := maxf(dash_hit_push_slowdown_power, 1.0)
+	_damage_push_elapsed = minf(_damage_push_elapsed + delta, _damage_push_duration)
+	var progress := _damage_push_elapsed / _damage_push_duration
+	var slowdown_power := maxf(_damage_push_slowdown_power, 1.0)
 	var distance_ratio := 1.0 - pow(1.0 - progress, slowdown_power)
-	var frame_distance := (distance_ratio - _damage_push_distance_ratio) * dash_hit_push_distance
+	var frame_distance := (distance_ratio - _damage_push_distance_ratio) * _damage_push_distance
 
 	global_position += _damage_push_direction * frame_distance
 	_face_direction(_damage_push_direction, delta)
@@ -149,7 +163,7 @@ func _process_dash_damage_push(delta: float) -> void:
 
 func _start_dash_damage_hold() -> void:
 	_state = "dash_damage_hold"
-	_damage_state_time_left = dash_hit_damage_duration
+	_damage_state_time_left = _damage_hold_duration
 	_damage_push_direction = Vector3.ZERO
 	_damage_push_elapsed = 0.0
 	_damage_push_distance_ratio = 0.0
@@ -242,10 +256,16 @@ func take_damage(damage: int) -> void:
 	_apply_damage(damage)
 
 
+func take_attack_hit(direction: Vector3, damage: int) -> void:
+	_apply_damage(damage)
+	if health > 0:
+		_start_hit_damage(direction, attack_hit_push_distance, attack_hit_push_duration, attack_hit_push_slowdown_power, attack_hit_damage_duration)
+
+
 func take_dash_hit(direction: Vector3, damage: int) -> void:
 	_apply_damage(damage)
 	if health > 0:
-		_start_dash_damage(direction)
+		_start_hit_damage(direction, dash_hit_push_distance, dash_hit_push_duration, dash_hit_push_slowdown_power, dash_hit_damage_duration)
 
 
 func _apply_damage(damage: int) -> void:
@@ -260,6 +280,7 @@ func _apply_damage(damage: int) -> void:
 	if health <= 0:
 		_is_dead = true
 		_spawn_death_spark()
+		_spawn_death_drop()
 		queue_free()
 
 
@@ -323,6 +344,28 @@ func _spawn_death_spark() -> void:
 	var longest_lifetime := _restart_particles_recursive(death_spark)
 
 	death_spark.get_tree().create_timer(longest_lifetime + 0.1).timeout.connect(death_spark.queue_free)
+
+
+func _spawn_death_drop() -> void:
+	if death_drop_scene == null:
+		return
+
+	var drop := death_drop_scene.instantiate() as Node3D
+	if drop == null:
+		return
+
+	var drop_parent := get_tree().current_scene
+	if drop_parent == null:
+		drop_parent = get_parent()
+	if drop_parent == null:
+		return
+
+	drop_parent.add_child(drop)
+	var drop_position := global_position + Vector3.UP * death_drop_ground_offset
+	drop.global_position = drop_position
+
+	if drop.has_method("pop_from_ground"):
+		drop.call("pop_from_ground", drop_position)
 
 
 func _restart_particles_recursive(node: Node) -> float:
