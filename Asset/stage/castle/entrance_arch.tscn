@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://da5yh46ydjthk"]
+
+[ext_resource type="PackedScene" uid="uid://n7fif4dj3fm4" path="res://Asset/stage/castle/entrance_arch.glb" id="1_lie7e"]
+[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_n06lm"]
+
+[node name="entrance_arch" type="Node3D" unique_id=1138955613]
+
+[node name="entrance_arch" parent="." unique_id=1873376193 instance=ExtResource("1_lie7e")]
+
+[node name="entrance_arch" parent="entrance_arch" index="0" unique_id=1871302125]
+surface_material_override/0 = ExtResource("2_n06lm")
+
+[node name="entrance_arch-col" parent="entrance_arch" index="1" unique_id=2096541585]
+visible = false
+
+[editable path="entrance_arch"]

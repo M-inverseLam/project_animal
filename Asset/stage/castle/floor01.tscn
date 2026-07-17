@@ -1,16 +1,23 @@
 [gd_scene format=3 uid="uid://27dbmplqek24"]
 
 [ext_resource type="PackedScene" uid="uid://cbovseo1e5dyf" path="res://Asset/stage/castle/floor01.glb" id="1_3pvqf"]
-[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_ew6ol"]
+[ext_resource type="Texture2D" uid="uid://d0pyf0x6iw28b" path="res://Asset/stage/castle/stage_castle01.tga" id="2_3pvqf"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ew6ol"]
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("2_3pvqf")
+roughness = 0.83
+rim_enabled = true
+rim = 0.2
 
 [node name="floor01" type="Node3D" unique_id=1187278167]
 
 [node name="floor01" parent="." unique_id=1987132927 instance=ExtResource("1_3pvqf")]
 
-[node name="floor01" parent="floor01" index="0" unique_id=268069798]
-surface_material_override/0 = ExtResource("2_ew6ol")
+[node name="floor01" parent="floor01" index="0" unique_id=2102650669]
+surface_material_override/0 = SubResource("StandardMaterial3D_ew6ol")
 
-[node name="floor01-col" parent="floor01" index="1" unique_id=1476292313]
+[node name="floor01-col" parent="floor01" index="1" unique_id=275837086]
 visible = false
 
 [editable path="floor01"]

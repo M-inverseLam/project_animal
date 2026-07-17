@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bqbkuf2hbun18"]
 
-[ext_resource type="Texture2D" uid="uid://jr5lh1nsgd5e" path="res://Asset/sfx/hitspark01a.tga" id="1_lyww6"]
+[ext_resource type="Texture2D" uid="uid://dw1ayc068weov" path="res://Asset/sfx/hitspark02b.tga" id="1_lyww6"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mtrak"]
 transparency = 1

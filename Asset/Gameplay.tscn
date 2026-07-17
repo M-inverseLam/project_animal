@@ -9,10 +9,11 @@
 [sub_resource type="Environment" id="Environment_4kxuq"]
 ambient_light_source = 2
 ambient_light_color = Color(0.5346019, 0.6110975, 0.7413434, 1)
+ssao_enabled = true
+ssao_intensity = 4.0
 glow_enabled = true
-glow_bloom = 0.18
-adjustment_enabled = true
-adjustment_saturation = 1.58
+glow_strength = 0.16
+glow_bloom = 0.1
 
 [node name="Node3D" type="Node3D" unique_id=129724868]
 
@@ -27,10 +28,11 @@ layer = 10
 environment = SubResource("Environment_4kxuq")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="world" unique_id=1416725517]
-transform = Transform3D(0.99999994, 0, 0, 0, 0.5, 0.8660253, 0, -0.8660254, 0.50000006, 0, 6.4843073, 0)
+transform = Transform3D(0.8660252, 0.12940946, 0.4829629, -0.35355332, -0.52451897, 0.7745189, 0.35355335, -0.8415062, -0.4084937, 0, 6.4843073, 0)
+light_color = Color(0.92535293, 0.9253528, 0.9253529, 1)
 light_specular = 2.0
 shadow_enabled = true
-shadow_opacity = 0.86
+shadow_opacity = 0.9
 
 [node name="Camera3D" type="Camera3D" parent="world" unique_id=1915048110]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.70710677, 0, 26.15118, 25.622486)

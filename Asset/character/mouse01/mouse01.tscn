@@ -2,10 +2,10 @@
 
 [ext_resource type="PackedScene" uid="uid://dil4wgp7t3ybo" path="res://Asset/character/mouse01/mouse01.glb" id="1_bibxf"]
 [ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_j6xua"]
-[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_yhtvq"]
 [ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Asset/character/mouse01/mouse01.gd" id="3_os0wa"]
 [ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Asset/character/mouse01/mouse01_damage_receiver.gd" id="4_dqao1"]
 [ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark02.tscn" id="5_d8v3k"]
+[ext_resource type="Material" uid="uid://bgx81mtsn6x2u" path="res://Asset/character/mouse01/mouse01.material" id="6_02pfu"]
 [ext_resource type="PackedScene" uid="uid://c5svw8lgdf8um" path="res://Asset/item/gems01.tscn" id="6_own4y"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_mti6b"]
@@ -36,13 +36,13 @@ death_drop_scene = ExtResource("6_own4y")
 
 [node name="mouse01" parent="." unique_id=914325302 instance=ExtResource("1_bibxf")]
 
-[node name="Skeleton3D" parent="mouse01/Armature" parent_id_path=PackedInt32Array(914325302, 1374255771) index="0" unique_id=1496087432]
+[node name="Skeleton3D" parent="mouse01/Armature" parent_id_path=PackedInt32Array(914325302, 29520693) index="0" unique_id=258768163]
 bones/2/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
 bones/3/rotation = Quaternion(-0.7071065, 0, 0.7071072, 0)
 bones/4/rotation = Quaternion(-0.7071068, 1.9612881e-07, 1.9612881e-07, 0.7071068)
 
-[node name="body" parent="mouse01/Armature/Skeleton3D" index="0" unique_id=447228997]
-surface_material_override/0 = ExtResource("2_yhtvq")
+[node name="body" parent="mouse01/Armature/Skeleton3D" index="0" unique_id=1976999993]
+surface_material_override/0 = ExtResource("6_02pfu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1079959090]
 script = ExtResource("4_dqao1")

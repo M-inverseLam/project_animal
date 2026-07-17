@@ -3,57 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cse58w0vue7hy" path="res://Asset/item/gems01.glb" id="1_l6clh"]
 [ext_resource type="Script" uid="uid://77q8rry3hve8" path="res://Asset/item/gems01.gd" id="3_bm5a8"]
 [ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="4_3pvye"]
-[ext_resource type="Shader" uid="uid://bwwb7wvg12iq2" path="res://Asset/shader/gems.gdshader" id="4_pjb7e"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_2c67e"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_smfs1"]
-width = 128
-height = 128
-noise = SubResource("FastNoiseLite_2c67e")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_cscit"]
-render_priority = 0
-shader = ExtResource("4_pjb7e")
-shader_parameter/enable_triplanar = false
-shader_parameter/base_color = Color(0.34815326, 0.5988092, 0.9999967, 1)
-shader_parameter/metallic = 0.3870000183825
-shader_parameter/smoothness = 0.2
-shader_parameter/opacity = 1.0
-shader_parameter/base_tiling = 0.5
-shader_parameter/base_normal_intensity = -0.1
-shader_parameter/base_color_multiplier = Color(1, 1, 1, 1)
-shader_parameter/base_specular_power = 0.5
-shader_parameter/base_metallic = 0.8
-shader_parameter/enable_top_projection = false
-shader_parameter/top_tiling = 0.5
-shader_parameter/top_normal_intensity = -0.1
-shader_parameter/spread = 0.3
-shader_parameter/fade_amount = 38.6
-shader_parameter/top_color_multiplier = Color(1, 1, 1, 1)
-shader_parameter/top_opacity = 1.0
-shader_parameter/top_specular_power = 0.5
-shader_parameter/top_metallic = 0.0
-shader_parameter/enable_fresnel = true
-shader_parameter/fresnel_color = Color(1, 1, 1, 1)
-shader_parameter/fresnel_border = 3.77
-shader_parameter/fresnel_power = 4.86
-shader_parameter/enable_depth = false
-shader_parameter/depth_power_multiplier = 1.99
-shader_parameter/deep_color = Color(1, 1, 1, 1)
-shader_parameter/deep_power = 8.0
-shader_parameter/shallow_color = Color(1, 1, 1, 1)
-shader_parameter/shallow_power = 1.2
-shader_parameter/enable_refraction = false
-shader_parameter/refraction_texture = SubResource("NoiseTexture2D_smfs1")
-shader_parameter/refraction_color = Color(1, 1, 1, 1)
-shader_parameter/refraction_power = 3.0
-shader_parameter/steps = 0.0
-shader_parameter/amplitude = -50.0
-shader_parameter/refraction_tiling = 5.0
-shader_parameter/inner_distortion = true
-shader_parameter/noise_tiling = 2.5
-shader_parameter/inner_distortion_power = 0.05
+[ext_resource type="Material" uid="uid://ddsigjmoenfil" path="res://Asset/item/gems01.material" id="4_pjb7e"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_mti6b"]
 height = 0.88861084
@@ -69,8 +19,8 @@ bounce_duration = 0.5
 [node name="gems01" parent="." unique_id=1469226022 instance=ExtResource("1_l6clh")]
 script = ExtResource("4_3pvye")
 
-[node name="gems01" parent="gems01" index="0" unique_id=644088033]
-surface_material_override/0 = SubResource("ShaderMaterial_cscit")
+[node name="gems01" parent="gems01" index="0" unique_id=1657122020]
+surface_material_override/0 = ExtResource("4_pjb7e")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=400671923]
 

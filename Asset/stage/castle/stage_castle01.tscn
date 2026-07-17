@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://27dbmplqek24" path="res://Asset/stage/castle/floor01.tscn" id="4_p8p76"]
 [ext_resource type="PackedScene" uid="uid://gdniqifb5o6n" path="res://Asset/stage/castle/wall01.tscn" id="5_iry3h"]
 [ext_resource type="PackedScene" uid="uid://8v2e68i4lfde" path="res://Asset/stage/castle/wall_pillar01.tscn" id="6_g4s6y"]
+[ext_resource type="PackedScene" uid="uid://da5yh46ydjthk" path="res://Asset/stage/castle/entrance_arch.tscn" id="7_8six8"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_4kxuq"]
 size = Vector2(300, 300)
@@ -95,3 +96,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 0, 49.5)
 
 [node name="wall_pillar04" parent="." unique_id=284078158 instance=ExtResource("6_g4s6y")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 0, 49.5)
+
+[node name="entrance_arch" parent="." unique_id=1138955613 instance=ExtResource("7_8six8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -49.5)

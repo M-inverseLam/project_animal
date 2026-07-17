@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://bcicy8ebmq0jo"]
 
 [ext_resource type="PackedScene" uid="uid://cbfpl8xeg1u5h" path="res://Asset/character/chicken01/chicken01.glb" id="1_vu6b7"]
-[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="3_ht5rd"]
 [ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Asset/character/chicken01/chicken01.gd" id="3_pwh2x"]
 [ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust.tscn" id="4_6w3vu"]
+[ext_resource type="Material" uid="uid://2ijoo8x2e25m" path="res://Asset/character/chicken01/chicken01.material" id="4_xlvvj"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark01.tscn" id="5_r1bvn"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_attack_hitbox"]
@@ -32,8 +32,8 @@ hit_spark_scene = ExtResource("5_r1bvn")
 
 [node name="chicken01" parent="." unique_id=1857688968 instance=ExtResource("1_vu6b7")]
 
-[node name="body" parent="chicken01/Armature/Skeleton3D" parent_id_path=PackedInt32Array(1857688968, 1709787358) index="0" unique_id=1592137300]
-surface_material_override/0 = ExtResource("3_ht5rd")
+[node name="body" parent="chicken01/Armature/Skeleton3D" parent_id_path=PackedInt32Array(1857688968, 422429585) index="0" unique_id=1667567163]
+surface_material_override/0 = ExtResource("4_xlvvj")
 
 [node name="DashDust" parent="." unique_id=1507512813 instance=ExtResource("4_6w3vu")]
 
