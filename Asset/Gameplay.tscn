@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://gy2nqvfermwd"]
 
-[ext_resource type="PackedScene" uid="uid://bcicy8ebmq0jo" path="res://Asset/character/chicken01/chicken01.tscn" id="2_4fa47"]
 [ext_resource type="Script" uid="uid://bbcc5d0litwvb" path="res://Asset/GameplayCamera.gd" id="3_nhh1a"]
 [ext_resource type="PackedScene" uid="uid://ml5v4gxkx6fm" path="res://Asset/stage/castle/stage_castle01.tscn" id="4_cscit"]
 [ext_resource type="PackedScene" uid="uid://dj2qvdmc3lcmv" path="res://Asset/character/mouse01/mouse01.tscn" id="4_fklpt"]
 [ext_resource type="PackedScene" uid="uid://qvtqchh8es53" path="res://Asset/ui/ui04/ui04_main.tscn" id="5_7nfr3"]
+[ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/character/girl/hero_girl01.tscn" id="5_s8hmd"]
 
 [sub_resource type="Environment" id="Environment_4kxuq"]
 ambient_light_source = 2
@@ -28,7 +28,7 @@ layer = 10
 environment = SubResource("Environment_4kxuq")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="world" unique_id=1416725517]
-transform = Transform3D(0.8660252, 0.12940946, 0.4829629, -0.35355332, -0.52451897, 0.7745189, 0.35355335, -0.8415062, -0.4084937, 0, 6.4843073, 0)
+transform = Transform3D(0.8660252, 0.3535533, 0.35355338, -0.35355332, -0.066987306, 0.93301255, 0.35355335, -0.93301255, 0.06698722, 0, 6.4843073, 0)
 light_color = Color(0.92535293, 0.9253528, 0.9253529, 1)
 light_specular = 2.0
 shadow_enabled = true
@@ -36,14 +36,11 @@ shadow_opacity = 0.9
 
 [node name="Camera3D" type="Camera3D" parent="world" unique_id=1915048110]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.70710677, 0, 26.15118, 25.622486)
-fov = 25.0
+fov = 45.0
 script = ExtResource("3_nhh1a")
-target_path = NodePath("../../chicken01")
-follow_offset = Vector3(0, 45, 45)
+target_path = NodePath("../../hero_girl01")
+follow_offset = Vector3(0, 20, 20)
 spring_strength = 20.0
-
-[node name="chicken01" parent="." unique_id=291576543 instance=ExtResource("2_4fa47")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.030096292, 0)
 
 [node name="mouse01" parent="." unique_id=1435796696 instance=ExtResource("4_fklpt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 13.117197)
@@ -54,3 +51,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.681784, 0, 7.183359)
 damage_number_font_size = 180
 
 [node name="stage_castle01" parent="." unique_id=465259332 instance=ExtResource("4_cscit")]
+
+[node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]

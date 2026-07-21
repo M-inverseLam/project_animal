@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://dfvcg21i8p2t6"]
+
+[ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Script/hero01.gd" id="1_b2opn"]
+[ext_resource type="PackedScene" uid="uid://dpsr7yntks1cs" path="res://Asset/character/girl/hero_girl01.glb" id="1_oxnaq"]
+[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark01.tscn" id="2_sxbsq"]
+[ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/character/girl/hero_girl_body.material" id="3_5dmvc"]
+[ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/character/girl/hero_girl_hair.material" id="4_b2opn"]
+[ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust.tscn" id="5_b2opn"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hsrdd"]
+radius = 0.6303711
+height = 1.7294922
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b2opn"]
+size = Vector3(1.3, 1.2, 1.6)
+
+[node name="hero_girl01" type="CharacterBody3D" unique_id=2135685820]
+script = ExtResource("1_b2opn")
+dash_hit_camera_shake_duration = 0.85
+dash_hit_camera_shake_strength = 0.1
+hit_spark_scene = ExtResource("2_sxbsq")
+
+[node name="hero_girl01" parent="." unique_id=827222378 instance=ExtResource("1_oxnaq")]
+
+[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 817607732) index="0" unique_id=663052136]
+surface_material_override/0 = ExtResource("3_5dmvc")
+
+[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 817607732) index="1" unique_id=1272521256]
+surface_material_override/0 = ExtResource("3_5dmvc")
+surface_material_override/1 = ExtResource("4_b2opn")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=374903544]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8652938, 0)
+shape = SubResource("CapsuleShape3D_hsrdd")
+
+[node name="DashDust" parent="." unique_id=1495796045 instance=ExtResource("5_b2opn")]
+
+[node name="DashHitbox" type="Area3D" parent="." unique_id=791997754]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DashHitbox" unique_id=1351024814]
+shape = SubResource("BoxShape3D_b2opn")
+disabled = true
+
+[editable path="hero_girl01"]
