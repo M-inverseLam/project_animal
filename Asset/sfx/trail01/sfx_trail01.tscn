@@ -1,0 +1,95 @@
+[gd_scene format=3 uid="uid://w6mxk5ll5q1i"]
+
+[ext_resource type="PackedScene" uid="uid://cgtbyf3cppreg" path="res://Asset/sfx/trail01/sfx_trail01.glb" id="1_r3f3l"]
+[ext_resource type="Shader" uid="uid://bitswbtkl4yxo" path="res://Asset/sfx/trail01/sfx_trail01.tres" id="2_4b6s2"]
+[ext_resource type="Texture2D" uid="uid://b0dhphxvihyju" path="res://Asset/sfx/trail01/sfx_trail01.tga" id="3_u8nmy"]
+[ext_resource type="Texture2D" uid="uid://b6wcmo2yahilx" path="res://Asset/sfx/trail01/sfx_trail01_highlight.tga" id="3_wuwc5"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_u8nmy"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_wuwc5"]
+noise = SubResource("FastNoiseLite_u8nmy")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r3f3l"]
+render_priority = 0
+shader = ExtResource("2_4b6s2")
+shader_parameter/BaseColor = Color(0, 0.72509617, 1.353256, 1)
+shader_parameter/progress = -1.0
+shader_parameter/Texture = ExtResource("3_u8nmy")
+shader_parameter/HighlightColor = Color(0.30665916, 2.0463703, 2.8493137, 1)
+shader_parameter/HighlightTexture = ExtResource("3_wuwc5")
+shader_parameter/dissolve = SubResource("NoiseTexture2D_wuwc5")
+shader_parameter/DissolveValue = 0.0
+
+[sub_resource type="Animation" id="Animation_wuwc5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [-1.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/DissolveValue")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_u8nmy"]
+resource_name = "slash"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-1.0, 4.7499999933364734e-08, 4.7499999933364734e-08]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/DissolveValue")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.19999997, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, 0.0, 1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_wuwc5"]
+_data = {
+&"RESET": SubResource("Animation_wuwc5"),
+&"slash": SubResource("Animation_u8nmy")
+}
+
+[node name="sfx_trail01" type="Node3D" unique_id=993554698]
+
+[node name="sfx_trail01" parent="." unique_id=1939423181 instance=ExtResource("1_r3f3l")]
+
+[node name="sfx_trail01" parent="sfx_trail01" index="0" unique_id=1671191248]
+surface_material_override/0 = SubResource("ShaderMaterial_r3f3l")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1179991917]
+libraries/ = SubResource("AnimationLibrary_wuwc5")
+
+[editable path="sfx_trail01"]

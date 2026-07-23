@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bk2a41h4g7iml"
-path="res://.godot/imported/dust.glb-169ebe8bcb9aed01a16b9a5f577b872c.scn"
+uid="uid://8tjuridvtmu3"
+path="res://.godot/imported/lance01.glb-e50c21aeb5f771112074586408587722.scn"
 
 [deps]
 
-source_file="res://Asset/sfx/dust.glb"
-dest_files=["res://.godot/imported/dust.glb-169ebe8bcb9aed01a16b9a5f577b872c.scn"]
+source_file="res://Asset/character_weapon/lance01.glb"
+dest_files=["res://.godot/imported/lance01.glb-e50c21aeb5f771112074586408587722.scn"]
 
 [params]
 

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c2j70j25dh160"]
 
-[ext_resource type="Material" uid="uid://xarggrfvbum" path="res://Asset/sfx/dust01.material" id="1_p8p5a"]
-[ext_resource type="Mesh" path="res://Asset/sfx/dust.res" id="2_h3fgs"]
+[ext_resource type="Material" uid="uid://xarggrfvbum" path="res://Asset/sfx/dust/dust01.material" id="1_p8p5a"]
+[ext_resource type="Mesh" uid="uid://dmb5lvgwbm3dm" path="res://Asset/sfx/dust/dust.res" id="2_h3fgs"]
 
 [sub_resource type="Curve" id="Curve_tegp5"]
 _data = [Vector2(0, 0), 0.0, 9.357823, 0, 0, Vector2(0.31615123, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.0805688, 0.0, 0, 0]

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jr5lh1nsgd5e"
-path.s3tc="res://.godot/imported/hitspark01a.tga-3b39b7a40442028bdd0c08c89c4d2a4a.s3tc.ctex"
+uid="uid://b6wcmo2yahilx"
+path.s3tc="res://.godot/imported/sfx_trail01_highlight.tga-d0a49a78f51fd10e5396bd125f26e6aa.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Asset/sfx/hitspark01a.tga"
-dest_files=["res://.godot/imported/hitspark01a.tga-3b39b7a40442028bdd0c08c89c4d2a4a.s3tc.ctex"]
+source_file="res://Asset/sfx/trail01/sfx_trail01_highlight.tga"
+dest_files=["res://.godot/imported/sfx_trail01_highlight.tga-d0a49a78f51fd10e5396bd125f26e6aa.s3tc.ctex"]
 
 [params]
 

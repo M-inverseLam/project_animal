@@ -36,10 +36,10 @@ shadow_opacity = 0.9
 
 [node name="Camera3D" type="Camera3D" parent="world" unique_id=1915048110]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.70710677, 0, 26.15118, 25.622486)
-fov = 45.0
+fov = 30.0
 script = ExtResource("3_nhh1a")
 target_path = NodePath("../../hero_girl01")
-follow_offset = Vector3(0, 20, 20)
+follow_offset = Vector3(0, 30, 30)
 spring_strength = 20.0
 
 [node name="mouse01" parent="." unique_id=1435796696 instance=ExtResource("4_fklpt")]

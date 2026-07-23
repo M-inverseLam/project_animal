@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dw1ayc068weov"
-path.s3tc="res://.godot/imported/hitspark02b.tga-fa3f13cc3d27301f0a9aede681845eeb.s3tc.ctex"
+uid="uid://dfwb0iddwh3q"
+path.s3tc="res://.godot/imported/hitspark02a.tga-054901abd3e1ab7352107cfa9e3a1286.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Asset/sfx/hitspark02b.tga"
-dest_files=["res://.godot/imported/hitspark02b.tga-fa3f13cc3d27301f0a9aede681845eeb.s3tc.ctex"]
+source_file="res://Asset/sfx/hitspark/hitspark02a.tga"
+dest_files=["res://.godot/imported/hitspark02a.tga-054901abd3e1ab7352107cfa9e3a1286.s3tc.ctex"]
 
 [params]
 
