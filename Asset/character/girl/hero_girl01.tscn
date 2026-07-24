@@ -19,7 +19,6 @@ size = Vector3(1.3, 1.2, 1.6)
 script = ExtResource("1_b2opn")
 move_speed = 6.0
 step_tilt = 0.5
-animation_blend_time = 0.5
 slide_duration = 0.0
 attack_duration = 0.4
 attack_dash_duration = 0.0
@@ -34,10 +33,10 @@ hit_spark_scene = ExtResource("2_sxbsq")
 
 [node name="hero_girl01" parent="." unique_id=827222378 instance=ExtResource("1_oxnaq")]
 
-[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1668385366) index="0" unique_id=1836004194]
+[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1674741533) index="0" unique_id=781475624]
 surface_material_override/0 = ExtResource("3_5dmvc")
 
-[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1668385366) index="1" unique_id=673943302]
+[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1674741533) index="1" unique_id=673943302]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8553567, 0)
 setting_count = 2
 settings/0/root_bone_name = "hairtail1.L"
@@ -87,7 +86,7 @@ settings/1/joints/1/bone = 10
 settings/1/enable_all_child_collisions = true
 settings/1/exclude_collision_count = 0
 
-[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1668385366) index="2" unique_id=857353812]
+[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1674741533) index="2" unique_id=938340047]
 surface_material_override/0 = ExtResource("3_5dmvc")
 surface_material_override/1 = ExtResource("4_b2opn")
 
@@ -106,6 +105,6 @@ shape = SubResource("BoxShape3D_b2opn")
 disabled = true
 
 [node name="shootposition" type="Marker3D" parent="." unique_id=1782878625]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.73583806, 0.99807966)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.73583806, 0.7478901)
 
 [editable path="hero_girl01"]

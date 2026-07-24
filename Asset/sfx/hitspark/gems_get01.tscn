@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://bqbkuf2hbun18"]
+[gd_scene format=3 uid="uid://dqewmd408yu8f"]
 
-[ext_resource type="Texture2D" uid="uid://dfwb0iddwh3q" path="res://Asset/sfx/hitspark/hitspark02a.tga" id="1_lyww6"]
-[ext_resource type="Script" uid="uid://csxqxjwn4ghtk" path="res://Asset/sfx/hitspark/hitspark01_random_rotation.gd" id="2_2xrer"]
+[ext_resource type="Script" uid="uid://csxqxjwn4ghtk" path="res://Asset/sfx/hitspark/hitspark01_random_rotation.gd" id="1_bncrk"]
+[ext_resource type="Texture2D" uid="uid://btwppao1l811g" path="res://Asset/sfx/hitspark/gems_get01.tga" id="2_bncrk"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mtrak"]
 transparency = 1
@@ -10,7 +10,7 @@ no_depth_test = true
 shading_mode = 0
 vertex_color_use_as_albedo = true
 albedo_color = Color(2.03982, 2.03982, 2.03982, 1)
-albedo_texture = ExtResource("1_lyww6")
+albedo_texture = ExtResource("2_bncrk")
 billboard_mode = 1
 billboard_keep_scale = true
 
@@ -39,10 +39,10 @@ scale_curve = SubResource("CurveTexture_svfu8")
 alpha_curve = SubResource("CurveTexture_hjok4")
 
 [sub_resource type="QuadMesh" id="QuadMesh_svfu8"]
-size = Vector2(3, 3)
+size = Vector2(1.5, 1.5)
 
 [node name="Node3D" type="Node3D" unique_id=822129534]
-script = ExtResource("2_2xrer")
+script = ExtResource("1_bncrk")
 
 [node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=293211926]
 material_override = SubResource("StandardMaterial3D_mtrak")

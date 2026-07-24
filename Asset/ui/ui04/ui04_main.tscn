@@ -6,8 +6,25 @@
 [sub_resource type="Theme" id="Theme_ycw01"]
 default_font = ExtResource("2_bx36w")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vri65"]
+bg_color = Color(0, 0, 0, 0.49019608)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 3
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bx36w"]
 bg_color = Color(0.87629503, 0.4869402, 5.7756904e-07, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 0)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -27,9 +44,9 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 2.0
-offset_top = -81.0
-offset_right = 1082.0
-offset_bottom = -41.0
+offset_top = -1070.0
+offset_right = 1920.0
+offset_bottom = -1029.9998
 grow_vertical = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=2078210733]
@@ -41,15 +58,35 @@ custom_minimum_size = Vector2(42, 40)
 layout_mode = 2
 size_flags_vertical = 4
 offset_transform_enabled = true
+offset_transform_position = Vector2(8, 0)
 texture = ExtResource("1_ycw01")
 stretch_mode = 3
 
-[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/HBoxContainer" unique_id=562068422]
-custom_minimum_size = Vector2(560, 20)
+[node name="HealthBar" type="ProgressBar" parent="MarginContainer/HBoxContainer" unique_id=562068422]
+custom_minimum_size = Vector2(400, 24)
 layout_mode = 2
 size_flags_vertical = 4
 theme = SubResource("Theme_ycw01")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_styles/background = SubResource("StyleBoxFlat_vri65")
 theme_override_styles/fill = SubResource("StyleBoxFlat_bx36w")
-value = 50.0
+max_value = 500.0
+value = 500.0
 rounded = true
+show_percentage = false
+
+[node name="HealthValueLabel" type="Label" parent="MarginContainer/HBoxContainer/HealthBar" unique_id=1934874282]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_ycw01")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "500"
+horizontal_alignment = 1
+vertical_alignment = 1

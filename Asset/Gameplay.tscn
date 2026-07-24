@@ -50,6 +50,18 @@ damage_number_font_size = 180
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.681784, 0, 7.183359)
 damage_number_font_size = 180
 
+[node name="mouse03" parent="." unique_id=43561108 instance=ExtResource("4_fklpt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.7380776, 0, -6.702873)
+damage_number_font_size = 180
+
+[node name="mouse04" parent="." unique_id=1551684995 instance=ExtResource("4_fklpt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.932808, 0, -6.702873)
+damage_number_font_size = 180
+
+[node name="mouse05" parent="." unique_id=1887586894 instance=ExtResource("4_fklpt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.8019285, 0, 3.0212584)
+damage_number_font_size = 180
+
 [node name="stage_castle01" parent="." unique_id=465259332 instance=ExtResource("4_cscit")]
 
 [node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]

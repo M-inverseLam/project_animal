@@ -10,6 +10,7 @@ extends CharacterBody3D
 
 @export_group("Attack")
 @export var attack_animation_name: String = "attack01"
+@export var attack_idle_animation_name: String = "attack_idle"
 @export var attack_animation_cycle: PackedStringArray = PackedStringArray(["attack01", "attack02"])
 @export var attack_damage: int = 1
 @export var attack_duration: float = 0.6
@@ -28,6 +29,7 @@ extends CharacterBody3D
 
 @export_group("Dash")
 @export var dash_animation_name: String = "dash"
+@export var dash_animation_cycle: PackedStringArray = PackedStringArray(["dash", "dash02"])
 @export var dash_duration: float = 1.0
 @export var dash_distance: float = 5.0
 @export var dash_damage: int = 1
@@ -60,8 +62,26 @@ extends CharacterBody3D
 
 var _current_animation := ""
 var _animation_tree: AnimationTree
-var _attack_animation_node: AnimationNodeAnimation
+var _attack_animation_node_a: AnimationNodeAnimation
+var _attack_animation_node_b: AnimationNodeAnimation
+var _dash_animation_node: AnimationNodeAnimation
 var _uses_animation_tree := false
+var _runtime_idle_animation_name := ""
+var _runtime_walk_animation_name := ""
+var _runtime_dash_animation_name := ""
+var _runtime_attack_idle_animation_name := ""
+var _runtime_attack_animation_names := {}
+var _locomotion_blend_amount := 0.0
+var _target_locomotion_blend_amount := 0.0
+var _dash_blend_amount := 0.0
+var _target_dash_blend_amount := 0.0
+var _upper_idle_blend_amount := 1.0
+var _target_upper_idle_blend_amount := 1.0
+var _attack_blend_amount := 0.0
+var _target_attack_blend_amount := 0.0
+var _attack_layer_blend_amount := 0.0
+var _target_attack_layer_blend_amount := 0.0
+var _active_attack_blend_slot := 0
 var _visual_start_position := Vector3.ZERO
 var _visual_start_rotation := Vector3.ZERO
 var _walk_time := 0.0
@@ -71,12 +91,15 @@ var _attack_key_was_pressed := false
 var _is_attacking := false
 var _attack_elapsed := 0.0
 var _active_attack_animation_name := ""
+var _queued_attack_animation_name := ""
 var _next_attack_animation_index := 0
 var _attack_dash_elapsed := 0.0
 var _attack_dash_distance_ratio := 0.0
 var _attack_projectile_was_spawned := false
 var _dash_key_was_pressed := false
 var _is_dashing := false
+var _active_dash_animation_name := ""
+var _next_dash_animation_index := 0
 var _dash_time_left := 0.0
 var _dash_elapsed := 0.0
 var _dash_distance_ratio := 0.0
@@ -111,6 +134,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_update_dash_cooldown(delta)
+	_update_animation_tree_blends(delta)
 	_update_attack_input()
 	_update_attack_hitbox(delta)
 
@@ -193,13 +217,24 @@ func _start_attack() -> void:
 	if _is_dashing:
 		return
 
+	if _is_attacking and _queued_attack_animation_name != "":
+		return
+
 	var selected_attack_animation := _get_next_attack_animation_name()
 	if selected_attack_animation == "":
 		return
 
+	if _is_attacking:
+		_queued_attack_animation_name = selected_attack_animation
+		return
+
+	_play_attack_animation(selected_attack_animation)
+
+
+func _play_attack_animation(animation_name: String) -> void:
 	_is_attacking = true
 	_attack_elapsed = 0.0
-	_active_attack_animation_name = selected_attack_animation
+	_active_attack_animation_name = animation_name
 	_attack_dash_elapsed = 0.0
 	_attack_dash_distance_ratio = 0.0
 	_attack_projectile_was_spawned = false
@@ -217,8 +252,13 @@ func _start_dash() -> void:
 	if _dash_cooldown_time_left > 0.0:
 		return
 
+	var selected_dash_animation := _get_next_dash_animation_name()
+	if selected_dash_animation == "":
+		return
+
 	_stop_attack()
 	_is_dashing = true
+	_active_dash_animation_name = selected_dash_animation
 	_dash_time_left = dash_duration
 	_dash_elapsed = 0.0
 	_dash_distance_ratio = 0.0
@@ -233,7 +273,7 @@ func _start_dash() -> void:
 	_reset_walk_pose(get_physics_process_delta_time())
 	_set_dash_hitbox_enabled(true)
 	_start_dash_dust()
-	_play_animation(dash_animation_name, true)
+	_play_animation(_active_dash_animation_name, true)
 
 
 func _process_dash(delta: float) -> void:
@@ -280,6 +320,7 @@ func _process_dash_bounce_back(delta: float) -> void:
 
 func _stop_dash() -> void:
 	_is_dashing = false
+	_active_dash_animation_name = ""
 	_dash_time_left = 0.0
 	_dash_elapsed = 0.0
 	_dash_distance_ratio = 0.0
@@ -320,8 +361,7 @@ func _update_attack_hitbox(delta: float) -> void:
 		attack_time = _attack_elapsed
 
 		if _attack_elapsed >= attack_duration:
-			_stop_attack()
-			_current_animation = ""
+			_finish_attack()
 			return
 
 	if not _attack_projectile_was_spawned and attack_time >= attack_projectile_spawn_time:
@@ -335,16 +375,36 @@ func _update_attack_hitbox(delta: float) -> void:
 
 
 func _stop_attack() -> void:
+	_clear_attack_state(true)
+
+
+func _clear_attack_state(abort_animation: bool) -> void:
 	_is_attacking = false
 	_attack_elapsed = 0.0
 	_active_attack_animation_name = ""
+	_queued_attack_animation_name = ""
 	_attack_dash_elapsed = 0.0
 	_attack_dash_distance_ratio = 0.0
 	_attack_projectile_was_spawned = false
 	_attack_hit_targets.clear()
 	_set_attack_hitbox_enabled(false)
 	if _uses_animation_tree and _animation_tree != null:
-		_animation_tree.set("parameters/AttackOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
+		_target_attack_layer_blend_amount = 0.0
+		if abort_animation:
+			_attack_layer_blend_amount = 0.0
+			_animation_tree.set("parameters/AttackLayerBlend/blend_amount", _attack_layer_blend_amount)
+
+
+func _finish_attack() -> void:
+	var next_attack_animation := _queued_attack_animation_name
+	_queued_attack_animation_name = ""
+
+	if next_attack_animation != "":
+		_play_attack_animation(next_attack_animation)
+		return
+
+	_clear_attack_state(false)
+	_current_animation = ""
 
 
 func _process_attack_dash(delta: float) -> void:
@@ -668,20 +728,21 @@ func _reset_walk_pose(delta: float) -> void:
 
 func _on_animation_finished(animation_name: StringName) -> void:
 	if _is_attack_animation(String(animation_name)):
-		_stop_attack()
-		_current_animation = ""
-	if animation_name == StringName(dash_animation_name):
+		_finish_attack()
+	if _is_dash_animation(String(animation_name)):
 		_current_animation = ""
 
 
 func _setup_animation_tree() -> void:
 	if animation_player == null or skeleton == null:
 		return
-	if not _has_animation("idle") or not _has_animation("walk") or not _has_animation(dash_animation_name) or _get_valid_attack_animation_names().is_empty():
+	if not _has_animation("idle") or not _has_animation("walk") or _get_valid_dash_animation_names().is_empty() or not _has_animation(attack_idle_animation_name) or _get_valid_attack_animation_names().is_empty():
 		return
 
 	var animation_root := animation_player.get_parent()
 	if animation_root == null:
+		return
+	if not _setup_split_body_runtime_animations():
 		return
 
 	_animation_tree = animation_root.get_node_or_null("HeroAnimationTree") as AnimationTree
@@ -694,29 +755,59 @@ func _setup_animation_tree() -> void:
 	_animation_tree.tree_root = tree_root
 	_animation_tree.anim_player = animation_player.get_path()
 
-	_add_animation_tree_animation(tree_root, "Idle", "idle")
-	_add_animation_tree_animation(tree_root, "Walk", "walk")
-	_add_animation_tree_animation(tree_root, "Dash", dash_animation_name)
-	_attack_animation_node = _add_animation_tree_animation(tree_root, "Attack", _get_valid_attack_animation_names()[0])
+	_add_animation_tree_animation(tree_root, "Idle", _runtime_idle_animation_name)
+	_add_animation_tree_animation(tree_root, "Walk", _runtime_walk_animation_name)
+	_dash_animation_node = _add_animation_tree_animation(tree_root, "Dash", _runtime_dash_animation_name)
+	_add_animation_tree_animation(tree_root, "AttackIdle", _runtime_attack_idle_animation_name)
+	var first_attack_animation := _get_runtime_attack_animation_name(_get_valid_attack_animation_names()[0])
+	_attack_animation_node_a = _add_animation_tree_animation(tree_root, "AttackA", first_attack_animation)
+	_attack_animation_node_b = _add_animation_tree_animation(tree_root, "AttackB", first_attack_animation)
 
-	tree_root.add_node("LocomotionBlend", AnimationNodeBlend2.new(), Vector2(280.0, 0.0))
+	var locomotion_blend := AnimationNodeBlend2.new()
+	locomotion_blend.filter_enabled = true
+	tree_root.add_node("LocomotionBlend", locomotion_blend, Vector2(280.0, 0.0))
 	tree_root.connect_node("LocomotionBlend", 0, "Idle")
 	tree_root.connect_node("LocomotionBlend", 1, "Walk")
 
-	tree_root.add_node("DashBlend", AnimationNodeBlend2.new(), Vector2(560.0, 0.0))
+	var dash_blend := AnimationNodeBlend2.new()
+	dash_blend.filter_enabled = false
+	tree_root.add_node("DashBlend", dash_blend, Vector2(560.0, 0.0))
 	tree_root.connect_node("DashBlend", 0, "LocomotionBlend")
-	tree_root.connect_node("DashBlend", 1, "Dash")
 
-	var attack_one_shot := AnimationNodeOneShot.new()
-	attack_one_shot.filter_enabled = true
-	tree_root.add_node("AttackOneShot", attack_one_shot, Vector2(840.0, 0.0))
-	tree_root.connect_node("AttackOneShot", 0, "DashBlend")
-	tree_root.connect_node("AttackOneShot", 1, "Attack")
-	tree_root.connect_node("output", 0, "AttackOneShot")
+	tree_root.add_node("DashSeek", AnimationNodeTimeSeek.new(), Vector2(560.0, 160.0))
+	tree_root.connect_node("DashSeek", 0, "Dash")
+	tree_root.connect_node("DashBlend", 1, "DashSeek")
 
-	_apply_upper_body_attack_filter(attack_one_shot, animation_root)
+	var upper_idle_blend := AnimationNodeBlend2.new()
+	upper_idle_blend.filter_enabled = true
+	tree_root.add_node("UpperIdleBlend", upper_idle_blend, Vector2(840.0, -120.0))
+	tree_root.connect_node("UpperIdleBlend", 0, "DashBlend")
+	tree_root.connect_node("UpperIdleBlend", 1, "AttackIdle")
+
+	var attack_blend := AnimationNodeBlend2.new()
+	attack_blend.filter_enabled = true
+	tree_root.add_node("AttackBlend", attack_blend, Vector2(1120.0, 120.0))
+	tree_root.connect_node("AttackBlend", 0, "AttackA")
+	tree_root.connect_node("AttackBlend", 1, "AttackB")
+
+	var attack_layer_blend := AnimationNodeBlend2.new()
+	attack_layer_blend.filter_enabled = true
+	tree_root.add_node("AttackLayerBlend", attack_layer_blend, Vector2(1400.0, 0.0))
+	tree_root.connect_node("AttackLayerBlend", 0, "UpperIdleBlend")
+	tree_root.connect_node("AttackLayerBlend", 1, "AttackBlend")
+	tree_root.connect_node("output", 0, "AttackLayerBlend")
+
+	_apply_lower_body_locomotion_filter(locomotion_blend, animation_root)
+	_apply_upper_body_filter(upper_idle_blend, animation_root)
+	_apply_upper_body_filter(attack_blend, animation_root)
+	_apply_upper_body_filter(attack_layer_blend, animation_root)
 	_animation_tree.active = true
 	_uses_animation_tree = true
+	_animation_tree.set("parameters/UpperIdleBlend/blend_amount", _upper_idle_blend_amount)
+	_animation_tree.set("parameters/LocomotionBlend/blend_amount", _locomotion_blend_amount)
+	_animation_tree.set("parameters/DashBlend/blend_amount", _dash_blend_amount)
+	_animation_tree.set("parameters/AttackBlend/blend_amount", _attack_blend_amount)
+	_animation_tree.set("parameters/AttackLayerBlend/blend_amount", _attack_layer_blend_amount)
 	_set_locomotion_animation("idle")
 
 
@@ -727,7 +818,96 @@ func _add_animation_tree_animation(tree_root: AnimationNodeBlendTree, node_name:
 	return animation_node
 
 
-func _apply_upper_body_attack_filter(attack_node: AnimationNodeOneShot, animation_root: Node) -> void:
+func _setup_split_body_runtime_animations() -> bool:
+	var lower_bone_index := skeleton.find_bone(attack_lower_body_bone_name)
+	var upper_bone_index := skeleton.find_bone(attack_upper_body_bone_name)
+	if lower_bone_index == -1 or upper_bone_index == -1:
+		return false
+
+	var lower_bones := _get_bone_index_lookup(_get_bone_and_children_indices(lower_bone_index))
+	var upper_bones := _get_bone_index_lookup(_get_bone_and_children_indices(upper_bone_index))
+	for bone_index in upper_bones.keys():
+		lower_bones.erase(bone_index)
+
+	var runtime_library := AnimationLibrary.new()
+	_runtime_idle_animation_name = "hero_split/idle_lower"
+	_runtime_walk_animation_name = "hero_split/walk_lower"
+	_runtime_dash_animation_name = _get_valid_dash_animation_names()[0]
+	_runtime_attack_idle_animation_name = "hero_split/" + attack_idle_animation_name + "_upper"
+	_runtime_attack_animation_names.clear()
+
+	runtime_library.add_animation("idle_lower", _create_body_filtered_animation("idle", lower_bones))
+	runtime_library.add_animation("walk_lower", _create_body_filtered_animation("walk", lower_bones))
+	runtime_library.add_animation(attack_idle_animation_name + "_upper", _create_body_filtered_animation(attack_idle_animation_name, upper_bones))
+
+	for attack_name in _get_valid_attack_animation_names():
+		var runtime_name := attack_name + "_upper"
+		runtime_library.add_animation(runtime_name, _create_body_filtered_animation(attack_name, upper_bones))
+		_runtime_attack_animation_names[attack_name] = "hero_split/" + runtime_name
+
+	if animation_player.has_animation_library("hero_split"):
+		animation_player.remove_animation_library("hero_split")
+	animation_player.add_animation_library("hero_split", runtime_library)
+	return true
+
+
+func _create_body_filtered_animation(animation_name: String, allowed_bones: Dictionary) -> Animation:
+	var source_animation := animation_player.get_animation(animation_name)
+	var filtered_animation := source_animation.duplicate(true) as Animation
+
+	for track_index in range(filtered_animation.get_track_count() - 1, -1, -1):
+		var bone_index := _get_skeleton_bone_index_from_track_path(filtered_animation.track_get_path(track_index))
+		if bone_index != -1 and not allowed_bones.has(bone_index):
+			filtered_animation.remove_track(track_index)
+
+	return filtered_animation
+
+
+func _get_skeleton_bone_index_from_track_path(track_path: NodePath) -> int:
+	var track_path_text := String(track_path)
+	var separator_index := track_path_text.rfind(":")
+	if separator_index == -1:
+		return -1
+
+	var bone_name := track_path_text.substr(separator_index + 1)
+	return skeleton.find_bone(bone_name)
+
+
+func _get_bone_index_lookup(bone_indices: Array[int]) -> Dictionary:
+	var lookup := {}
+	for bone_index in bone_indices:
+		lookup[bone_index] = true
+	return lookup
+
+
+func _get_runtime_attack_animation_name(animation_name: String) -> String:
+	return _runtime_attack_animation_names.get(animation_name, animation_name)
+
+
+func _apply_lower_body_locomotion_filter(locomotion_node: AnimationNode, animation_root: Node) -> void:
+	var lower_bone_index := skeleton.find_bone(attack_lower_body_bone_name)
+	if lower_bone_index == -1:
+		push_warning("Attack lower body bone not found: " + attack_lower_body_bone_name)
+		return
+
+	var excluded_upper_bones := {}
+	var upper_bone_index := skeleton.find_bone(attack_upper_body_bone_name)
+	if upper_bone_index != -1:
+		for bone_index in _get_bone_and_children_indices(upper_bone_index):
+			excluded_upper_bones[bone_index] = true
+	else:
+		push_warning("Attack upper body bone not found: " + attack_upper_body_bone_name)
+
+	var skeleton_path := String(animation_root.get_path_to(skeleton))
+	for bone_index in _get_bone_and_children_indices(lower_bone_index):
+		if excluded_upper_bones.has(bone_index):
+			continue
+
+		var bone_path := NodePath(skeleton_path + ":" + skeleton.get_bone_name(bone_index))
+		locomotion_node.set_filter_path(bone_path, true)
+
+
+func _apply_upper_body_filter(animation_node: AnimationNode, animation_root: Node) -> void:
 	var upper_bone_index := skeleton.find_bone(attack_upper_body_bone_name)
 	if upper_bone_index == -1:
 		push_warning("Attack upper body bone not found: " + attack_upper_body_bone_name)
@@ -737,7 +917,7 @@ func _apply_upper_body_attack_filter(attack_node: AnimationNodeOneShot, animatio
 
 	var skeleton_path := String(animation_root.get_path_to(skeleton))
 	for bone_path in _get_bone_and_children_filter_paths(upper_bone_index, skeleton_path):
-		attack_node.set_filter_path(bone_path, true)
+		animation_node.set_filter_path(bone_path, true)
 
 
 func _get_bone_and_children_filter_paths(bone_index: int, skeleton_path: String) -> Array[NodePath]:
@@ -746,11 +926,24 @@ func _get_bone_and_children_filter_paths(bone_index: int, skeleton_path: String)
 	return result
 
 
+func _get_bone_and_children_indices(bone_index: int) -> Array[int]:
+	var result: Array[int] = []
+	_collect_bone_and_children_indices(bone_index, result)
+	return result
+
+
 func _collect_bone_and_children_filter_paths(bone_index: int, skeleton_path: String, result: Array[NodePath]) -> void:
 	result.append(NodePath(skeleton_path + ":" + skeleton.get_bone_name(bone_index)))
 
 	for child_index in skeleton.get_bone_children(bone_index):
 		_collect_bone_and_children_filter_paths(child_index, skeleton_path, result)
+
+
+func _collect_bone_and_children_indices(bone_index: int, result: Array[int]) -> void:
+	result.append(bone_index)
+
+	for child_index in skeleton.get_bone_children(bone_index):
+		_collect_bone_and_children_indices(child_index, result)
 
 
 func _get_next_attack_animation_name() -> String:
@@ -778,11 +971,47 @@ func _get_valid_attack_animation_names() -> PackedStringArray:
 	return attack_names
 
 
+func _get_next_dash_animation_name() -> String:
+	var dash_names := _get_valid_dash_animation_names()
+	if dash_names.is_empty():
+		return ""
+
+	if _next_dash_animation_index >= dash_names.size():
+		_next_dash_animation_index = 0
+
+	var animation_name := dash_names[_next_dash_animation_index]
+	_next_dash_animation_index = (_next_dash_animation_index + 1) % dash_names.size()
+	return animation_name
+
+
+func _get_valid_dash_animation_names() -> PackedStringArray:
+	var dash_names := PackedStringArray()
+	for animation_name in dash_animation_cycle:
+		if animation_name != "" and _has_animation(animation_name):
+			dash_names.append(animation_name)
+
+	if dash_names.is_empty() and dash_animation_name != "" and _has_animation(dash_animation_name):
+		dash_names.append(dash_animation_name)
+
+	return dash_names
+
+
 func _is_attack_animation(animation_name: String) -> bool:
 	if animation_name == attack_animation_name:
 		return true
 
 	for cycle_animation_name in attack_animation_cycle:
+		if animation_name == cycle_animation_name:
+			return true
+
+	return false
+
+
+func _is_dash_animation(animation_name: String) -> bool:
+	if animation_name == dash_animation_name:
+		return true
+
+	for cycle_animation_name in dash_animation_cycle:
 		if animation_name == cycle_animation_name:
 			return true
 
@@ -795,6 +1024,9 @@ func _play_animation(animation_name: String, force_restart := false) -> void:
 	if _uses_animation_tree:
 		if _is_attack_animation(animation_name):
 			_play_upper_body_attack(animation_name)
+			return
+		if _is_dash_animation(animation_name):
+			_play_dash_animation(animation_name)
 			return
 		_set_locomotion_animation(animation_name)
 		return
@@ -809,12 +1041,31 @@ func _play_upper_body_attack(animation_name: String) -> void:
 	if _animation_tree == null:
 		return
 
-	if _attack_animation_node != null:
-		_attack_animation_node.animation = StringName(animation_name)
+	var runtime_animation_name := StringName(_get_runtime_attack_animation_name(animation_name))
+	if _active_attack_blend_slot == 0:
+		if _attack_animation_node_b != null:
+			_attack_animation_node_b.animation = runtime_animation_name
+		_active_attack_blend_slot = 1
+		_target_attack_blend_amount = 1.0
+	else:
+		if _attack_animation_node_a != null:
+			_attack_animation_node_a.animation = runtime_animation_name
+		_active_attack_blend_slot = 0
+		_target_attack_blend_amount = 0.0
 
-	_animation_tree.set("parameters/AttackOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
-	_animation_tree.set("parameters/AttackOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	_target_attack_layer_blend_amount = 1.0
 	_current_animation = animation_name
+
+
+func _play_dash_animation(animation_name: String) -> void:
+	if _animation_tree == null:
+		return
+
+	if _dash_animation_node != null:
+		_dash_animation_node.animation = StringName(animation_name)
+
+	_set_locomotion_animation(animation_name)
+	_animation_tree.set("parameters/DashSeek/seek_request", 0.0)
 
 
 func _set_locomotion_animation(animation_name: String) -> void:
@@ -824,17 +1075,43 @@ func _set_locomotion_animation(animation_name: String) -> void:
 		return
 
 	if animation_name == "walk":
-		_animation_tree.set("parameters/LocomotionBlend/blend_amount", 1.0)
-		_animation_tree.set("parameters/DashBlend/blend_amount", 0.0)
-	elif animation_name == dash_animation_name:
-		_animation_tree.set("parameters/DashBlend/blend_amount", 1.0)
+		_target_locomotion_blend_amount = 1.0
+		_target_dash_blend_amount = 0.0
+		_target_upper_idle_blend_amount = 1.0
+	elif _is_dash_animation(animation_name):
+		_target_dash_blend_amount = 1.0
+		_dash_blend_amount = 1.0
+		_target_upper_idle_blend_amount = 0.0
+		_target_attack_layer_blend_amount = 0.0
+		_animation_tree.set("parameters/DashBlend/blend_amount", _dash_blend_amount)
 	elif animation_name == "idle":
-		_animation_tree.set("parameters/LocomotionBlend/blend_amount", 0.0)
-		_animation_tree.set("parameters/DashBlend/blend_amount", 0.0)
+		_target_locomotion_blend_amount = 0.0
+		_target_dash_blend_amount = 0.0
+		_target_upper_idle_blend_amount = 1.0
 	else:
 		return
 
 	_current_animation = animation_name
+
+
+func _update_animation_tree_blends(delta: float) -> void:
+	if not _uses_animation_tree or _animation_tree == null:
+		return
+
+	var blend_step := 1.0
+	if animation_blend_time > 0.0:
+		blend_step = clampf(delta / animation_blend_time, 0.0, 1.0)
+
+	_locomotion_blend_amount = move_toward(_locomotion_blend_amount, _target_locomotion_blend_amount, blend_step)
+	_dash_blend_amount = move_toward(_dash_blend_amount, _target_dash_blend_amount, blend_step)
+	_upper_idle_blend_amount = move_toward(_upper_idle_blend_amount, _target_upper_idle_blend_amount, blend_step)
+	_attack_blend_amount = move_toward(_attack_blend_amount, _target_attack_blend_amount, blend_step)
+	_attack_layer_blend_amount = move_toward(_attack_layer_blend_amount, _target_attack_layer_blend_amount, blend_step)
+	_animation_tree.set("parameters/LocomotionBlend/blend_amount", _locomotion_blend_amount)
+	_animation_tree.set("parameters/DashBlend/blend_amount", _dash_blend_amount)
+	_animation_tree.set("parameters/UpperIdleBlend/blend_amount", _upper_idle_blend_amount)
+	_animation_tree.set("parameters/AttackBlend/blend_amount", _attack_blend_amount)
+	_animation_tree.set("parameters/AttackLayerBlend/blend_amount", _attack_layer_blend_amount)
 
 
 func _has_animation(animation_name: String) -> bool:
