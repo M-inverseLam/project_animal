@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://dfvcg21i8p2t6"]
 
 [ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Script/hero01.gd" id="1_b2opn"]
-[ext_resource type="PackedScene" uid="uid://dpsr7yntks1cs" path="res://Asset/character/girl/hero_girl01.glb" id="1_oxnaq"]
+[ext_resource type="PackedScene" uid="uid://dpsr7yntks1cs" path="res://Asset/char1_hero/girl/hero_girl01.glb" id="1_oxnaq"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_sxbsq"]
-[ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/character/girl/hero_girl_body.material" id="3_5dmvc"]
-[ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/character/girl/hero_girl_hair.material" id="4_b2opn"]
+[ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/char1_hero/girl/hero_girl_body.material" id="3_5dmvc"]
+[ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/char1_hero/girl/hero_girl_hair.material" id="4_b2opn"]
 [ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust/dust.tscn" id="5_b2opn"]
 [ext_resource type="PackedScene" uid="uid://bl1xhcimd7ddn" path="res://Asset/character_weapon/lance01.tscn" id="7_4kxuq"]
 
@@ -33,10 +33,10 @@ hit_spark_scene = ExtResource("2_sxbsq")
 
 [node name="hero_girl01" parent="." unique_id=827222378 instance=ExtResource("1_oxnaq")]
 
-[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1674741533) index="0" unique_id=781475624]
+[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 771384317) index="0" unique_id=1473972655]
 surface_material_override/0 = ExtResource("3_5dmvc")
 
-[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1674741533) index="1" unique_id=673943302]
+[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 771384317) index="1" unique_id=673943302]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8553567, 0)
 setting_count = 2
 settings/0/root_bone_name = "hairtail1.L"
@@ -86,7 +86,7 @@ settings/1/joints/1/bone = 10
 settings/1/enable_all_child_collisions = true
 settings/1/exclude_collision_count = 0
 
-[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1674741533) index="2" unique_id=938340047]
+[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 771384317) index="2" unique_id=1960367775]
 surface_material_override/0 = ExtResource("3_5dmvc")
 surface_material_override/1 = ExtResource("4_b2opn")
 

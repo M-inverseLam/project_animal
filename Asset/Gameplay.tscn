@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bbcc5d0litwvb" path="res://Asset/GameplayCamera.gd" id="3_nhh1a"]
 [ext_resource type="PackedScene" uid="uid://ml5v4gxkx6fm" path="res://Asset/stage/castle/stage_castle01.tscn" id="4_cscit"]
-[ext_resource type="PackedScene" uid="uid://dj2qvdmc3lcmv" path="res://Asset/character/mouse01/mouse01.tscn" id="4_fklpt"]
+[ext_resource type="PackedScene" uid="uid://dj2qvdmc3lcmv" path="res://Asset/char2_enemy/mouse01/mouse01.tscn" id="4_fklpt"]
 [ext_resource type="PackedScene" uid="uid://qvtqchh8es53" path="res://Asset/ui/ui04/ui04_main.tscn" id="5_7nfr3"]
-[ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/character/girl/hero_girl01.tscn" id="5_s8hmd"]
+[ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/char1_hero/girl/hero_girl01.tscn" id="5_s8hmd"]
 
 [sub_resource type="Environment" id="Environment_4kxuq"]
 ambient_light_source = 2
@@ -41,6 +41,7 @@ script = ExtResource("3_nhh1a")
 target_path = NodePath("../../hero_girl01")
 follow_offset = Vector3(0, 30, 30)
 spring_strength = 20.0
+shake_strength = 0.05
 
 [node name="mouse01" parent="." unique_id=1435796696 instance=ExtResource("4_fklpt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 13.117197)

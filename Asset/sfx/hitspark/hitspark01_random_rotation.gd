@@ -1,12 +1,7 @@
 extends Node3D
 
-var _rng := RandomNumberGenerator.new()
-
-
 func _ready() -> void:
-	_rng.randomize()
 	_align_to_camera()
-	rotate_object_local(Vector3.FORWARD, _rng.randf_range(0.0, TAU))
 
 
 func _align_to_camera() -> void:

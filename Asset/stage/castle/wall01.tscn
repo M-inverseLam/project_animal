@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://gdniqifb5o6n"]
 
 [ext_resource type="PackedScene" uid="uid://c0bwtppbd6w5l" path="res://Asset/stage/castle/wall01.glb" id="1_uqbpu"]
-[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/character/01_share_material_texture/colorWheel.material" id="2_hhrx2"]
+[ext_resource type="Material" uid="uid://bcdonqywvr4kd" path="res://Asset/char1_hero/01_share_material_texture/colorWheel.material" id="2_hhrx2"]
 
 [node name="wall01" type="Node3D" unique_id=669750281]
 

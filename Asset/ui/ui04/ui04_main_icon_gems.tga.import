@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dpddwv3q5wo3r"
-path.s3tc="res://.godot/imported/hero_girl_hair.tga-be0f66bcd61bfa50b7b8b10d7aaf73cf.s3tc.ctex"
+uid="uid://dvflqnufw7t53"
+path="res://.godot/imported/ui04_main_icon_gems.tga-440ac7619bdc2ee5649a98e4f41e15d2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://Asset/character/girl/hero_girl_hair.tga"
-dest_files=["res://.godot/imported/hero_girl_hair.tga-be0f66bcd61bfa50b7b8b10d7aaf73cf.s3tc.ctex"]
+source_file="res://Asset/ui/ui04/ui04_main_icon_gems.tga"
+dest_files=["res://.godot/imported/ui04_main_icon_gems.tga-440ac7619bdc2ee5649a98e4f41e15d2.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -24,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -38,4 +37,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

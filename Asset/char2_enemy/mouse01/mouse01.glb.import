@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dil4wgp7t3ybo"
-path="res://.godot/imported/mouse01.glb-fd7702123f98e94e8554649ba710b46f.scn"
+path="res://.godot/imported/mouse01.glb-46543f70885691d400e06f68742638f3.scn"
 
 [deps]
 
-source_file="res://Asset/character/mouse01/mouse01.glb"
-dest_files=["res://.godot/imported/mouse01.glb-fd7702123f98e94e8554649ba710b46f.scn"]
+source_file="res://Asset/char2_enemy/mouse01/mouse01.glb"
+dest_files=["res://.godot/imported/mouse01.glb-46543f70885691d400e06f68742638f3.scn"]
 
 [params]
 

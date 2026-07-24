@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://c1iwbrf4dtc4b" path="res://Asset/ui/ui04/ui04_main_icon_heath.tga" id="1_ycw01"]
 [ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_bx36w"]
+[ext_resource type="Texture2D" uid="uid://dvflqnufw7t53" path="res://Asset/ui/ui04/ui04_main_icon_gems.tga" id="3_tw8gj"]
 
 [sub_resource type="Theme" id="Theme_ycw01"]
 default_font = ExtResource("2_bx36w")
@@ -30,6 +31,12 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="LabelSettings" id="LabelSettings_4kxuq"]
+font = ExtResource("2_bx36w")
+font_size = 24
+outline_size = 7
+outline_color = Color(0, 0, 0, 1)
+
 [node name="ui04_main" type="Control" unique_id=619611884]
 layout_mode = 3
 anchors_preset = 15
@@ -53,7 +60,7 @@ grow_vertical = 0
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=260229048]
+[node name="healthicon" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=260229048]
 custom_minimum_size = Vector2(42, 40)
 layout_mode = 2
 size_flags_vertical = 4
@@ -90,3 +97,17 @@ theme_override_constants/outline_size = 4
 text = "500"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="gemsicon" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=939212301]
+custom_minimum_size = Vector2(42, 40)
+layout_mode = 2
+size_flags_vertical = 4
+offset_transform_enabled = true
+offset_transform_position = Vector2(12, 0)
+texture = ExtResource("3_tw8gj")
+stretch_mode = 3
+
+[node name="gemstotal" type="Label" parent="MarginContainer/HBoxContainer" unique_id=496747787]
+layout_mode = 2
+text = "0"
+label_settings = SubResource("LabelSettings_4kxuq")

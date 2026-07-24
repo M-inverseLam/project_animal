@@ -8,10 +8,10 @@ transparency = 1
 blend_mode = 1
 no_depth_test = true
 shading_mode = 0
+cull_mode = 2
 vertex_color_use_as_albedo = true
 albedo_color = Color(2.03982, 2.03982, 2.03982, 1)
 albedo_texture = ExtResource("2_bncrk")
-billboard_mode = 1
 billboard_keep_scale = true
 
 [sub_resource type="Curve" id="Curve_pvq37"]
@@ -20,6 +20,14 @@ point_count = 3
 
 [sub_resource type="CurveTexture" id="CurveTexture_hjok4"]
 curve = SubResource("Curve_pvq37")
+
+[sub_resource type="Curve" id="Curve_angle"]
+_limits = [-360.0, 360.0, 0.0, 1.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_angle"]
+curve = SubResource("Curve_angle")
 
 [sub_resource type="Curve" id="Curve_bmp2w"]
 _data = [Vector2(0, 0), 0.0, 3.8148131, 0, 1, Vector2(0.21782178, 0.8309493), 0.62087697, 0.62087697, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -31,6 +39,7 @@ curve = SubResource("Curve_bmp2w")
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bmp2w"]
 angle_min = -180.0
 angle_max = 180.0
+angle_curve = SubResource("CurveTexture_angle")
 use_rotation_3d = true
 rotation_3d_min = Vector3(0, 0, -180)
 rotation_3d_max = Vector3(0, 0, 180)
@@ -39,7 +48,7 @@ scale_curve = SubResource("CurveTexture_svfu8")
 alpha_curve = SubResource("CurveTexture_hjok4")
 
 [sub_resource type="QuadMesh" id="QuadMesh_svfu8"]
-size = Vector2(1.5, 1.5)
+size = Vector2(2, 2)
 
 [node name="Node3D" type="Node3D" unique_id=822129534]
 script = ExtResource("1_bncrk")

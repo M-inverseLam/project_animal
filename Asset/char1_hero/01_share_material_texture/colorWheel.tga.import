@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1nu1qk2weypy"
-path.s3tc="res://.godot/imported/hero_girl_body.tga-36ed48538db5617685be2a17db509a02.s3tc.ctex"
+uid="uid://d0sueu3enlyx6"
+path.s3tc="res://.godot/imported/colorWheel.tga-d5a95fbaa9cdfb15e54995424be4983d.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Asset/character/girl/hero_girl_body.tga"
-dest_files=["res://.godot/imported/hero_girl_body.tga-36ed48538db5617685be2a17db509a02.s3tc.ctex"]
+source_file="res://Asset/char1_hero/01_share_material_texture/colorWheel.tga"
+dest_files=["res://.godot/imported/colorWheel.tga-d5a95fbaa9cdfb15e54995424be4983d.s3tc.ctex"]
 
 [params]
 

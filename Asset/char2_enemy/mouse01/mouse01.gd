@@ -306,7 +306,7 @@ func _show_damage_number(damage: int) -> void:
 		label.font = damage_number_font
 	label.font_size = damage_number_font_size
 	label.modulate = damage_number_color
-	label.outline_size = 8
+	label.outline_size = 16
 	label.outline_modulate = Color(0.0, 0.0, 0.0, 1.0)
 
 	var label_parent := get_tree().current_scene
