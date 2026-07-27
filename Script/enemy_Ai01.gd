@@ -1,39 +1,76 @@
 extends Node3D
 
-@export var max_health: int = 3
-@export var walk_speed: float = 2.0
-@export var turn_speed: float = 8.0
-@export var idle_time_min: float = 2.0
-@export var idle_time_max: float = 4.0
-@export var walk_time_min: float = 2.0
-@export var walk_time_max: float = 4.0
-@export var run_away_speed: float = 5.0
-@export var attack_hit_push_distance: float = 1.0
-@export var attack_hit_push_duration: float = 0.25
-@export var attack_hit_push_slowdown_power: float = 2.0
-@export var attack_hit_damage_duration: float = 0.35
-@export var dash_hit_push_distance: float = 3.0
-@export var dash_hit_push_duration: float = 0.5
-@export var dash_hit_push_slowdown_power: float = 3.0
-@export var dash_hit_damage_duration: float = 1.0
+const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
+
+@export_group("Animation")
 @export var idle_animation_name: String = "idle"
 @export var walk_animation_name: String = "walk"
 @export var damage_animation_name: String = "damage"
 @export var animation_blend_time: float = 0.2
+
+@export_group("Health")
+@export var max_health: int = 3
+
+@export_group("Movement")
+@export var walk_speed: float = 2.0
+@export var turn_speed: float = 8.0
+@export var idle_time_range: Vector2 = Vector2(2.0, 4.0)
+@export var walk_time_range: Vector2 = Vector2(2.0, 4.0)
+@export var run_away_speed: float = 5.0
+
+@export_group("AI Decision")
+@export var use_weighted_ai: bool = false
+@export var target_node_name: String = "hero_girl01"
+@export var ai_idle_weight: float = 10.0
+@export var ai_chase_weight: float = 70.0
+@export var ai_shoot_weight: float = 30.0
+@export var chase_speed: float = 5.0
+@export var chase_time_range: Vector2 = Vector2(1.0, 2.0)
+@export var shoot_animation_name: String = "idle"
+@export var shoot_time_range: Vector2 = Vector2(0.5, 0.8)
+@export var shoot_projectile_scene: PackedScene
+@export var shoot_projectile_spawn_path: NodePath = NodePath("")
+@export var shoot_projectile_spawn_delay: float = 0.15
+
+@export_group("Overlap Avoidance")
+@export var avoid_enemy_overlap: bool = false
+@export var overlap_avoidance_radius: float = 1.2
+@export var overlap_avoidance_strength: float = 8.0
+@export var overlap_avoidance_max_push_speed: float = 3.0
+
+@export_group("Hit Reaction")
+@export var attack_hit_push_distance: float = 1.0
+@export var attack_hit_push_duration: float = 0.25
+@export var attack_hit_push_slowdown_power: float = 2.0
+@export var attack_hit_damage_duration: float = 0.35
+@export var face_hit_push_direction: bool = true
+@export var dash_hit_push_distance: float = 3.0
+@export var dash_hit_push_duration: float = 0.5
+@export var dash_hit_push_slowdown_power: float = 3.0
+@export var dash_hit_damage_duration: float = 1.0
+
+@export_group("Damage Number")
 @export var damage_number_height: float = 1.6
 @export var damage_number_rise: float = 1.0
 @export var damage_number_duration: float = 0.7
 @export var damage_number_font: Font
 @export var damage_number_font_size: int = 48
 @export var damage_number_color := Color(1.0, 0.18, 0.08, 1.0)
+
+@export_group("Death Spark")
 @export var death_spark_scene: PackedScene
 @export var death_spark_height: float = 0.8
+
+@export_group("Death Drop")
 @export var death_drop_scene: PackedScene
 @export var death_drop_ground_offset: float = 0.0
+
+@export_group("")
 
 @onready var visual_root := get_node_or_null("mouse01") as Node3D
 @onready var animation_player := find_child("AnimationPlayer", true, false) as AnimationPlayer
 @onready var player_detection := get_node_or_null("playerdetection") as Area3D
+@onready var shoot_projectile_spawn := get_node_or_null(shoot_projectile_spawn_path) as Node3D
 
 var health := 0
 var _visual_start_scale := Vector3.ONE
@@ -53,6 +90,8 @@ var _damage_push_duration := 0.0
 var _damage_push_slowdown_power := 1.0
 var _damage_hold_duration := 0.0
 var _is_dead := false
+var _shoot_elapsed := 0.0
+var _shoot_projectile_was_spawned := false
 
 
 func _ready() -> void:
@@ -63,7 +102,12 @@ func _ready() -> void:
 	if player_detection != null:
 		player_detection.body_entered.connect(_on_player_detection_body_entered)
 		player_detection.body_exited.connect(_on_player_detection_body_exited)
-	_start_idle()
+	if avoid_enemy_overlap:
+		add_to_group(OVERLAP_AVOIDANCE_GROUP)
+	if use_weighted_ai:
+		_start_weighted_decision()
+	else:
+		_start_idle()
 
 
 func _physics_process(delta: float) -> void:
@@ -73,15 +117,25 @@ func _physics_process(delta: float) -> void:
 	if _state == "dash_damage_hold":
 		_process_dash_damage_hold(delta)
 		return
+	_apply_overlap_avoidance(delta)
 	if _state == "run_away":
 		_process_run_away(delta)
+		return
+	if _state == "chase":
+		_process_chase(delta)
+		return
+	if _state == "shoot":
+		_process_shoot(delta)
 		return
 
 	_state_time_left -= delta
 
 	if _state == "idle":
 		if _state_time_left <= 0.0:
-			_start_walk()
+			if use_weighted_ai:
+				_start_weighted_decision()
+			else:
+				_start_walk()
 		return
 
 	if _state == "walk":
@@ -89,7 +143,10 @@ func _physics_process(delta: float) -> void:
 		_face_direction(_walk_direction, delta)
 
 		if _state_time_left <= 0.0:
-			_start_idle()
+			if use_weighted_ai:
+				_start_weighted_decision()
+			else:
+				_start_idle()
 
 
 func _start_run_away(player: Node3D) -> void:
@@ -114,6 +171,101 @@ func _process_run_away(delta: float) -> void:
 	run_direction = run_direction.normalized()
 	global_position += run_direction * run_away_speed * delta
 	_face_direction(run_direction, delta)
+
+
+func _start_chase(player: Node3D) -> void:
+	_detected_player = player
+	_state = "chase"
+	_state_time_left = _rng.randf_range(chase_time_range.x, chase_time_range.y)
+	_play_animation(walk_animation_name)
+
+
+func _process_chase(delta: float) -> void:
+	if _detected_player == null or not is_instance_valid(_detected_player):
+		_detected_player = null
+		_start_weighted_decision()
+		return
+
+	_state_time_left -= delta
+
+	var chase_direction := _detected_player.global_position - global_position
+	chase_direction.y = 0.0
+
+	if chase_direction != Vector3.ZERO:
+		chase_direction = chase_direction.normalized()
+		global_position += chase_direction * chase_speed * delta
+		_face_direction(chase_direction, delta)
+
+	if _state_time_left <= 0.0:
+		_start_weighted_decision()
+
+
+func _start_shoot(player: Node3D) -> void:
+	_detected_player = player
+	_state = "shoot"
+	_state_time_left = _rng.randf_range(shoot_time_range.x, shoot_time_range.y)
+	_shoot_elapsed = 0.0
+	_shoot_projectile_was_spawned = false
+	_play_animation(shoot_animation_name, true)
+
+
+func _process_shoot(delta: float) -> void:
+	_state_time_left -= delta
+	_shoot_elapsed += delta
+
+	if _detected_player != null and is_instance_valid(_detected_player):
+		var face_direction := _detected_player.global_position - global_position
+		face_direction.y = 0.0
+		_face_direction(face_direction.normalized(), delta)
+
+	if not _shoot_projectile_was_spawned and _shoot_elapsed >= shoot_projectile_spawn_delay:
+		_spawn_shoot_projectile()
+
+	if _state_time_left <= 0.0:
+		_start_weighted_decision()
+
+
+func _apply_overlap_avoidance(delta: float) -> void:
+	if not avoid_enemy_overlap:
+		return
+	if overlap_avoidance_radius <= 0.0:
+		return
+
+	var separation := Vector3.ZERO
+	for node in get_tree().get_nodes_in_group(OVERLAP_AVOIDANCE_GROUP):
+		var other: Node3D = node as Node3D
+		if other == null or other == self:
+			continue
+		if not is_instance_valid(other):
+			continue
+
+		var offset := global_position - other.global_position
+		offset.y = 0.0
+		var distance := offset.length()
+		if distance <= 0.001:
+			offset = global_transform.basis.x * _get_overlap_tiebreak_sign(other)
+			offset.y = 0.0
+			distance = 0.001
+
+		if distance >= overlap_avoidance_radius:
+			continue
+
+		var push_ratio := (overlap_avoidance_radius - distance) / overlap_avoidance_radius
+		separation += offset.normalized() * push_ratio
+
+	if separation == Vector3.ZERO:
+		return
+
+	var push_velocity := separation * overlap_avoidance_strength
+	var push_speed := minf(push_velocity.length(), overlap_avoidance_max_push_speed)
+	global_position += push_velocity.normalized() * push_speed * delta
+
+
+func _get_overlap_tiebreak_sign(other: Node3D) -> float:
+	if get_instance_id() < other.get_instance_id():
+		return -1.0
+
+	return 1.0
 
 
 func _stop_run_away(player: Node3D) -> void:
@@ -153,7 +305,8 @@ func _process_dash_damage_push(delta: float) -> void:
 	var frame_distance := (distance_ratio - _damage_push_distance_ratio) * _damage_push_distance
 
 	global_position += _damage_push_direction * frame_distance
-	_face_direction(_damage_push_direction, delta)
+	if face_hit_push_direction:
+		_face_direction(_damage_push_direction, delta)
 	_damage_push_distance_ratio = distance_ratio
 	_damage_state_time_left -= delta
 
@@ -178,6 +331,10 @@ func _process_dash_damage_hold(delta: float) -> void:
 
 
 func _resume_idle_or_run_away() -> void:
+	if use_weighted_ai:
+		_start_weighted_decision()
+		return
+
 	var player := _find_detected_chicken()
 	if player != null:
 		_start_run_away(player)
@@ -187,16 +344,51 @@ func _resume_idle_or_run_away() -> void:
 
 func _start_idle() -> void:
 	_state = "idle"
-	_state_time_left = _rng.randf_range(idle_time_min, idle_time_max)
+	_state_time_left = _rng.randf_range(idle_time_range.x, idle_time_range.y)
 	_walk_direction = Vector3.ZERO
 	_play_animation(idle_animation_name)
 
 
 func _start_walk() -> void:
 	_state = "walk"
-	_state_time_left = _rng.randf_range(walk_time_min, walk_time_max)
+	_state_time_left = _rng.randf_range(walk_time_range.x, walk_time_range.y)
 	_walk_direction = _get_random_walk_direction()
 	_play_animation(walk_animation_name)
+
+
+func _start_weighted_decision() -> void:
+	_detected_player = _find_ai_target()
+	var action := _pick_weighted_action()
+
+	if action == "chase" and _detected_player != null:
+		_start_chase(_detected_player)
+		return
+
+	if action == "shoot" and _detected_player != null:
+		_start_shoot(_detected_player)
+		return
+
+	_start_idle()
+
+
+func _pick_weighted_action() -> String:
+	var idle_weight := maxf(ai_idle_weight, 0.0)
+	var chase_weight := maxf(ai_chase_weight, 0.0)
+	var shoot_weight := maxf(ai_shoot_weight, 0.0)
+	var total_weight := idle_weight + chase_weight + shoot_weight
+
+	if total_weight <= 0.0:
+		return "idle"
+
+	var roll := _rng.randf_range(0.0, total_weight)
+	if roll < idle_weight:
+		return "idle"
+
+	roll -= idle_weight
+	if roll < chase_weight:
+		return "chase"
+
+	return "shoot"
 
 
 func _get_random_walk_direction() -> Vector3:
@@ -214,6 +406,8 @@ func _face_direction(direction: Vector3, delta: float) -> void:
 
 
 func _on_player_detection_body_entered(body: Node3D) -> void:
+	if use_weighted_ai:
+		return
 	if _state == "dash_damage_push" or _state == "dash_damage_hold":
 		return
 
@@ -223,6 +417,9 @@ func _on_player_detection_body_entered(body: Node3D) -> void:
 
 
 func _on_player_detection_body_exited(body: Node3D) -> void:
+	if use_weighted_ai:
+		return
+
 	var player := _get_detected_chicken(body)
 	if player != null:
 		_stop_run_away(player)
@@ -250,6 +447,63 @@ func _find_detected_chicken() -> Node3D:
 			return player
 
 	return null
+
+
+func _find_ai_target() -> Node3D:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return null
+
+	var target := scene_root.find_child(target_node_name, true, false)
+	if target is Node3D:
+		return target as Node3D
+
+	return null
+
+
+func _spawn_shoot_projectile() -> void:
+	_shoot_projectile_was_spawned = true
+	if shoot_projectile_scene == null:
+		return
+
+	var projectile := shoot_projectile_scene.instantiate() as Node3D
+	if projectile == null:
+		return
+
+	var projectile_parent := get_tree().current_scene
+	if projectile_parent == null:
+		projectile_parent = get_parent()
+	if projectile_parent == null:
+		projectile_parent = self
+
+	projectile_parent.add_child(projectile)
+
+	var spawn_transform := global_transform
+	if shoot_projectile_spawn != null:
+		spawn_transform = shoot_projectile_spawn.global_transform
+
+	var shoot_direction := global_transform.basis.z.normalized()
+	if _detected_player != null and is_instance_valid(_detected_player):
+		shoot_direction = _detected_player.global_position - spawn_transform.origin
+		if shoot_direction == Vector3.ZERO:
+			shoot_direction = global_transform.basis.z
+		shoot_direction = shoot_direction.normalized()
+
+	projectile.global_transform = Transform3D(_basis_with_y_axis(shoot_direction), spawn_transform.origin)
+
+	if projectile.has_method("setup"):
+		projectile.call("setup", shoot_direction, self)
+
+
+func _basis_with_y_axis(direction: Vector3) -> Basis:
+	var y_axis := direction.normalized()
+	var helper_axis := Vector3.UP
+	if absf(y_axis.dot(helper_axis)) > 0.98:
+		helper_axis = Vector3.RIGHT
+
+	var x_axis := helper_axis.cross(y_axis).normalized()
+	var z_axis := x_axis.cross(y_axis).normalized()
+	return Basis(x_axis, y_axis, z_axis)
 
 
 func take_damage(damage: int) -> void:

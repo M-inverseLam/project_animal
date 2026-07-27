@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bmhxfby7oqfne"]
+
+[ext_resource type="Texture2D" uid="uid://drii4836i5lmc" path="res://Asset/ui/ui04/ui04_mousecursor.tga" id="1_q6jb1"]
+[ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="2_werqg"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_4kxuq"]
+size = Vector2(2, 2)
+orientation = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mti6b"]
+transparency = 1
+cull_mode = 2
+no_depth_test = true
+shading_mode = 0
+albedo_texture = ExtResource("1_q6jb1")
+
+[node name="mouse_cursor" type="Node3D" unique_id=912863034]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=275136443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.13278398, 0)
+mesh = SubResource("QuadMesh_4kxuq")
+surface_material_override/0 = SubResource("StandardMaterial3D_mti6b")
+script = ExtResource("2_werqg")
+rotation_speed_degrees = 180.0

@@ -12,6 +12,8 @@ radius = 0.45410156
 
 [node name="lance01" type="Node3D" unique_id=24254344]
 script = ExtResource("3_4kxuq")
+speed = 24.0
+damage = 2
 hit_spark_scene = ExtResource("4_lance")
 
 [node name="lance01" parent="." unique_id=2013849724 instance=ExtResource("1_t0dif")]

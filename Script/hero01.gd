@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+const MOUSE_AIM_PLANE_Y := 0.0
+
 @export var move_speed: float = 4.0
 @export var turn_speed: float = 12.0
 @export var step_height: float = 0.08
@@ -12,16 +14,8 @@ extends CharacterBody3D
 @export var attack_animation_name: String = "attack01"
 @export var attack_idle_animation_name: String = "attack_idle"
 @export var attack_animation_cycle: PackedStringArray = PackedStringArray(["attack01", "attack02"])
-@export var attack_damage: int = 1
-@export var attack_duration: float = 0.6
-@export var attack_hitbox_start: float = 0.2
-@export var attack_hitbox_end: float = 0.45
-@export var attack_dash_distance: float = 0.0
-@export var attack_dash_duration: float = 0.18
-@export var attack_dash_slowdown_power: float = 2.0
 @export var attack_projectile_scene: PackedScene
 @export var attack_projectile_spawn_path: NodePath = NodePath("shootposition")
-@export var attack_projectile_spawn_time: float = 0.05
 @export var attack_upper_body_bone_name: String = "spline1"
 @export var attack_lower_body_bone_name: String = "pelvis"
 
@@ -30,13 +24,6 @@ extends CharacterBody3D
 @export_group("Dash")
 @export var dash_animation_name: String = "dash"
 @export var dash_animation_cycle: PackedStringArray = PackedStringArray(["dash", "dash02"])
-@export var dash_duration: float = 1.0
-@export var dash_distance: float = 5.0
-@export var dash_damage: int = 1
-@export var dash_slowdown_power: float = 4.0
-@export var dash_bounce_back_distance: float = 1.4
-@export var dash_bounce_back_duration: float = 0.25
-@export var dash_bounce_back_slowdown_power: float = 2.5
 @export var dash_cooldown: float = 0.5
 @export var dash_hit_camera_shake_duration: float = 0.5
 @export var dash_hit_camera_shake_strength: float = 0.45
@@ -54,8 +41,6 @@ extends CharacterBody3D
 @onready var skeleton := find_child("Skeleton3D", true, false) as Skeleton3D
 @onready var visual_root := get_node_or_null("chicken01") as Node3D
 @onready var dash_dust_template := get_node_or_null("DashDust") as Node3D
-@onready var attack_hitbox := get_node_or_null("AttackHitbox") as Area3D
-@onready var attack_hitbox_shape := get_node_or_null("AttackHitbox/CollisionShape3D") as CollisionShape3D
 @onready var attack_projectile_spawn := get_node_or_null(attack_projectile_spawn_path) as Node3D
 @onready var dash_hitbox := get_node_or_null("DashHitbox") as Area3D
 @onready var dash_hitbox_shape := get_node_or_null("DashHitbox/CollisionShape3D") as CollisionShape3D
@@ -88,13 +73,13 @@ var _walk_time := 0.0
 var _last_movement := Vector3.ZERO
 var _slide_time_left := 0.0
 var _attack_key_was_pressed := false
+var _auto_shoot_is_enabled := true
+var _resume_auto_shoot_after_dash := false
 var _is_attacking := false
-var _attack_elapsed := 0.0
+var _attack_time_left := 0.0
 var _active_attack_animation_name := ""
 var _queued_attack_animation_name := ""
 var _next_attack_animation_index := 0
-var _attack_dash_elapsed := 0.0
-var _attack_dash_distance_ratio := 0.0
 var _attack_projectile_was_spawned := false
 var _dash_key_was_pressed := false
 var _is_dashing := false
@@ -109,34 +94,40 @@ var _dash_bounce_elapsed := 0.0
 var _dash_bounce_distance_ratio := 0.0
 var _dash_cooldown_time_left := 0.0
 var _active_dash_dust: Node3D
-var _attack_hit_targets: Array[Node] = []
 var _dash_hit_targets: Array[Node] = []
+var _weapon_dash_duration := 1.0
+var _weapon_dash_distance := 5.0
+var _weapon_dash_damage := 1
+var _weapon_dash_slowdown_power := 4.0
+var _weapon_dash_bounce_back_distance := 1.4
+var _weapon_dash_bounce_back_duration := 0.25
+var _weapon_dash_bounce_back_slowdown_power := 2.5
+var _mouse_world_position := Vector3.ZERO
 
 
 func _ready() -> void:
+	_load_weapon_dash_parameters()
 	if visual_root != null:
 		_visual_start_position = visual_root.position
 		_visual_start_rotation = visual_root.rotation
 	if animation_player != null:
 		animation_player.animation_finished.connect(_on_animation_finished)
 	_setup_animation_tree()
-	if attack_hitbox != null:
-		attack_hitbox.body_entered.connect(_on_attack_hitbox_body_entered)
-		attack_hitbox.area_entered.connect(_on_attack_hitbox_area_entered)
 	if dash_hitbox != null:
 		dash_hitbox.body_entered.connect(_on_dash_hitbox_body_entered)
 		dash_hitbox.area_entered.connect(_on_dash_hitbox_area_entered)
-	_set_attack_hitbox_enabled(false)
 	_set_dash_hitbox_enabled(false)
 	_stop_dash_dust()
 	_play_animation("idle")
+	_start_attack()
 
 
 func _physics_process(delta: float) -> void:
 	_update_dash_cooldown(delta)
 	_update_animation_tree_blends(delta)
 	_update_attack_input()
-	_update_attack_hitbox(delta)
+	_face_mouse_cursor(delta)
+	_update_attack_projectile(delta)
 
 	_update_dash_input()
 
@@ -161,7 +152,6 @@ func _physics_process(delta: float) -> void:
 	if movement != Vector3.ZERO:
 		_move_with_collision(movement * move_speed * delta, delta)
 		if not is_sliding:
-			_face_direction(movement, delta)
 			_animate_walk(delta)
 			if not _is_dashing:
 				_play_animation("walk")
@@ -191,16 +181,21 @@ func _get_keyboard_movement() -> Vector3:
 
 
 func _update_attack_input() -> void:
-	var attack_key_is_pressed := Input.is_physical_key_pressed(KEY_UP)
+	var attack_key_is_pressed := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 
 	if attack_key_is_pressed and not _attack_key_was_pressed:
+		_auto_shoot_is_enabled = not _auto_shoot_is_enabled
+		if _auto_shoot_is_enabled:
+			_start_attack()
+
+	if _auto_shoot_is_enabled and not _is_attacking:
 		_start_attack()
 
 	_attack_key_was_pressed = attack_key_is_pressed
 
 
 func _update_dash_input() -> void:
-	var dash_key_is_pressed := Input.is_physical_key_pressed(KEY_DOWN)
+	var dash_key_is_pressed := Input.is_physical_key_pressed(KEY_SPACE)
 
 	if dash_key_is_pressed and not _dash_key_was_pressed:
 		_start_dash()
@@ -233,21 +228,15 @@ func _start_attack() -> void:
 
 func _play_attack_animation(animation_name: String) -> void:
 	_is_attacking = true
-	_attack_elapsed = 0.0
+	_attack_time_left = _get_animation_length(animation_name)
 	_active_attack_animation_name = animation_name
-	_attack_dash_elapsed = 0.0
-	_attack_dash_distance_ratio = 0.0
 	_attack_projectile_was_spawned = false
-	_attack_hit_targets.clear()
-	_set_attack_hitbox_enabled(false)
 
 	_play_animation(_active_attack_animation_name, true)
 
 
 func _start_dash() -> void:
 	if _is_dashing:
-		return
-	if _is_attacking:
 		return
 	if _dash_cooldown_time_left > 0.0:
 		return
@@ -256,10 +245,11 @@ func _start_dash() -> void:
 	if selected_dash_animation == "":
 		return
 
-	_stop_attack()
+	_resume_auto_shoot_after_dash = _auto_shoot_is_enabled
+	_clear_attack_state(true)
 	_is_dashing = true
 	_active_dash_animation_name = selected_dash_animation
-	_dash_time_left = dash_duration
+	_dash_time_left = _weapon_dash_duration
 	_dash_elapsed = 0.0
 	_dash_distance_ratio = 0.0
 	_dash_direction = _get_dash_direction()
@@ -281,15 +271,15 @@ func _process_dash(delta: float) -> void:
 		_process_dash_bounce_back(delta)
 		return
 
-	if dash_duration <= 0.0 or dash_distance <= 0.0:
+	if _weapon_dash_duration <= 0.0 or _weapon_dash_distance <= 0.0:
 		_stop_dash()
 		return
 
-	_dash_elapsed = minf(_dash_elapsed + delta, dash_duration)
-	var progress := _dash_elapsed / dash_duration
-	var slowdown_power := maxf(dash_slowdown_power, 1.0)
+	_dash_elapsed = minf(_dash_elapsed + delta, _weapon_dash_duration)
+	var progress := _dash_elapsed / _weapon_dash_duration
+	var slowdown_power := maxf(_weapon_dash_slowdown_power, 1.0)
 	var distance_ratio := 1.0 - pow(1.0 - progress, slowdown_power)
-	var frame_distance := (distance_ratio - _dash_distance_ratio) * dash_distance
+	var frame_distance := (distance_ratio - _dash_distance_ratio) * _weapon_dash_distance
 
 	_move_with_collision(_dash_direction * frame_distance, delta)
 	_dash_distance_ratio = distance_ratio
@@ -301,20 +291,20 @@ func _process_dash(delta: float) -> void:
 
 
 func _process_dash_bounce_back(delta: float) -> void:
-	if dash_bounce_back_duration <= 0.0 or dash_bounce_back_distance <= 0.0:
+	if _weapon_dash_bounce_back_duration <= 0.0 or _weapon_dash_bounce_back_distance <= 0.0:
 		_stop_dash()
 		return
 
-	_dash_bounce_elapsed = minf(_dash_bounce_elapsed + delta, dash_bounce_back_duration)
-	var progress := _dash_bounce_elapsed / dash_bounce_back_duration
-	var slowdown_power := maxf(dash_bounce_back_slowdown_power, 1.0)
+	_dash_bounce_elapsed = minf(_dash_bounce_elapsed + delta, _weapon_dash_bounce_back_duration)
+	var progress := _dash_bounce_elapsed / _weapon_dash_bounce_back_duration
+	var slowdown_power := maxf(_weapon_dash_bounce_back_slowdown_power, 1.0)
 	var distance_ratio := 1.0 - pow(1.0 - progress, slowdown_power)
-	var frame_distance := (distance_ratio - _dash_bounce_distance_ratio) * dash_bounce_back_distance
+	var frame_distance := (distance_ratio - _dash_bounce_distance_ratio) * _weapon_dash_bounce_back_distance
 
 	_move_with_collision(-_dash_direction * frame_distance, delta)
 	_dash_bounce_distance_ratio = distance_ratio
 
-	if _dash_bounce_elapsed >= dash_bounce_back_duration:
+	if _dash_bounce_elapsed >= _weapon_dash_bounce_back_duration:
 		_stop_dash()
 
 
@@ -332,10 +322,70 @@ func _stop_dash() -> void:
 	_stop_dash_dust()
 	_dash_cooldown_time_left = dash_cooldown
 	_current_animation = ""
+	if _resume_auto_shoot_after_dash:
+		_resume_auto_shoot_after_dash = false
+		_auto_shoot_is_enabled = true
+		_start_attack()
+	else:
+		_resume_auto_shoot_after_dash = false
 
 
 func _get_dash_direction() -> Vector3:
+	var input_direction := _get_keyboard_movement()
+	if input_direction != Vector3.ZERO:
+		return input_direction
+
 	return global_transform.basis.z.normalized()
+
+
+func _load_weapon_dash_parameters() -> void:
+	if attack_projectile_scene == null:
+		return
+
+	var weapon: Node = attack_projectile_scene.instantiate()
+	if weapon == null:
+		return
+
+	_weapon_dash_duration = _get_float_property(weapon, "dash_duration", _weapon_dash_duration)
+	_weapon_dash_distance = _get_float_property(weapon, "dash_distance", _weapon_dash_distance)
+	_weapon_dash_damage = _get_int_property(weapon, "dash_damage", _weapon_dash_damage)
+	_weapon_dash_slowdown_power = _get_float_property(weapon, "dash_slowdown_power", _weapon_dash_slowdown_power)
+	_weapon_dash_bounce_back_distance = _get_float_property(weapon, "dash_bounce_back_distance", _weapon_dash_bounce_back_distance)
+	_weapon_dash_bounce_back_duration = _get_float_property(weapon, "dash_bounce_back_duration", _weapon_dash_bounce_back_duration)
+	_weapon_dash_bounce_back_slowdown_power = _get_float_property(weapon, "dash_bounce_back_slowdown_power", _weapon_dash_bounce_back_slowdown_power)
+	weapon.free()
+
+
+func _get_float_property(object: Object, property_name: String, fallback: float) -> float:
+	if not _has_property(object, property_name):
+		return fallback
+
+	var value: Variant = object.get(property_name)
+	if value is float or value is int:
+		return float(value)
+
+	return fallback
+
+
+func _get_int_property(object: Object, property_name: String, fallback: int) -> int:
+	if not _has_property(object, property_name):
+		return fallback
+
+	var value: Variant = object.get(property_name)
+	if value is int:
+		return int(value)
+	if value is float:
+		return int(value)
+
+	return fallback
+
+
+func _has_property(object: Object, property_name: String) -> bool:
+	for property in object.get_property_list():
+		if property.get("name", "") == property_name:
+			return true
+
+	return false
 
 
 func _move_with_collision(displacement: Vector3, delta: float) -> void:
@@ -348,46 +398,31 @@ func _move_with_collision(displacement: Vector3, delta: float) -> void:
 	velocity = Vector3.ZERO
 
 
-func _update_attack_hitbox(delta: float) -> void:
+func _update_attack_projectile(delta: float) -> void:
 	if not _is_attacking:
-		_set_attack_hitbox_enabled(false)
 		return
 
-	var attack_time := 0.0
-	if _active_attack_animation_name != "" and _has_animation(_active_attack_animation_name) and animation_player.current_animation == StringName(_active_attack_animation_name):
-		attack_time = animation_player.current_animation_position
-	else:
-		_attack_elapsed += delta
-		attack_time = _attack_elapsed
-
-		if _attack_elapsed >= attack_duration:
-			_finish_attack()
-			return
-
-	if not _attack_projectile_was_spawned and attack_time >= attack_projectile_spawn_time:
+	if not _attack_projectile_was_spawned:
 		_spawn_attack_projectile()
 
-	var hitbox_is_active := attack_projectile_scene == null and attack_time >= attack_hitbox_start and attack_time <= attack_hitbox_end
-	_set_attack_hitbox_enabled(hitbox_is_active)
-
-	if hitbox_is_active:
-		_apply_current_attack_overlaps()
+	if _attack_time_left > 0.0:
+		_attack_time_left = maxf(_attack_time_left - delta, 0.0)
+		if _attack_time_left <= 0.0:
+			_finish_attack()
 
 
 func _stop_attack() -> void:
+	_auto_shoot_is_enabled = false
+	_resume_auto_shoot_after_dash = false
 	_clear_attack_state(true)
 
 
 func _clear_attack_state(abort_animation: bool) -> void:
 	_is_attacking = false
-	_attack_elapsed = 0.0
+	_attack_time_left = 0.0
 	_active_attack_animation_name = ""
 	_queued_attack_animation_name = ""
-	_attack_dash_elapsed = 0.0
-	_attack_dash_distance_ratio = 0.0
 	_attack_projectile_was_spawned = false
-	_attack_hit_targets.clear()
-	_set_attack_hitbox_enabled(false)
 	if _uses_animation_tree and _animation_tree != null:
 		_target_attack_layer_blend_amount = 0.0
 		if abort_animation:
@@ -396,6 +431,9 @@ func _clear_attack_state(abort_animation: bool) -> void:
 
 
 func _finish_attack() -> void:
+	if not _is_attacking:
+		return
+
 	var next_attack_animation := _queued_attack_animation_name
 	_queued_attack_animation_name = ""
 
@@ -403,24 +441,14 @@ func _finish_attack() -> void:
 		_play_attack_animation(next_attack_animation)
 		return
 
+	if _auto_shoot_is_enabled:
+		var selected_attack_animation := _get_next_attack_animation_name()
+		if selected_attack_animation != "":
+			_play_attack_animation(selected_attack_animation)
+			return
+
 	_clear_attack_state(false)
 	_current_animation = ""
-
-
-func _process_attack_dash(delta: float) -> void:
-	if attack_dash_duration <= 0.0 or attack_dash_distance <= 0.0:
-		return
-	if _attack_dash_elapsed >= attack_dash_duration:
-		return
-
-	_attack_dash_elapsed = minf(_attack_dash_elapsed + delta, attack_dash_duration)
-	var progress := _attack_dash_elapsed / attack_dash_duration
-	var slowdown_power := maxf(attack_dash_slowdown_power, 1.0)
-	var distance_ratio := 1.0 - pow(1.0 - progress, slowdown_power)
-	var frame_distance := (distance_ratio - _attack_dash_distance_ratio) * attack_dash_distance
-
-	_move_with_collision(global_transform.basis.z.normalized() * frame_distance, delta)
-	_attack_dash_distance_ratio = distance_ratio
 
 
 func _spawn_attack_projectile() -> void:
@@ -444,10 +472,18 @@ func _spawn_attack_projectile() -> void:
 		spawn_transform = attack_projectile_spawn.global_transform
 
 	var shoot_direction := global_transform.basis.z.normalized()
+	if _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
+		shoot_direction = _mouse_world_position - spawn_transform.origin
+		shoot_direction.y = 0.0
+		if shoot_direction == Vector3.ZERO:
+			shoot_direction = global_transform.basis.z.normalized()
+		else:
+			shoot_direction = shoot_direction.normalized()
+
 	projectile.global_transform = Transform3D(_basis_with_y_axis(shoot_direction), spawn_transform.origin)
 
 	if projectile.has_method("setup"):
-		projectile.call("setup", shoot_direction, attack_damage, self)
+		projectile.call("setup", shoot_direction, self)
 
 
 func _basis_with_y_axis(direction: Vector3) -> Basis:
@@ -461,11 +497,15 @@ func _basis_with_y_axis(direction: Vector3) -> Basis:
 	return Basis(x_axis, y_axis, z_axis)
 
 
-func _set_attack_hitbox_enabled(is_enabled: bool) -> void:
-	if attack_hitbox != null:
-		attack_hitbox.set_deferred("monitoring", is_enabled)
-	if attack_hitbox_shape != null:
-		attack_hitbox_shape.set_deferred("disabled", not is_enabled)
+func _get_animation_length(animation_name: String) -> float:
+	if not _has_animation(animation_name):
+		return 0.0
+
+	var animation: Animation = animation_player.get_animation(animation_name)
+	if animation == null:
+		return 0.0
+
+	return animation.length
 
 
 func _set_dash_hitbox_enabled(is_enabled: bool) -> void:
@@ -473,43 +513,6 @@ func _set_dash_hitbox_enabled(is_enabled: bool) -> void:
 		dash_hitbox.set_deferred("monitoring", is_enabled)
 	if dash_hitbox_shape != null:
 		dash_hitbox_shape.set_deferred("disabled", not is_enabled)
-
-
-func _apply_current_attack_overlaps() -> void:
-	if attack_hitbox == null:
-		return
-	if not attack_hitbox.monitoring:
-		return
-
-	for body in attack_hitbox.get_overlapping_bodies():
-		_apply_attack_hit(body)
-	for area in attack_hitbox.get_overlapping_areas():
-		_apply_attack_hit(area)
-
-
-func _on_attack_hitbox_body_entered(body: Node3D) -> void:
-	_apply_attack_hit(body)
-
-
-func _on_attack_hitbox_area_entered(area: Area3D) -> void:
-	_apply_attack_hit(area)
-
-
-func _apply_attack_hit(target: Node) -> void:
-	if not _is_attacking:
-		return
-	if target == self or is_ancestor_of(target) or target.is_ancestor_of(self):
-		return
-	if _attack_hit_targets.has(target):
-		return
-
-	_attack_hit_targets.append(target)
-	if target.has_method("take_attack_hit"):
-		target.call("take_attack_hit", global_transform.basis.z.normalized(), attack_damage)
-		_spawn_hit_spark(target)
-	elif target.has_method("take_damage"):
-		target.call("take_damage", attack_damage)
-		_spawn_hit_spark(target)
 
 
 func _apply_current_dash_overlaps() -> void:
@@ -544,12 +547,12 @@ func _apply_dash_hit(target: Node) -> void:
 
 	_dash_hit_targets.append(target)
 	if target.has_method("take_dash_hit"):
-		target.call("take_dash_hit", _dash_direction, dash_damage)
+		target.call("take_dash_hit", _dash_direction, _weapon_dash_damage)
 		_spawn_hit_spark(target)
 		_shake_camera_on_dash_hit()
 		_start_dash_bounce_back()
 	elif target.has_method("take_damage"):
-		target.call("take_damage", dash_damage)
+		target.call("take_damage", _weapon_dash_damage)
 		_spawn_hit_spark(target)
 		_shake_camera_on_dash_hit()
 		_start_dash_bounce_back()
@@ -702,9 +705,40 @@ func _stop_particles_recursive(node: Node) -> float:
 
 
 func _face_direction(direction: Vector3, delta: float) -> void:
+	if direction == Vector3.ZERO:
+		return
+
 	var target_transform := global_transform.looking_at(global_position - direction, Vector3.UP)
 	var blend := clampf(turn_speed * delta, 0.0, 1.0)
 	global_transform = Transform3D(global_transform.basis.slerp(target_transform.basis, blend), global_position)
+
+
+func _face_mouse_cursor(delta: float) -> void:
+	if not _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
+		return
+
+	var face_direction := _mouse_world_position - global_position
+	face_direction.y = 0.0
+	_face_direction(face_direction.normalized(), delta)
+
+
+func _update_mouse_world_position_on_plane(plane_y: float) -> bool:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return false
+
+	var mouse_position := get_viewport().get_mouse_position()
+	var ray_origin := camera.project_ray_origin(mouse_position)
+	var ray_direction := camera.project_ray_normal(mouse_position)
+	if absf(ray_direction.y) <= 0.001:
+		return false
+
+	var distance_to_plane := (plane_y - ray_origin.y) / ray_direction.y
+	if distance_to_plane <= 0.0:
+		return false
+
+	_mouse_world_position = ray_origin + ray_direction * distance_to_plane
+	return true
 
 
 func _animate_walk(delta: float) -> void:

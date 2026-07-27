@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://blni847ylfhaf"]
+
+[ext_resource type="Script" uid="uid://3jfr3h4j5qdk" path="res://Asset/char2_enemy/bees/bee01_bullet01_projectile.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://do3kvb2e7ojta" path="res://Asset/char2_enemy/bees/resource/bee01_bullet01.glb" id="2_2c8tb"]
+[ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="3_1lbdq"]
+[ext_resource type="Material" uid="uid://c70rjp222jt72" path="res://Asset/char2_enemy/bees/resource/bee01.material" id="3_iwa12"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_f16bk"]
+radius = 0.4005676
+
+[node name="bee_bullet01" type="Node3D" unique_id=2005302953]
+script = ExtResource("1_script")
+lifetime = 10.0
+
+[node name="Area3D" type="Area3D" parent="." unique_id=116655872]
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=879847628]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -7.945099e-09, 0.1817627)
+shape = SubResource("SphereShape3D_f16bk")
+
+[node name="bee01_bullet01" parent="." unique_id=709771529 instance=ExtResource("2_2c8tb")]
+script = ExtResource("3_1lbdq")
+rotation_axis = Vector3(1, 1, 0)
+
+[node name="bee_bullet01" parent="bee01_bullet01" index="0" unique_id=163714505]
+surface_material_override/0 = ExtResource("3_iwa12")
+
+[editable path="bee01_bullet01"]

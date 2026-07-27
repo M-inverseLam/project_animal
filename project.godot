@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Project_animal"
+config/name="Project_arena"
 run/main_scene="uid://gy2nqvfermwd"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="uid://bc4n67c70nxhf"
@@ -26,6 +26,10 @@ window/stretch/aspect="expand"
 [dotnet]
 
 project/assembly_name="Project_animal"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/enemy_ai_inspector/plugin.cfg")
 
 [physics]
 

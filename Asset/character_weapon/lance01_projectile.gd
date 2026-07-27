@@ -2,35 +2,53 @@ extends Node3D
 
 @export var speed: float = 18.0
 @export var lifetime: float = 2.0
+@export var spawn_delay: float = 0.05
+@export var damage: int = 1
+
+@export_group("Dash")
+@export var dash_duration: float = 0.5
+@export var dash_distance: float = 5.0
+@export var dash_damage: int = 1
+@export var dash_slowdown_power: float = 2.5
+@export var dash_bounce_back_distance: float = 1.4
+@export var dash_bounce_back_duration: float = 0.25
+@export var dash_bounce_back_slowdown_power: float = 2.5
+
+@export_group("")
 @export var hit_spark_scene: PackedScene
 @export var hit_spark_height: float = 0.8
 
 @onready var hit_area := get_node_or_null("Area3D") as Area3D
 
 var _direction := Vector3.FORWARD
-var _damage := 1
 var _source: Node
 var _hit_targets: Array[Node] = []
+var _is_active := false
 
 
 func _ready() -> void:
+	_set_projectile_active(false)
 	if hit_area != null:
 		hit_area.body_entered.connect(_on_hit_body_entered)
 		hit_area.area_entered.connect(_on_hit_area_entered)
 
-	if lifetime > 0.0:
-		get_tree().create_timer(lifetime).timeout.connect(queue_free)
+	if spawn_delay <= 0.0:
+		_activate_projectile()
+	else:
+		get_tree().create_timer(spawn_delay).timeout.connect(_activate_projectile)
 
 
-func setup(direction: Vector3, damage: int, source: Node = null) -> void:
+func setup(direction: Vector3, source: Node = null) -> void:
 	if direction != Vector3.ZERO:
 		_direction = direction.normalized()
-	_damage = damage
 	_source = source
 	global_transform = Transform3D(_basis_with_y_axis(_direction), global_position)
 
 
 func _physics_process(delta: float) -> void:
+	if not _is_active:
+		return
+
 	global_position += _direction * speed * delta
 
 
@@ -43,6 +61,8 @@ func _on_hit_area_entered(area: Area3D) -> void:
 
 
 func _apply_hit(target: Node) -> void:
+	if not _is_active:
+		return
 	if target == null:
 		return
 	if target == self or target == _source:
@@ -54,13 +74,27 @@ func _apply_hit(target: Node) -> void:
 
 	_hit_targets.append(target)
 	if target.has_method("take_attack_hit"):
-		target.call("take_attack_hit", _direction, _damage)
+		target.call("take_attack_hit", _direction, damage)
 		_spawn_hit_spark(target)
 		queue_free()
 	elif target.has_method("take_damage"):
-		target.call("take_damage", _damage)
+		target.call("take_damage", damage)
 		_spawn_hit_spark(target)
 		queue_free()
+
+
+func _activate_projectile() -> void:
+	_set_projectile_active(true)
+
+	if lifetime > 0.0:
+		get_tree().create_timer(lifetime).timeout.connect(queue_free)
+
+
+func _set_projectile_active(is_active: bool) -> void:
+	_is_active = is_active
+	visible = is_active
+	if hit_area != null:
+		hit_area.monitoring = is_active
 
 
 func _spawn_hit_spark(target: Node) -> void:

@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://bvclms3oujko6"]
+
+[ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Script/enemy_Ai01.gd" id="1_um2gp"]
+[ext_resource type="PackedScene" uid="uid://cmcdkaxbpv3fa" path="res://Asset/char2_enemy/bees/resource/bee01.glb" id="1_vx0fs"]
+[ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_jfhy1"]
+[ext_resource type="Material" uid="uid://c70rjp222jt72" path="res://Asset/char2_enemy/bees/resource/bee01.material" id="2_um2gp"]
+[ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark/hitspark02.tscn" id="3_m4aol"]
+[ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Asset/char2_enemy/mouse01/mouse01_damage_receiver.gd" id="4_584u7"]
+[ext_resource type="PackedScene" uid="uid://blni847ylfhaf" path="res://Asset/char2_enemy/bees/bee01_bullet01.tscn" id="5_bullet"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_jfhy1"]
+radius = 0.61037946
+
+[node name="bee01" type="Node3D" unique_id=648269543]
+script = ExtResource("1_um2gp")
+walk_animation_name = "idle"
+max_health = 20
+walk_speed = 5.0
+idle_time_range = Vector2(0.2, 0.5)
+use_weighted_ai = true
+ai_shoot_weight = 50.0
+chase_speed = 2.0
+chase_time_range = Vector2(0.8, 1.6)
+shoot_projectile_scene = ExtResource("5_bullet")
+shoot_projectile_spawn_path = NodePath("shootposition")
+avoid_enemy_overlap = true
+overlap_avoidance_strength = 10.0
+overlap_avoidance_max_push_speed = 4.0
+face_hit_push_direction = false
+damage_number_duration = 1.0
+damage_number_font = ExtResource("2_jfhy1")
+damage_number_font_size = 120
+damage_number_color = Color(1, 1, 1, 1)
+death_spark_scene = ExtResource("3_m4aol")
+
+[node name="bee01" parent="." unique_id=1863990590 instance=ExtResource("1_vx0fs")]
+
+[node name="body" parent="bee01/Armature/Skeleton3D" parent_id_path=PackedInt32Array(1863990590, 371037396) index="0" unique_id=150806956]
+surface_material_override/0 = ExtResource("2_um2gp")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1150994528]
+script = ExtResource("4_584u7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=872520673]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.063412905, 0)
+shape = SubResource("SphereShape3D_jfhy1")
+
+[node name="shootposition" type="Marker3D" parent="." unique_id=186434109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.8546848)
+
+[editable path="bee01"]

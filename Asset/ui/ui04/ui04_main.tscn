@@ -1,8 +1,11 @@
 [gd_scene format=3 uid="uid://qvtqchh8es53"]
 
+[ext_resource type="Script" uid="uid://du25u26skkyj2" path="res://Asset/ui/ui04/ui04_main.gd" id="1_cursor"]
 [ext_resource type="Texture2D" uid="uid://c1iwbrf4dtc4b" path="res://Asset/ui/ui04/ui04_main_icon_heath.tga" id="1_ycw01"]
 [ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_bx36w"]
 [ext_resource type="Texture2D" uid="uid://dvflqnufw7t53" path="res://Asset/ui/ui04/ui04_main_icon_gems.tga" id="3_tw8gj"]
+[ext_resource type="Texture2D" uid="uid://drii4836i5lmc" path="res://Asset/ui/ui04/ui04_mousecursor.tga" id="4_cursor"]
+[ext_resource type="PackedScene" uid="uid://bmhxfby7oqfne" path="res://Asset/ui/ui04/ui04_mousecursor.tscn" id="5_ground_cursor"]
 
 [sub_resource type="Theme" id="Theme_ycw01"]
 default_font = ExtResource("2_bx36w")
@@ -44,6 +47,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_cursor")
+mouse_cursor_texture = ExtResource("4_cursor")
+ground_cursor_scene = ExtResource("5_ground_cursor")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1668673301]
 layout_mode = 1
