@@ -6,8 +6,10 @@ extends Control
 @export var ground_plane_y: float = 0.0
 @export var ground_cursor_height_offset: float = 0.12
 @export var hide_system_cursor: bool = true
+@export var face_control_node_name: String = "hero_girl01"
 
 var _ground_cursor: Node3D
+var _face_control_node: Node
 var _is_system_cursor_hidden := false
 
 
@@ -51,10 +53,15 @@ func _update_ground_cursor_position() -> void:
 	if _ground_cursor == null:
 		return
 
+	if not _is_mouse_face_control_enabled():
+		_ground_cursor.visible = false
+		_hide_system_cursor()
+		return
+
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	if camera == null:
 		_ground_cursor.visible = false
-		_show_system_cursor()
+		_hide_system_cursor()
 		return
 
 	var mouse_position: Vector2 = get_viewport().get_mouse_position()
@@ -62,13 +69,13 @@ func _update_ground_cursor_position() -> void:
 	var ray_direction: Vector3 = camera.project_ray_normal(mouse_position)
 	if absf(ray_direction.y) <= 0.001:
 		_ground_cursor.visible = false
-		_show_system_cursor()
+		_hide_system_cursor()
 		return
 
 	var distance_to_plane: float = (ground_plane_y - ray_origin.y) / ray_direction.y
 	if distance_to_plane <= 0.0:
 		_ground_cursor.visible = false
-		_show_system_cursor()
+		_hide_system_cursor()
 		return
 
 	var cursor_position: Vector3 = ray_origin + ray_direction * distance_to_plane
@@ -94,3 +101,25 @@ func _show_system_cursor() -> void:
 
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_is_system_cursor_hidden = false
+
+
+func _is_mouse_face_control_enabled() -> bool:
+	var face_control_node := _get_face_control_node()
+	if face_control_node == null:
+		return false
+	if not face_control_node.has_method("is_mouse_face_control_enabled"):
+		return false
+
+	return bool(face_control_node.call("is_mouse_face_control_enabled"))
+
+
+func _get_face_control_node() -> Node:
+	if _face_control_node != null and is_instance_valid(_face_control_node):
+		return _face_control_node
+
+	var scene_root: Node = get_tree().current_scene
+	if scene_root == null:
+		return null
+
+	_face_control_node = scene_root.find_child(face_control_node_name, true, false)
+	return _face_control_node

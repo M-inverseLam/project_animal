@@ -2,13 +2,25 @@ extends CharacterBody3D
 
 const MOUSE_AIM_PLANE_Y := 0.0
 
+enum FaceControlMode {
+	KEY_ARROW,
+	MOUSE_CURSOR,
+}
+
 @export var move_speed: float = 4.0
 @export var turn_speed: float = 12.0
+@export var arrow_face_turn_speed: float = 4.0
+@export var arrow_face_turn_step_degrees: float = 15.0
 @export var step_height: float = 0.08
 @export var step_tilt: float = 0.08
 @export var step_speed: float = 10.0
 @export var animation_blend_time: float = 0.2
 @export var slide_duration: float = 0.3
+
+@export_group("Health")
+@export var max_health: int = 500
+
+@export_group("")
 
 @export_group("Attack")
 @export var attack_animation_name: String = "attack01"
@@ -67,6 +79,7 @@ var _target_attack_blend_amount := 0.0
 var _attack_layer_blend_amount := 0.0
 var _target_attack_layer_blend_amount := 0.0
 var _active_attack_blend_slot := 0
+var _current_health := 0
 var _visual_start_position := Vector3.ZERO
 var _visual_start_rotation := Vector3.ZERO
 var _walk_time := 0.0
@@ -103,9 +116,21 @@ var _weapon_dash_bounce_back_distance := 1.4
 var _weapon_dash_bounce_back_duration := 0.25
 var _weapon_dash_bounce_back_slowdown_power := 2.5
 var _mouse_world_position := Vector3.ZERO
+var _face_control_mode: int = FaceControlMode.KEY_ARROW
+var _face_control_toggle_was_pressed := false
+var _last_keyboard_face_direction := Vector3.FORWARD
+var _has_keyboard_face_target := false
+var _keyboard_face_up_was_pressed := false
+var _keyboard_face_down_was_pressed := false
+var _keyboard_face_left_was_pressed := false
+var _keyboard_face_right_was_pressed := false
 
 
 func _ready() -> void:
+	_face_control_mode = FaceControlMode.KEY_ARROW
+	_has_keyboard_face_target = false
+	_current_health = max_health
+	_update_health_ui()
 	_load_weapon_dash_parameters()
 	if visual_root != null:
 		_visual_start_position = visual_root.position
@@ -126,7 +151,7 @@ func _physics_process(delta: float) -> void:
 	_update_dash_cooldown(delta)
 	_update_animation_tree_blends(delta)
 	_update_attack_input()
-	_face_mouse_cursor(delta)
+	_update_face_direction_input(delta)
 	_update_attack_projectile(delta)
 
 	_update_dash_input()
@@ -398,6 +423,29 @@ func _move_with_collision(displacement: Vector3, delta: float) -> void:
 	velocity = Vector3.ZERO
 
 
+func take_damage(damage: int) -> void:
+	if damage <= 0:
+		return
+
+	_current_health = maxi(_current_health - damage, 0)
+	_update_health_ui()
+
+
+func _update_health_ui() -> void:
+	var scene_root: Node = get_tree().current_scene
+	if scene_root == null:
+		return
+
+	var health_bar := scene_root.get_node_or_null("Interface/ui04_main/MarginContainer/HBoxContainer/HealthBar") as ProgressBar
+	if health_bar != null:
+		health_bar.max_value = max_health
+		health_bar.value = _current_health
+
+	var health_label := scene_root.get_node_or_null("Interface/ui04_main/MarginContainer/HBoxContainer/HealthBar/HealthValueLabel") as Label
+	if health_label != null:
+		health_label.text = str(_current_health)
+
+
 func _update_attack_projectile(delta: float) -> void:
 	if not _is_attacking:
 		return
@@ -472,7 +520,7 @@ func _spawn_attack_projectile() -> void:
 		spawn_transform = attack_projectile_spawn.global_transform
 
 	var shoot_direction := global_transform.basis.z.normalized()
-	if _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
+	if _face_control_mode == FaceControlMode.MOUSE_CURSOR and _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
 		shoot_direction = _mouse_world_position - spawn_transform.origin
 		shoot_direction.y = 0.0
 		if shoot_direction == Vector3.ZERO:
@@ -704,13 +752,131 @@ func _stop_particles_recursive(node: Node) -> float:
 	return longest_lifetime
 
 
-func _face_direction(direction: Vector3, delta: float) -> void:
+func _face_direction(direction: Vector3, delta: float, face_turn_speed: float = -1.0) -> void:
 	if direction == Vector3.ZERO:
 		return
 
-	var target_transform := global_transform.looking_at(global_position - direction, Vector3.UP)
-	var blend := clampf(turn_speed * delta, 0.0, 1.0)
-	global_transform = Transform3D(global_transform.basis.slerp(target_transform.basis, blend), global_position)
+	var current_direction := global_transform.basis.z
+	current_direction.y = 0.0
+	if current_direction == Vector3.ZERO:
+		current_direction = Vector3.FORWARD
+	else:
+		current_direction = current_direction.normalized()
+
+	var target_direction := direction
+	target_direction.y = 0.0
+	target_direction = target_direction.normalized()
+
+	var current_yaw := atan2(current_direction.x, current_direction.z)
+	var target_yaw := atan2(target_direction.x, target_direction.z)
+	var rotation_speed := turn_speed
+	if face_turn_speed >= 0.0:
+		rotation_speed = face_turn_speed
+
+	var next_yaw := rotate_toward(current_yaw, target_yaw, rotation_speed * delta)
+	var next_direction := Vector3(sin(next_yaw), 0.0, cos(next_yaw)).normalized()
+	global_transform = global_transform.looking_at(global_position - next_direction, Vector3.UP)
+
+
+func _update_face_direction_input(delta: float) -> void:
+	var toggle_is_pressed := Input.is_physical_key_pressed(KEY_Q)
+	if toggle_is_pressed and not _face_control_toggle_was_pressed:
+		if _face_control_mode == FaceControlMode.KEY_ARROW:
+			_face_control_mode = FaceControlMode.MOUSE_CURSOR
+		else:
+			_face_control_mode = FaceControlMode.KEY_ARROW
+
+	_face_control_toggle_was_pressed = toggle_is_pressed
+
+	if _face_control_mode == FaceControlMode.MOUSE_CURSOR:
+		_face_mouse_cursor(delta)
+	else:
+		_face_keyboard_arrow(delta)
+
+
+func _face_keyboard_arrow(delta: float) -> void:
+	var face_direction := _update_keyboard_face_target_direction(delta)
+	if face_direction != Vector3.ZERO:
+		_last_keyboard_face_direction = face_direction
+		_has_keyboard_face_target = true
+
+	if _has_keyboard_face_target:
+		_face_direction(_last_keyboard_face_direction, delta, arrow_face_turn_speed)
+
+
+func _update_keyboard_face_target_direction(delta: float) -> Vector3:
+	var up_is_pressed := Input.is_physical_key_pressed(KEY_UP)
+	var down_is_pressed := Input.is_physical_key_pressed(KEY_DOWN)
+	var left_is_pressed := Input.is_physical_key_pressed(KEY_LEFT)
+	var right_is_pressed := Input.is_physical_key_pressed(KEY_RIGHT)
+	var face_direction := Vector3.ZERO
+	var pressed_direction_count := 0
+	var combined_direction := Vector3.ZERO
+
+	if up_is_pressed:
+		pressed_direction_count += 1
+		combined_direction += Vector3.FORWARD
+	if down_is_pressed:
+		pressed_direction_count += 1
+		combined_direction += Vector3.BACK
+	if left_is_pressed:
+		pressed_direction_count += 1
+		combined_direction += Vector3.LEFT
+	if right_is_pressed:
+		pressed_direction_count += 1
+		combined_direction += Vector3.RIGHT
+
+	if pressed_direction_count >= 2 and combined_direction != Vector3.ZERO:
+		face_direction = combined_direction.normalized()
+	elif up_is_pressed and not _keyboard_face_up_was_pressed:
+		face_direction = _step_keyboard_face_target_toward(Vector3.FORWARD)
+	elif down_is_pressed and not _keyboard_face_down_was_pressed:
+		face_direction = _step_keyboard_face_target_toward(Vector3.BACK)
+	elif left_is_pressed and not _keyboard_face_left_was_pressed:
+		face_direction = _step_keyboard_face_target_toward(Vector3.LEFT)
+	elif right_is_pressed and not _keyboard_face_right_was_pressed:
+		face_direction = _step_keyboard_face_target_toward(Vector3.RIGHT)
+	elif up_is_pressed:
+		face_direction = _move_keyboard_face_target_toward(Vector3.FORWARD, delta)
+	elif down_is_pressed:
+		face_direction = _move_keyboard_face_target_toward(Vector3.BACK, delta)
+	elif left_is_pressed:
+		face_direction = _move_keyboard_face_target_toward(Vector3.LEFT, delta)
+	elif right_is_pressed:
+		face_direction = _move_keyboard_face_target_toward(Vector3.RIGHT, delta)
+
+	_keyboard_face_up_was_pressed = up_is_pressed
+	_keyboard_face_down_was_pressed = down_is_pressed
+	_keyboard_face_left_was_pressed = left_is_pressed
+	_keyboard_face_right_was_pressed = right_is_pressed
+
+	return face_direction
+
+
+func _step_keyboard_face_target_toward(target_direction: Vector3) -> Vector3:
+	var step_radians := deg_to_rad(maxf(arrow_face_turn_step_degrees, 0.0))
+	return _rotate_keyboard_face_target_toward(target_direction, step_radians)
+
+
+func _move_keyboard_face_target_toward(target_direction: Vector3, delta: float) -> Vector3:
+	var step_radians := maxf(arrow_face_turn_speed, 0.0) * delta
+	return _rotate_keyboard_face_target_toward(target_direction, step_radians)
+
+
+func _rotate_keyboard_face_target_toward(target_direction: Vector3, step_radians: float) -> Vector3:
+	var current_direction := _last_keyboard_face_direction
+	if not _has_keyboard_face_target:
+		current_direction = global_transform.basis.z
+		current_direction.y = 0.0
+		if current_direction == Vector3.ZERO:
+			current_direction = Vector3.FORWARD
+		else:
+			current_direction = current_direction.normalized()
+
+	var current_yaw := atan2(current_direction.x, current_direction.z)
+	var target_yaw := atan2(target_direction.x, target_direction.z)
+	var next_yaw := rotate_toward(current_yaw, target_yaw, step_radians)
+	return Vector3(sin(next_yaw), 0.0, cos(next_yaw)).normalized()
 
 
 func _face_mouse_cursor(delta: float) -> void:
@@ -719,7 +885,11 @@ func _face_mouse_cursor(delta: float) -> void:
 
 	var face_direction := _mouse_world_position - global_position
 	face_direction.y = 0.0
-	_face_direction(face_direction.normalized(), delta)
+	_face_direction(face_direction.normalized(), delta, turn_speed)
+
+
+func is_mouse_face_control_enabled() -> bool:
+	return _face_control_mode == FaceControlMode.MOUSE_CURSOR
 
 
 func _update_mouse_world_position_on_plane(plane_y: float) -> bool:

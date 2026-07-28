@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://bl1xhcimd7ddn"]
+
+[ext_resource type="PackedScene" uid="uid://8tjuridvtmu3" path="res://Asset/char1_weapon/lance01.glb" id="1_t0dif"]
+[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_sflnl"]
+[ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Asset/char1_weapon/lance01_projectile.gd" id="3_4kxuq"]
+[ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="3_udx3m"]
+[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="4_lance"]
+[ext_resource type="Shader" uid="uid://27g0twyfv3ug" path="res://Asset/shader/sfx_slash_uv_scroll_mask.gdshader" id="6_ae7hw"]
+[ext_resource type="Texture2D" uid="uid://c5kbjjkucv0wu" path="res://Asset/sfx/weapon_trail01/weapon_trail01.tga" id="7_rc0he"]
+[ext_resource type="Texture2D" uid="uid://bon3204uy1o05" path="res://Asset/sfx/weapon_trail01/weapon_trail01_mask.tga" id="8_rc0he"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rc0he"]
+render_priority = 0
+shader = ExtResource("6_ae7hw")
+shader_parameter/albedo_texture = ExtResource("7_rc0he")
+shader_parameter/uv_scroll_speed = Vector2(0, -5)
+shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0.2, -0.1)
+shader_parameter/albedo_noise_tiling = Vector2(2, 2)
+shader_parameter/albedo_distortion_strength = 0.025
+shader_parameter/mask_texture = ExtResource("8_rc0he")
+shader_parameter/mask_uv_scroll_speed = Vector2(0, 0)
+shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
+shader_parameter/noise_tiling = Vector2(2, 2)
+shader_parameter/mask_distortion_strength = 0.04
+shader_parameter/tint_color = Color(1.5531965e-05, 1.5330559, 2.3190527, 1)
+shader_parameter/alpha_multiplier = 1.0
+shader_parameter/emission_multiplier = 1.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_4kxuq"]
+height = 2.3936768
+radius = 0.45410156
+
+[node name="lance01" type="Node3D" unique_id=24254344]
+script = ExtResource("3_4kxuq")
+speed = 24.0
+damage = 2
+hit_spark_scene = ExtResource("4_lance")
+
+[node name="lance01" parent="." unique_id=2013849724 instance=ExtResource("1_t0dif")]
+script = ExtResource("3_udx3m")
+
+[node name="lance01" parent="lance01" index="0" unique_id=1581786124]
+surface_material_override/0 = ExtResource("2_sflnl")
+
+[node name="trail" parent="lance01" index="1" unique_id=1160557418]
+surface_material_override/0 = SubResource("ShaderMaterial_rc0he")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=1580205493]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=699602840]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1913793, 0)
+shape = SubResource("CylinderShape3D_4kxuq")
+
+[editable path="lance01"]

@@ -5,8 +5,9 @@
 [ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_jfhy1"]
 [ext_resource type="Material" uid="uid://c70rjp222jt72" path="res://Asset/char2_enemy/bees/resource/bee01.material" id="2_um2gp"]
 [ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark/hitspark02.tscn" id="3_m4aol"]
-[ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Asset/char2_enemy/mouse01/mouse01_damage_receiver.gd" id="4_584u7"]
+[ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Script/enemy_damage_receiver.gd" id="4_584u7"]
 [ext_resource type="PackedScene" uid="uid://blni847ylfhaf" path="res://Asset/char2_enemy/bees/bee01_bullet01.tscn" id="5_bullet"]
+[ext_resource type="PackedScene" uid="uid://c5svw8lgdf8um" path="res://Asset/item/gems01.tscn" id="5_omjav"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_jfhy1"]
 radius = 0.61037946
@@ -22,7 +23,7 @@ ai_shoot_weight = 50.0
 chase_speed = 2.0
 chase_time_range = Vector2(0.8, 1.6)
 shoot_projectile_scene = ExtResource("5_bullet")
-shoot_projectile_spawn_path = NodePath("shootposition")
+shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
 avoid_enemy_overlap = true
 overlap_avoidance_strength = 10.0
 overlap_avoidance_max_push_speed = 4.0
@@ -32,6 +33,7 @@ damage_number_font = ExtResource("2_jfhy1")
 damage_number_font_size = 120
 damage_number_color = Color(1, 1, 1, 1)
 death_spark_scene = ExtResource("3_m4aol")
+death_drop_scene = ExtResource("5_omjav")
 
 [node name="bee01" parent="." unique_id=1863990590 instance=ExtResource("1_vx0fs")]
 

@@ -17,6 +17,7 @@ extends Node3D
 @export_group("")
 @export var hit_spark_scene: PackedScene
 @export var hit_spark_height: float = 0.8
+@export var ignored_root_names: PackedStringArray = PackedStringArray(["bee_bullet01"])
 
 @onready var hit_area := get_node_or_null("Area3D") as Area3D
 
@@ -69,6 +70,8 @@ func _apply_hit(target: Node) -> void:
 		return
 	if _source != null and (target.is_ancestor_of(_source) or _source.is_ancestor_of(target)):
 		return
+	if _is_ignored_target(target):
+		return
 	if _hit_targets.has(target):
 		return
 
@@ -81,6 +84,16 @@ func _apply_hit(target: Node) -> void:
 		target.call("take_damage", damage)
 		_spawn_hit_spark(target)
 		queue_free()
+
+
+func _is_ignored_target(target: Node) -> bool:
+	var current := target
+	while current != null:
+		if ignored_root_names.has(String(current.name)):
+			return true
+		current = current.get_parent()
+
+	return false
 
 
 func _activate_projectile() -> void:

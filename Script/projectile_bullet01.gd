@@ -5,8 +5,14 @@ extends Node3D
 @export var keep_level: bool = true
 @export var damage: int = 1
 @export var hit_activation_delay: float = 0.35
-@export var ignored_root_names: PackedStringArray = PackedStringArray(["bee01"])
-@export var ignored_script_paths: PackedStringArray = PackedStringArray(["res://Script/enemy_Ai01.gd"])
+
+@export_group("Hit Spark")
+@export var hit_spark_scene: PackedScene
+@export var hit_spark_height: float = 0.0
+
+@export_group("")
+@export var ignored_root_names: PackedStringArray = PackedStringArray(["bee01", "lance01"])
+@export var ignored_script_paths: PackedStringArray = PackedStringArray(["res://Script/enemy_Ai01.gd", "res://Asset/char1_weapon/lance01_projectile.gd"])
 
 @onready var hit_area := get_node_or_null("Area3D") as Area3D
 
@@ -72,10 +78,16 @@ func _apply_hit(target: Node) -> void:
 	_hit_targets.append(target)
 	if target.has_method("take_damage"):
 		target.call("take_damage", damage)
-		queue_free()
 	elif target.has_method("take_attack_hit"):
 		target.call("take_attack_hit", _direction, damage)
-		queue_free()
+
+	_spawn_impact_spark(target)
+	queue_free()
+
+
+func take_projectile_hit(_hit_direction: Vector3 = Vector3.ZERO, _hit_damage: int = 0) -> void:
+	_spawn_impact_spark(self)
+	queue_free()
 
 
 func _is_source_related(target: Node) -> bool:
@@ -98,7 +110,7 @@ func _is_source_related(target: Node) -> bool:
 func _is_ignored_target(target: Node) -> bool:
 	var current := target
 	while current != null:
-		if ignored_root_names.has(current.name):
+		if ignored_root_names.has(String(current.name)):
 			return true
 		var script := current.get_script() as Script
 		if script != null and ignored_script_paths.has(script.resource_path):
@@ -138,3 +150,43 @@ func _set_hit_area_active(is_active: bool) -> void:
 	_hit_area_is_active = is_active
 	if hit_area != null:
 		hit_area.monitoring = is_active
+
+
+func _spawn_impact_spark(target: Node) -> void:
+	if hit_spark_scene == null:
+		return
+
+	var impact_spark := hit_spark_scene.instantiate() as Node3D
+	if impact_spark == null:
+		return
+
+	var spark_parent: Node = get_tree().current_scene
+	if spark_parent == null:
+		spark_parent = get_parent()
+	if spark_parent == null:
+		return
+
+	spark_parent.add_child(impact_spark)
+	if target is Node3D:
+		impact_spark.global_position = (target as Node3D).global_position + Vector3.UP * hit_spark_height
+	else:
+		impact_spark.global_position = global_position
+
+	var longest_lifetime := _restart_particles_recursive(impact_spark)
+	impact_spark.get_tree().create_timer(longest_lifetime + 0.1).timeout.connect(impact_spark.queue_free)
+
+
+func _restart_particles_recursive(node: Node) -> float:
+	var longest_lifetime := 1.0
+
+	if node is GPUParticles3D:
+		var particles := node as GPUParticles3D
+		particles.emitting = false
+		particles.restart()
+		particles.emitting = true
+		longest_lifetime = maxf(longest_lifetime, particles.lifetime)
+
+	for child in node.get_children():
+		longest_lifetime = maxf(longest_lifetime, _restart_particles_recursive(child))
+
+	return longest_lifetime

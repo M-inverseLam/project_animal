@@ -6,7 +6,7 @@
 [ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/char1_hero/girl/hero_girl_body.material" id="3_5dmvc"]
 [ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/char1_hero/girl/hero_girl_hair.material" id="4_b2opn"]
 [ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust/dust.tscn" id="5_b2opn"]
-[ext_resource type="PackedScene" uid="uid://bl1xhcimd7ddn" path="res://Asset/character_weapon/lance01.tscn" id="7_4kxuq"]
+[ext_resource type="PackedScene" uid="uid://bl1xhcimd7ddn" path="res://Asset/char1_weapon/lance01.tscn" id="7_4kxuq"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hsrdd"]
 radius = 0.6303711
@@ -19,8 +19,11 @@ size = Vector3(1.3, 1.2, 1.6)
 script = ExtResource("1_b2opn")
 move_speed = 6.0
 turn_speed = 20.0
+arrow_face_turn_speed = 5.0
+arrow_face_turn_step_degrees = 2.0
 step_tilt = 0.5
 slide_duration = 0.0
+max_health = 50
 attack_projectile_scene = ExtResource("7_4kxuq")
 dash_cooldown = 0.0
 dash_hit_camera_shake_duration = 0.85
@@ -84,7 +87,6 @@ settings/1/enable_all_child_collisions = true
 settings/1/exclude_collision_count = 0
 
 [node name="HeadSpringBoneCollision" type="SpringBoneCollisionSphere3D" parent="hero_girl01/rig/Skeleton3D/SpringBoneSimulator3D" unique_id=1307076970]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 radius = 0.25
 
 [node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 363272416) index="2" unique_id=311143973]

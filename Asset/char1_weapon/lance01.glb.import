@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://8tjuridvtmu3"
-path="res://.godot/imported/lance01.glb-e50c21aeb5f771112074586408587722.scn"
+path="res://.godot/imported/lance01.glb-277c03b8e19e37f0b64d620fc187cfcf.scn"
 
 [deps]
 
-source_file="res://Asset/character_weapon/lance01.glb"
-dest_files=["res://.godot/imported/lance01.glb-e50c21aeb5f771112074586408587722.scn"]
+source_file="res://Asset/char1_weapon/lance01.glb"
+dest_files=["res://.godot/imported/lance01.glb-277c03b8e19e37f0b64d620fc187cfcf.scn"]
 
 [params]
 

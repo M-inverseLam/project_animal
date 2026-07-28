@@ -29,7 +29,7 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @export var shoot_animation_name: String = "idle"
 @export var shoot_time_range: Vector2 = Vector2(0.5, 0.8)
 @export var shoot_projectile_scene: PackedScene
-@export var shoot_projectile_spawn_path: NodePath = NodePath("")
+@export var shoot_projectile_spawn_paths: Array[NodePath] = []
 @export var shoot_projectile_spawn_delay: float = 0.15
 
 @export_group("Overlap Avoidance")
@@ -70,7 +70,6 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @onready var visual_root := get_node_or_null("mouse01") as Node3D
 @onready var animation_player := find_child("AnimationPlayer", true, false) as AnimationPlayer
 @onready var player_detection := get_node_or_null("playerdetection") as Area3D
-@onready var shoot_projectile_spawn := get_node_or_null(shoot_projectile_spawn_path) as Node3D
 
 var health := 0
 var _visual_start_scale := Vector3.ONE
@@ -92,6 +91,7 @@ var _damage_hold_duration := 0.0
 var _is_dead := false
 var _shoot_elapsed := 0.0
 var _shoot_projectile_was_spawned := false
+var _shoot_projectile_spawns: Array[Node3D] = []
 
 
 func _ready() -> void:
@@ -102,6 +102,7 @@ func _ready() -> void:
 	if player_detection != null:
 		player_detection.body_entered.connect(_on_player_detection_body_entered)
 		player_detection.body_exited.connect(_on_player_detection_body_exited)
+	_cache_shoot_projectile_spawns()
 	if avoid_enemy_overlap:
 		add_to_group(OVERLAP_AVOIDANCE_GROUP)
 	if use_weighted_ai:
@@ -466,21 +467,29 @@ func _spawn_shoot_projectile() -> void:
 	if shoot_projectile_scene == null:
 		return
 
-	var projectile := shoot_projectile_scene.instantiate() as Node3D
-	if projectile == null:
-		return
-
-	var projectile_parent := get_tree().current_scene
+	var projectile_parent: Node = get_tree().current_scene
 	if projectile_parent == null:
 		projectile_parent = get_parent()
 	if projectile_parent == null:
 		projectile_parent = self
 
-	projectile_parent.add_child(projectile)
+	if _shoot_projectile_spawns.is_empty():
+		_spawn_shoot_projectile_at(global_transform, projectile_parent)
+		return
 
-	var spawn_transform := global_transform
-	if shoot_projectile_spawn != null:
-		spawn_transform = shoot_projectile_spawn.global_transform
+	for spawn in _shoot_projectile_spawns:
+		if spawn == null or not is_instance_valid(spawn):
+			continue
+
+		_spawn_shoot_projectile_at(spawn.global_transform, projectile_parent)
+
+
+func _spawn_shoot_projectile_at(spawn_transform: Transform3D, projectile_parent: Node) -> void:
+	var projectile := shoot_projectile_scene.instantiate() as Node3D
+	if projectile == null:
+		return
+
+	projectile_parent.add_child(projectile)
 
 	var shoot_direction := global_transform.basis.z.normalized()
 	if _detected_player != null and is_instance_valid(_detected_player):
@@ -493,6 +502,19 @@ func _spawn_shoot_projectile() -> void:
 
 	if projectile.has_method("setup"):
 		projectile.call("setup", shoot_direction, self)
+
+
+func _cache_shoot_projectile_spawns() -> void:
+	_shoot_projectile_spawns.clear()
+	for spawn_path in shoot_projectile_spawn_paths:
+		if spawn_path == NodePath(""):
+			continue
+
+		var spawn := get_node_or_null(spawn_path) as Node3D
+		if spawn == null:
+			continue
+
+		_shoot_projectile_spawns.append(spawn)
 
 
 func _basis_with_y_axis(direction: Vector3) -> Basis:
