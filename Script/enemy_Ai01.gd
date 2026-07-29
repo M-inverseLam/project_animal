@@ -32,6 +32,12 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @export var shoot_projectile_spawn_paths: Array[NodePath] = []
 @export var shoot_projectile_spawn_delay: float = 0.15
 
+@export_group("Hero Spacing")
+@export var avoid_hero_when_too_close: bool = true
+@export var minimum_hero_distance: float = 2.0
+@export var retreat_from_hero_speed: float = 4.0
+@export var retreat_from_hero_duration: float = 0.5
+
 @export_group("Overlap Avoidance")
 @export var avoid_enemy_overlap: bool = false
 @export var overlap_avoidance_radius: float = 1.2
@@ -39,6 +45,7 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @export var overlap_avoidance_max_push_speed: float = 3.0
 
 @export_group("Hit Reaction")
+@export var knockback_resistance: float = 1.0
 @export var attack_hit_push_distance: float = 1.0
 @export var attack_hit_push_duration: float = 0.25
 @export var attack_hit_push_slowdown_power: float = 2.0
@@ -92,6 +99,7 @@ var _is_dead := false
 var _shoot_elapsed := 0.0
 var _shoot_projectile_was_spawned := false
 var _shoot_projectile_spawns: Array[Node3D] = []
+var _retreat_target: Node3D
 
 
 func _ready() -> void:
@@ -119,6 +127,12 @@ func _physics_process(delta: float) -> void:
 		_process_dash_damage_hold(delta)
 		return
 	_apply_overlap_avoidance(delta)
+	if _state == "retreat_from_hero":
+		_process_retreat_from_hero(delta)
+		return
+	if _try_start_retreat_from_hero():
+		_process_retreat_from_hero(delta)
+		return
 	if _state == "run_away":
 		_process_run_away(delta)
 		return
@@ -148,6 +162,52 @@ func _physics_process(delta: float) -> void:
 				_start_weighted_decision()
 			else:
 				_start_idle()
+
+
+func _try_start_retreat_from_hero() -> bool:
+	if not avoid_hero_when_too_close or minimum_hero_distance <= 0.0:
+		return false
+
+	var hero: Node3D = _find_ai_target()
+	if hero == null:
+		return false
+
+	var offset: Vector3 = global_position - hero.global_position
+	offset.y = 0.0
+	if offset.length_squared() >= minimum_hero_distance * minimum_hero_distance:
+		return false
+
+	_retreat_target = hero
+	_state = "retreat_from_hero"
+	_state_time_left = maxf(retreat_from_hero_duration, 0.0)
+	_play_animation(walk_animation_name)
+	return true
+
+
+func _process_retreat_from_hero(delta: float) -> void:
+	if _retreat_target == null or not is_instance_valid(_retreat_target):
+		_finish_retreat_from_hero()
+		return
+
+	var retreat_direction: Vector3 = global_position - _retreat_target.global_position
+	retreat_direction.y = 0.0
+	if retreat_direction == Vector3.ZERO:
+		retreat_direction = global_transform.basis.z
+	retreat_direction = retreat_direction.normalized()
+
+	global_position += retreat_direction * maxf(retreat_from_hero_speed, 0.0) * delta
+	_face_direction(retreat_direction, delta)
+	_state_time_left -= delta
+	if _state_time_left <= 0.0:
+		_finish_retreat_from_hero()
+
+
+func _finish_retreat_from_hero() -> void:
+	_retreat_target = null
+	if use_weighted_ai:
+		_start_weighted_decision()
+	else:
+		_start_idle()
 
 
 func _start_run_away(player: Node3D) -> void:
@@ -532,10 +592,12 @@ func take_damage(damage: int) -> void:
 	_apply_damage(damage)
 
 
-func take_attack_hit(direction: Vector3, damage: int) -> void:
+func take_attack_hit(direction: Vector3, damage: int, impact_weight: float = 1.0) -> void:
 	_apply_damage(damage)
 	if health > 0:
-		_start_hit_damage(direction, attack_hit_push_distance, attack_hit_push_duration, attack_hit_push_slowdown_power, attack_hit_damage_duration)
+		var push_multiplier: float = maxf(impact_weight, 0.0) / maxf(knockback_resistance, 0.1)
+		var push_distance: float = attack_hit_push_distance * push_multiplier
+		_start_hit_damage(direction, push_distance, attack_hit_push_duration, attack_hit_push_slowdown_power, attack_hit_damage_duration)
 
 
 func take_dash_hit(direction: Vector3, damage: int) -> void:

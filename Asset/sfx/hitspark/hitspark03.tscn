@@ -48,7 +48,7 @@ scale_curve = SubResource("CurveTexture_svfu8")
 alpha_curve = SubResource("CurveTexture_hjok4")
 
 [sub_resource type="QuadMesh" id="QuadMesh_svfu8"]
-size = Vector2(4, 4)
+size = Vector2(6, 6)
 
 [node name="Node3D" type="Node3D" unique_id=822129534]
 script = ExtResource("1_1i75s")

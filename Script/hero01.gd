@@ -19,6 +19,9 @@ enum FaceControlMode {
 
 @export_group("Health")
 @export var max_health: int = 500
+@export var death_animation_name: String = "die"
+@export var death_camera_shake_duration: float = 0.8
+@export var death_camera_shake_strength: float = 0.3
 
 @export_group("")
 
@@ -80,6 +83,7 @@ var _attack_layer_blend_amount := 0.0
 var _target_attack_layer_blend_amount := 0.0
 var _active_attack_blend_slot := 0
 var _current_health := 0
+var _is_dead := false
 var _visual_start_position := Vector3.ZERO
 var _visual_start_rotation := Vector3.ZERO
 var _walk_time := 0.0
@@ -93,7 +97,8 @@ var _attack_time_left := 0.0
 var _active_attack_animation_name := ""
 var _queued_attack_animation_name := ""
 var _next_attack_animation_index := 0
-var _attack_projectile_was_spawned := false
+var _attack_projectiles_emitted := 0
+var _attack_projectile_emit_time_left := 0.0
 var _dash_key_was_pressed := false
 var _is_dashing := false
 var _active_dash_animation_name := ""
@@ -115,6 +120,8 @@ var _weapon_dash_slowdown_power := 4.0
 var _weapon_dash_bounce_back_distance := 1.4
 var _weapon_dash_bounce_back_duration := 0.25
 var _weapon_dash_bounce_back_slowdown_power := 2.5
+var _weapon_emit_quantity := 1
+var _weapon_emit_projectile_offset_time := 0.1
 var _mouse_world_position := Vector3.ZERO
 var _face_control_mode: int = FaceControlMode.KEY_ARROW
 var _face_control_toggle_was_pressed := false
@@ -131,7 +138,7 @@ func _ready() -> void:
 	_has_keyboard_face_target = false
 	_current_health = max_health
 	_update_health_ui()
-	_load_weapon_dash_parameters()
+	_load_weapon_parameters()
 	if visual_root != null:
 		_visual_start_position = visual_root.position
 		_visual_start_rotation = visual_root.rotation
@@ -148,6 +155,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _is_dead:
+		velocity = Vector3.ZERO
+		return
+
 	_update_dash_cooldown(delta)
 	_update_animation_tree_blends(delta)
 	_update_attack_input()
@@ -255,7 +266,8 @@ func _play_attack_animation(animation_name: String) -> void:
 	_is_attacking = true
 	_attack_time_left = _get_animation_length(animation_name)
 	_active_attack_animation_name = animation_name
-	_attack_projectile_was_spawned = false
+	_attack_projectiles_emitted = 0
+	_attack_projectile_emit_time_left = 0.0
 
 	_play_animation(_active_attack_animation_name, true)
 
@@ -363,7 +375,7 @@ func _get_dash_direction() -> Vector3:
 	return global_transform.basis.z.normalized()
 
 
-func _load_weapon_dash_parameters() -> void:
+func _load_weapon_parameters() -> void:
 	if attack_projectile_scene == null:
 		return
 
@@ -378,6 +390,8 @@ func _load_weapon_dash_parameters() -> void:
 	_weapon_dash_bounce_back_distance = _get_float_property(weapon, "dash_bounce_back_distance", _weapon_dash_bounce_back_distance)
 	_weapon_dash_bounce_back_duration = _get_float_property(weapon, "dash_bounce_back_duration", _weapon_dash_bounce_back_duration)
 	_weapon_dash_bounce_back_slowdown_power = _get_float_property(weapon, "dash_bounce_back_slowdown_power", _weapon_dash_bounce_back_slowdown_power)
+	_weapon_emit_quantity = maxi(_get_int_property(weapon, "emit_quantity", _weapon_emit_quantity), 1)
+	_weapon_emit_projectile_offset_time = maxf(_get_float_property(weapon, "emit_each_projectile_offset_time", _weapon_emit_projectile_offset_time), 0.0)
 	weapon.free()
 
 
@@ -424,11 +438,14 @@ func _move_with_collision(displacement: Vector3, delta: float) -> void:
 
 
 func take_damage(damage: int) -> void:
-	if damage <= 0:
+	if damage <= 0 or _is_dead:
 		return
 
+	var previous_health: int = _current_health
 	_current_health = maxi(_current_health - damage, 0)
 	_update_health_ui()
+	if previous_health > 0 and _current_health == 0:
+		_start_death()
 
 
 func _update_health_ui() -> void:
@@ -446,17 +463,67 @@ func _update_health_ui() -> void:
 		health_label.text = str(_current_health)
 
 
+func _show_game_over_ui() -> void:
+	var scene_root: Node = get_tree().current_scene
+	if scene_root == null:
+		return
+
+	var main_ui: Node = scene_root.get_node_or_null("Interface/ui04_main")
+	if main_ui != null and main_ui.has_method("show_game_over"):
+		main_ui.call("show_game_over")
+
+
+func _start_death() -> void:
+	if _is_dead:
+		return
+
+	_is_dead = true
+	_shake_camera_on_death()
+	_auto_shoot_is_enabled = false
+	_resume_auto_shoot_after_dash = false
+	_clear_attack_state(true)
+	if _is_dashing:
+		_stop_dash()
+	_set_dash_hitbox_enabled(false)
+	_stop_dash_dust()
+	velocity = Vector3.ZERO
+	_last_movement = Vector3.ZERO
+	_slide_time_left = 0.0
+
+	if animation_player == null or not animation_player.has_animation(death_animation_name):
+		_show_game_over_ui()
+		return
+
+	if _animation_tree != null:
+		_animation_tree.active = false
+	animation_player.play(death_animation_name, animation_blend_time)
+	_current_animation = death_animation_name
+
+
+func _shake_camera_on_death() -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera != null and camera.has_method("shake"):
+		camera.call("shake", death_camera_shake_duration, death_camera_shake_strength)
+
+
 func _update_attack_projectile(delta: float) -> void:
 	if not _is_attacking:
 		return
 
-	if not _attack_projectile_was_spawned:
-		_spawn_attack_projectile()
+	if _attack_projectiles_emitted < _weapon_emit_quantity:
+		_attack_projectile_emit_time_left -= delta
+		while _attack_projectiles_emitted < _weapon_emit_quantity and _attack_projectile_emit_time_left <= 0.0:
+			_spawn_attack_projectile()
+			_attack_projectiles_emitted += 1
+			if _attack_projectiles_emitted >= _weapon_emit_quantity:
+				break
+			if _weapon_emit_projectile_offset_time > 0.0:
+				_attack_projectile_emit_time_left += _weapon_emit_projectile_offset_time
 
 	if _attack_time_left > 0.0:
 		_attack_time_left = maxf(_attack_time_left - delta, 0.0)
-		if _attack_time_left <= 0.0:
-			_finish_attack()
+	if _attack_time_left <= 0.0 and _attack_projectiles_emitted >= _weapon_emit_quantity:
+		_finish_attack()
 
 
 func _stop_attack() -> void:
@@ -470,7 +537,8 @@ func _clear_attack_state(abort_animation: bool) -> void:
 	_attack_time_left = 0.0
 	_active_attack_animation_name = ""
 	_queued_attack_animation_name = ""
-	_attack_projectile_was_spawned = false
+	_attack_projectiles_emitted = 0
+	_attack_projectile_emit_time_left = 0.0
 	if _uses_animation_tree and _animation_tree != null:
 		_target_attack_layer_blend_amount = 0.0
 		if abort_animation:
@@ -480,6 +548,8 @@ func _clear_attack_state(abort_animation: bool) -> void:
 
 func _finish_attack() -> void:
 	if not _is_attacking:
+		return
+	if _attack_projectiles_emitted < _weapon_emit_quantity:
 		return
 
 	var next_attack_animation := _queued_attack_animation_name
@@ -500,7 +570,6 @@ func _finish_attack() -> void:
 
 
 func _spawn_attack_projectile() -> void:
-	_attack_projectile_was_spawned = true
 	if attack_projectile_scene == null:
 		return
 
@@ -931,6 +1000,9 @@ func _reset_walk_pose(delta: float) -> void:
 
 
 func _on_animation_finished(animation_name: StringName) -> void:
+	if _is_dead and String(animation_name) == death_animation_name:
+		_show_game_over_ui()
+		return
 	if _is_attack_animation(String(animation_name)):
 		_finish_attack()
 	if _is_dash_animation(String(animation_name)):

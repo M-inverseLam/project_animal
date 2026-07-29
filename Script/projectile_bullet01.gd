@@ -11,8 +11,7 @@ extends Node3D
 @export var hit_spark_height: float = 0.0
 
 @export_group("")
-@export var ignored_root_names: PackedStringArray = PackedStringArray(["bee01", "lance01"])
-@export var ignored_script_paths: PackedStringArray = PackedStringArray(["res://Script/enemy_Ai01.gd", "res://Asset/char1_weapon/lance01_projectile.gd"])
+@export var ignored_groups: PackedStringArray = PackedStringArray(["enemy", "weapon"])
 
 @onready var hit_area := get_node_or_null("Area3D") as Area3D
 
@@ -110,11 +109,9 @@ func _is_source_related(target: Node) -> bool:
 func _is_ignored_target(target: Node) -> bool:
 	var current := target
 	while current != null:
-		if ignored_root_names.has(String(current.name)):
-			return true
-		var script := current.get_script() as Script
-		if script != null and ignored_script_paths.has(script.resource_path):
-			return true
+		for group_name in ignored_groups:
+			if current.is_in_group(group_name):
+				return true
 		current = current.get_parent()
 
 	return false

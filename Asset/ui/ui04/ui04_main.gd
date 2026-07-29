@@ -8,6 +8,8 @@ extends Control
 @export var hide_system_cursor: bool = true
 @export var face_control_node_name: String = "hero_girl01"
 
+@onready var game_over: Control = get_node_or_null("GameOver") as Control
+
 var _ground_cursor: Node3D
 var _face_control_node: Node
 var _is_system_cursor_hidden := false
@@ -33,6 +35,16 @@ func _exit_tree() -> void:
 
 func _process(_delta: float) -> void:
 	_update_ground_cursor_position()
+
+
+func show_game_over() -> void:
+	if game_over != null:
+		game_over.visible = true
+
+
+func hide_game_over() -> void:
+	if game_over != null:
+		game_over.visible = false
 
 
 func _spawn_ground_cursor() -> void:

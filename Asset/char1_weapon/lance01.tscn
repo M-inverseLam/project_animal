@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://8tjuridvtmu3" path="res://Asset/char1_weapon/lance01.glb" id="1_t0dif"]
 [ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_sflnl"]
-[ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Asset/char1_weapon/lance01_projectile.gd" id="3_4kxuq"]
+[ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="3_4kxuq"]
 [ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="3_udx3m"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="4_lance"]
 [ext_resource type="Shader" uid="uid://27g0twyfv3ug" path="res://Asset/shader/sfx_slash_uv_scroll_mask.gdshader" id="6_ae7hw"]
@@ -30,11 +30,16 @@ shader_parameter/emission_multiplier = 1.0
 height = 2.3936768
 radius = 0.45410156
 
-[node name="lance01" type="Node3D" unique_id=24254344]
+[node name="lance01" type="Node3D" unique_id=24254344 groups=["weapon"]]
 script = ExtResource("3_4kxuq")
-speed = 24.0
-damage = 2
+speed = 50.0
+damage = 7
+impact_weight = 3.0
+dash_duration = 0.7
+dash_distance = 6.0
+dash_damage = 3
 hit_spark_scene = ExtResource("4_lance")
+ignored_groups = PackedStringArray()
 
 [node name="lance01" parent="." unique_id=2013849724 instance=ExtResource("1_t0dif")]
 script = ExtResource("3_udx3m")

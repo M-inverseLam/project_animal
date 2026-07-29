@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Script/hero01.gd" id="1_b2opn"]
 [ext_resource type="PackedScene" uid="uid://dpsr7yntks1cs" path="res://Asset/char1_hero/girl/hero_girl01.glb" id="1_oxnaq"]
+[ext_resource type="PackedScene" uid="uid://cl5661ghjvers" path="res://Asset/char1_weapon/dagger01.tscn" id="2_grvn8"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_sxbsq"]
 [ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/char1_hero/girl/hero_girl_body.material" id="3_5dmvc"]
 [ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/char1_hero/girl/hero_girl_hair.material" id="4_b2opn"]
 [ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust/dust.tscn" id="5_b2opn"]
-[ext_resource type="PackedScene" uid="uid://bl1xhcimd7ddn" path="res://Asset/char1_weapon/lance01.tscn" id="7_4kxuq"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hsrdd"]
 radius = 0.6303711
@@ -17,14 +17,15 @@ size = Vector3(1.3, 1.2, 1.6)
 
 [node name="hero_girl01" type="CharacterBody3D" unique_id=2135685820]
 script = ExtResource("1_b2opn")
-move_speed = 6.0
+move_speed = 8.0
 turn_speed = 20.0
 arrow_face_turn_speed = 5.0
 arrow_face_turn_step_degrees = 2.0
 step_tilt = 0.5
 slide_duration = 0.0
 max_health = 50
-attack_projectile_scene = ExtResource("7_4kxuq")
+death_camera_shake_duration = 0.2
+attack_projectile_scene = ExtResource("2_grvn8")
 dash_cooldown = 0.0
 dash_hit_camera_shake_duration = 0.85
 dash_hit_camera_shake_strength = 0.1
@@ -33,10 +34,10 @@ hit_spark_scene = ExtResource("2_sxbsq")
 
 [node name="hero_girl01" parent="." unique_id=827222378 instance=ExtResource("1_oxnaq")]
 
-[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 363272416) index="0" unique_id=1975804883]
+[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1560432224) index="0" unique_id=126406539]
 surface_material_override/0 = ExtResource("3_5dmvc")
 
-[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 363272416) index="1" unique_id=673943302]
+[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1560432224) index="1" unique_id=673943302]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43512607, -0.075978085)
 setting_count = 2
 settings/0/root_bone_name = "hairtail1.L"
@@ -89,7 +90,7 @@ settings/1/exclude_collision_count = 0
 [node name="HeadSpringBoneCollision" type="SpringBoneCollisionSphere3D" parent="hero_girl01/rig/Skeleton3D/SpringBoneSimulator3D" unique_id=1307076970]
 radius = 0.25
 
-[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 363272416) index="2" unique_id=311143973]
+[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1560432224) index="2" unique_id=1389229695]
 surface_material_override/0 = ExtResource("3_5dmvc")
 surface_material_override/1 = ExtResource("4_b2opn")
 

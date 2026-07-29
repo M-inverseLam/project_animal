@@ -12,21 +12,23 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_jfhy1"]
 radius = 0.61037946
 
-[node name="bee01" type="Node3D" unique_id=648269543]
+[node name="bee01" type="Node3D" unique_id=648269543 groups=["enemy"]]
 script = ExtResource("1_um2gp")
 walk_animation_name = "idle"
 max_health = 20
 walk_speed = 5.0
 idle_time_range = Vector2(0.2, 0.5)
 use_weighted_ai = true
-ai_shoot_weight = 50.0
-chase_speed = 2.0
+ai_shoot_weight = 60.0
+chase_speed = 4.0
 chase_time_range = Vector2(0.8, 1.6)
 shoot_projectile_scene = ExtResource("5_bullet")
 shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
+retreat_from_hero_duration = 2.0
 avoid_enemy_overlap = true
 overlap_avoidance_strength = 10.0
 overlap_avoidance_max_push_speed = 4.0
+attack_hit_push_duration = 0.5
 face_hit_push_direction = false
 damage_number_duration = 1.0
 damage_number_font = ExtResource("2_jfhy1")

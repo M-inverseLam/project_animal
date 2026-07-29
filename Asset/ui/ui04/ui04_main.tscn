@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dvflqnufw7t53" path="res://Asset/ui/ui04/ui04_main_icon_gems.tga" id="3_tw8gj"]
 [ext_resource type="Texture2D" uid="uid://drii4836i5lmc" path="res://Asset/ui/ui04/ui04_mousecursor.tga" id="4_cursor"]
 [ext_resource type="PackedScene" uid="uid://bmhxfby7oqfne" path="res://Asset/ui/ui04/ui04_mousecursor.tscn" id="5_ground_cursor"]
+[ext_resource type="PackedScene" path="res://Asset/ui/ui04/ui04_gameover.tscn" id="6_gameover"]
 
 [sub_resource type="Theme" id="Theme_ycw01"]
 default_font = ExtResource("2_bx36w")
@@ -50,6 +51,8 @@ grow_vertical = 2
 script = ExtResource("1_cursor")
 mouse_cursor_texture = ExtResource("4_cursor")
 ground_cursor_scene = ExtResource("5_ground_cursor")
+
+[node name="GameOver" parent="." instance=ExtResource("6_gameover")]
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1668673301]
 layout_mode = 1

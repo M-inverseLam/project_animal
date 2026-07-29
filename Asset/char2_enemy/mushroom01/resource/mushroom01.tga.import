@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1hw8srjqdxyf"
-path.s3tc="res://.godot/imported/mushroom01.tga-430e3c897d8065cfe910aafc9900dbec.s3tc.ctex"
+path.s3tc="res://.godot/imported/mushroom01.tga-491b477f155e8d74d265dbfb3a172d46.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Asset/char2_enemy/mushroom01/mushroom01.tga"
-dest_files=["res://.godot/imported/mushroom01.tga-430e3c897d8065cfe910aafc9900dbec.s3tc.ctex"]
+source_file="res://Asset/char2_enemy/mushroom01/resource/mushroom01.tga"
+dest_files=["res://.godot/imported/mushroom01.tga-491b477f155e8d74d265dbfb3a172d46.s3tc.ctex"]
 
 [params]
 

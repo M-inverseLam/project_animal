@@ -4,6 +4,11 @@ extends Node3D
 @export var lifetime: float = 2.0
 @export var spawn_delay: float = 0.05
 @export var damage: int = 1
+@export var impact_weight: float = 1.0
+
+@export_group("Emission")
+@export var emit_quantity: int = 1
+@export var emit_each_projectile_offset_time: float = 0.1
 
 @export_group("Dash")
 @export var dash_duration: float = 0.5
@@ -17,7 +22,7 @@ extends Node3D
 @export_group("")
 @export var hit_spark_scene: PackedScene
 @export var hit_spark_height: float = 0.8
-@export var ignored_root_names: PackedStringArray = PackedStringArray(["bee_bullet01"])
+@export var ignored_groups: PackedStringArray = PackedStringArray(["enemy_projectile"])
 
 @onready var hit_area := get_node_or_null("Area3D") as Area3D
 
@@ -77,7 +82,7 @@ func _apply_hit(target: Node) -> void:
 
 	_hit_targets.append(target)
 	if target.has_method("take_attack_hit"):
-		target.call("take_attack_hit", _direction, damage)
+		target.call("take_attack_hit", _direction, damage, impact_weight)
 		_spawn_hit_spark(target)
 		queue_free()
 	elif target.has_method("take_damage"):
@@ -89,8 +94,9 @@ func _apply_hit(target: Node) -> void:
 func _is_ignored_target(target: Node) -> bool:
 	var current := target
 	while current != null:
-		if ignored_root_names.has(String(current.name)):
-			return true
+		for group_name in ignored_groups:
+			if current.is_in_group(group_name):
+				return true
 		current = current.get_parent()
 
 	return false

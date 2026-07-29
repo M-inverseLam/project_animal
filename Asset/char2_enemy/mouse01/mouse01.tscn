@@ -15,7 +15,7 @@ radius = 0.7260242
 height = 3.9692383
 radius = 8.82959
 
-[node name="mouse01" type="Node3D" unique_id=1987770555]
+[node name="mouse01" type="Node3D" unique_id=1987770555 groups=["enemy"]]
 script = ExtResource("3_os0wa")
 max_health = 5
 walk_speed = 1.5

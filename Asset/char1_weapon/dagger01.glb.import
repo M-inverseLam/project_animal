@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dsqhj6gpkdciu"
-path="res://.godot/imported/mushroom01_bullet01.glb-4b224dfdf246e529172b09b5756abc69.scn"
+uid="uid://mtqqchcmvu4d"
+path="res://.godot/imported/dagger01.glb-38d90d7531d2bdbe82ed1121633eaef6.scn"
 
 [deps]
 
-source_file="res://Asset/char2_enemy/mushroom01/mushroom01_bullet01.glb"
-dest_files=["res://.godot/imported/mushroom01_bullet01.glb-4b224dfdf246e529172b09b5756abc69.scn"]
+source_file="res://Asset/char1_weapon/dagger01.glb"
+dest_files=["res://.godot/imported/dagger01.glb-38d90d7531d2bdbe82ed1121633eaef6.scn"]
 
 [params]
 

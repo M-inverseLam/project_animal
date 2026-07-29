@@ -2,24 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bf1x0fwewm6kt"
-path.s3tc="res://.godot/imported/lance01_colorWheel.png-f85017ec7962b38f6eb39be54d3a0b31.s3tc.ctex"
+uid="uid://d2iwx2yof22no"
+path="res://.godot/imported/ui04_main_gameover.tga-3657014443bdb443820566fddceb0751.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
-}
-generator_parameters={
-"md5": "1869ce99ec0194dbd76bd6d4a614faa0"
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://Asset/char1_weapon/lance01_colorWheel.png"
-dest_files=["res://.godot/imported/lance01_colorWheel.png-f85017ec7962b38f6eb39be54d3a0b31.s3tc.ctex"]
+source_file="res://Asset/ui/ui04/ui04_main_gameover.tga"
+dest_files=["res://.godot/imported/ui04_main_gameover.tga-3657014443bdb443820566fddceb0751.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -27,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -41,4 +37,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

@@ -10,9 +10,9 @@ func take_damage(damage: int) -> void:
 		damage_target.call("take_damage", damage)
 
 
-func take_attack_hit(direction: Vector3, damage: int) -> void:
+func take_attack_hit(direction: Vector3, damage: int, impact_weight: float = 1.0) -> void:
 	if damage_target != null and damage_target.has_method("take_attack_hit"):
-		damage_target.call("take_attack_hit", direction, damage)
+		damage_target.call("take_attack_hit", direction, damage, impact_weight)
 
 
 func take_dash_hit(direction: Vector3, damage: int) -> void:

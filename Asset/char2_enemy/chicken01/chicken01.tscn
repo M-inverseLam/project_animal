@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://bcicy8ebmq0jo"]
 
-[ext_resource type="PackedScene" uid="uid://cbfpl8xeg1u5h" path="res://Asset/char2_enemy/chicken01/chicken01.glb" id="1_vu6b7"]
+[ext_resource type="PackedScene" uid="uid://cbfpl8xeg1u5h" path="res://Asset/char2_enemy/chicken01/resource/chicken01.glb" id="1_vu6b7"]
 [ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Script/hero01.gd" id="3_pwh2x"]
 [ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust/dust.tscn" id="4_6w3vu"]
-[ext_resource type="Material" uid="uid://2ijoo8x2e25m" path="res://Asset/char2_enemy/chicken01/chicken01.material" id="4_xlvvj"]
+[ext_resource type="Material" uid="uid://2ijoo8x2e25m" path="res://Asset/char2_enemy/chicken01/resource/chicken01.material" id="4_xlvvj"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="5_r1bvn"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_attack_hitbox"]

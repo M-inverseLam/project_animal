@@ -56,22 +56,22 @@ omni_range = 16.759138
 [node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]
 
 [node name="bee01" parent="." unique_id=648269543 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.506407, 0.88091373, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.213476, 0.88091373, 0)
 
 [node name="bee02" parent="." unique_id=503463345 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.506407, 0.88091373, -4.1989975)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.604202, 0.88091373, -7.0197906)
 
 [node name="bee03" parent="." unique_id=99222726 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.736545, 0.88091373, -9.180328)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.758614, 0.88091373, -15.980346)
 
 [node name="bee04" parent="." unique_id=449979704 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9934287, 0.88091373, -9.180328)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5962105, 0.88091373, -20.174234)
 
 [node name="mushroom01" parent="." unique_id=1092283170 instance=ExtResource("6_in5ka")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -14.657632)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -15.843237)
 
-[node name="mushroom02" parent="." unique_id=2034140610 instance=ExtResource("6_in5ka")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.304272, 0, -5.5294075)
+[node name="mushroom02" parent="." unique_id=157961903 instance=ExtResource("6_in5ka")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.534916, 0, -15.843237)
 
-[node name="mushroom03" parent="." unique_id=1919639830 instance=ExtResource("6_in5ka")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.783407, 0, -1.4631491)
+[node name="mushroom03" parent="." unique_id=1611990956 instance=ExtResource("6_in5ka")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.281025, 0, -5.8891144)
