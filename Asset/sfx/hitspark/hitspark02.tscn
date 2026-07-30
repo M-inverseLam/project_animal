@@ -6,10 +6,10 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e5obg"]
 transparency = 1
 blend_mode = 1
-shading_mode = 0
 no_depth_test = true
+shading_mode = 0
 vertex_color_use_as_albedo = true
-albedo_color = Color(2, 2, 2, 1)
+albedo_color = Color(0, 1.43, 3.185, 1)
 albedo_texture = ExtResource("1_1nql6")
 billboard_mode = 1
 billboard_keep_scale = true
@@ -39,8 +39,8 @@ size = Vector2(3, 3)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mtrak"]
 transparency = 1
 blend_mode = 1
-shading_mode = 0
 no_depth_test = true
+shading_mode = 0
 vertex_color_use_as_albedo = true
 albedo_color = Color(2, 2, 2, 1)
 albedo_texture = ExtResource("2_wabce")

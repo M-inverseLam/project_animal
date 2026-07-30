@@ -58,17 +58,14 @@ omni_range = 16.759138
 [node name="bee01" parent="." unique_id=648269543 instance=ExtResource("6_s8hmd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.642235, 0.88091373, -8.323002)
 
-[node name="bee02" parent="." unique_id=503463345 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.032963, 0.88091373, -15.3427925)
+[node name="bee02" parent="." unique_id=1657136805 instance=ExtResource("6_s8hmd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.27029, 0.88091373, -27.137426)
 
-[node name="bee03" parent="." unique_id=99222726 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.187374, 0.88091373, -24.303349)
-
-[node name="bee04" parent="." unique_id=449979704 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.024971, 0.88091373, -28.497236)
+[node name="bee03" parent="." unique_id=1111935303 instance=ExtResource("6_s8hmd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1623497, 0.88091373, -32.761726)
 
 [node name="mushroom01" parent="." unique_id=1092283170 instance=ExtResource("6_in5ka")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.549572, 0, -32.064125)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.692516, 0, -31.874165)
 
-[node name="mushroom02" parent="." unique_id=157961903 instance=ExtResource("6_in5ka")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.654137, 0, -28.125519)
+[node name="mushroom02" parent="." unique_id=219853543 instance=ExtResource("6_in5ka")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.39486, 0, -27.085735)

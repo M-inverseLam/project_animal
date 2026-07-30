@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Script/hero01.gd" id="1_b2opn"]
 [ext_resource type="PackedScene" uid="uid://dpsr7yntks1cs" path="res://Asset/char1_hero/girl/hero_girl01.glb" id="1_oxnaq"]
-[ext_resource type="PackedScene" uid="uid://cl5661ghjvers" path="res://Asset/char1_weapon/dagger01.tscn" id="2_grvn8"]
+[ext_resource type="PackedScene" uid="uid://bl1xhcimd7ddn" path="res://Asset/char1_weapon/lance01.tscn" id="2_cf24x"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_sxbsq"]
 [ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/char1_hero/girl/hero_girl_body.material" id="3_5dmvc"]
 [ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/char1_hero/girl/hero_girl_hair.material" id="4_b2opn"]
@@ -27,7 +27,8 @@ step_tilt = 0.5
 slide_duration = 0.0
 max_health = 50
 death_camera_shake_duration = 0.2
-attack_projectile_scene = ExtResource("2_grvn8")
+attack_projectile_scene = ExtResource("2_cf24x")
+super_attack_charge_time = 1.0
 super_attack_projectile_scene = ExtResource("6_super")
 super_attack_charge_effect_scene = ExtResource("7_charge")
 dash_cooldown = 0.0
