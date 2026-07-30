@@ -11,7 +11,7 @@ radius = 0.28883234
 
 [node name="bee_bullet01" type="Node3D" unique_id=2005302953 groups=["enemy_projectile"]]
 script = ExtResource("1_script")
-speed = 5.0
+speed = 8.0
 lifetime = 7.0
 damage = 3
 hit_spark_scene = ExtResource("4_spark")

@@ -1,0 +1,108 @@
+[gd_scene format=3 uid="uid://bl7o4s7lklpt6"]
+
+[ext_resource type="PackedScene" uid="uid://8tjuridvtmu3" path="res://Asset/char1_weapon/lance01.glb" id="1_b130i"]
+[ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark/hitspark02.tscn" id="2_ki1al"]
+[ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="2_tpioi"]
+[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="3_xhu8w"]
+[ext_resource type="Shader" uid="uid://27g0twyfv3ug" path="res://Asset/shader/sfx_slash_uv_scroll_mask.gdshader" id="4_x8ugf"]
+[ext_resource type="Texture2D" uid="uid://c5kbjjkucv0wu" path="res://Asset/sfx/weapon_trail01/weapon_trail01.tga" id="5_wb620"]
+[ext_resource type="Texture2D" uid="uid://bon3204uy1o05" path="res://Asset/sfx/weapon_trail01/weapon_trail01_mask.tga" id="6_ki1al"]
+[ext_resource type="PackedScene" uid="uid://cv80cjvfjja6u" path="res://Asset/char1_weapon/lance01_effect.glb" id="7_xhu8w"]
+[ext_resource type="Texture2D" uid="uid://cre5se3dq08v0" path="res://Asset/sfx/weapon_effect01/weapon_effect01.tga" id="8_x8ugf"]
+[ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="9_weapon"]
+[ext_resource type="Script" uid="uid://brqh6t5d1dyrl" path="res://addons/TrailRenderer/Runtime/GD/trail_renderer.gd" id="10_trail_renderer"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1jdhd"]
+render_priority = 0
+shader = ExtResource("4_x8ugf")
+shader_parameter/albedo_texture = ExtResource("5_wb620")
+shader_parameter/uv_scroll_speed = Vector2(0, -5)
+shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0.2, -0.1)
+shader_parameter/albedo_noise_tiling = Vector2(2, 2)
+shader_parameter/albedo_distortion_strength = 0.025
+shader_parameter/mask_texture = ExtResource("6_ki1al")
+shader_parameter/mask_uv_scroll_speed = Vector2(0, 0)
+shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
+shader_parameter/noise_tiling = Vector2(2, 2)
+shader_parameter/mask_distortion_strength = 0.04
+shader_parameter/tint_color = Color(1.5531965e-05, 1.5330559, 2.3190527, 1)
+shader_parameter/alpha_multiplier = 1.0
+shader_parameter/emission_multiplier = 1.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_unnut"]
+height = 2.3936768
+radius = 0.45410156
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wb620"]
+render_priority = 0
+shader = ExtResource("4_x8ugf")
+shader_parameter/albedo_texture = ExtResource("8_x8ugf")
+shader_parameter/uv_scroll_speed = Vector2(1, -5)
+shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0.2, -0.1)
+shader_parameter/albedo_noise_tiling = Vector2(2, 2)
+shader_parameter/albedo_distortion_strength = 0.025
+shader_parameter/mask_texture = ExtResource("6_ki1al")
+shader_parameter/mask_uv_scroll_speed = Vector2(0, 0)
+shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
+shader_parameter/noise_tiling = Vector2(2, 2)
+shader_parameter/mask_distortion_strength = 0.04
+shader_parameter/tint_color = Color(0, 1.4297296, 3.185202, 1)
+shader_parameter/alpha_multiplier = 1.0
+shader_parameter/emission_multiplier = 1.0
+
+[sub_resource type="Curve" id="Curve_nhoyf"]
+_data = [Vector2(0, 0), 0.0, 0.32214767, 0, 1, Vector2(1, 0.32214767), 0.32214767, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1jdhd"]
+render_priority = 1
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+use_particle_trails = true
+
+[sub_resource type="Gradient" id="Gradient_unnut"]
+offsets = PackedFloat32Array(0, 0.72794116, 0.89705884, 1)
+colors = PackedColorArray(2.0455569e-07, 0.11482709, 0.3225736, 0, 0, 0.43012735, 0.90069264, 0.75, 0.044800885, 0.81533617, 0.99999994, 1, 1, 1, 1, 0)
+
+[node name="lance01_super" type="Node3D" unique_id=68062775 groups=["weapon"]]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+script = ExtResource("9_weapon")
+speed = 50.0
+lifetime = 4.0
+damage = 25
+impact_weight = 20.0
+hit_spark_scene = ExtResource("2_ki1al")
+
+[node name="lance01" parent="." unique_id=417329665 instance=ExtResource("1_b130i")]
+script = ExtResource("2_tpioi")
+
+[node name="lance01" parent="lance01" index="0" unique_id=1581786124]
+surface_material_override/0 = ExtResource("3_xhu8w")
+
+[node name="trail" parent="lance01" index="1" unique_id=1160557418]
+surface_material_override/0 = SubResource("ShaderMaterial_1jdhd")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=370220446]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1891435766]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1913793, 0)
+shape = SubResource("CylinderShape3D_unnut")
+
+[node name="lance01_effect" parent="." unique_id=1348694647 instance=ExtResource("7_xhu8w")]
+
+[node name="energy" parent="lance01_effect" index="0" unique_id=900589898]
+surface_material_override/0 = SubResource("ShaderMaterial_wb620")
+
+[node name="TrailRenderer" type="Node3D" parent="." unique_id=443486953]
+script = ExtResource("10_trail_renderer")
+lifetime = 1.8
+min_vertex_distance = 0.02
+curve = SubResource("Curve_nhoyf")
+alignment = 0
+material = SubResource("StandardMaterial3D_1jdhd")
+color_gradient = SubResource("Gradient_unnut")
+
+[editable path="lance01"]
+[editable path="lance01_effect"]

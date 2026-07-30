@@ -49,7 +49,8 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @export var attack_hit_push_distance: float = 1.0
 @export var attack_hit_push_duration: float = 0.25
 @export var attack_hit_push_slowdown_power: float = 2.0
-@export var attack_hit_damage_duration: float = 0.35
+@export var hit_flash_duration: float = 0.25
+@export var hit_flash_power: float = 0.5
 @export var face_hit_push_direction: bool = true
 @export var dash_hit_push_distance: float = 3.0
 @export var dash_hit_push_duration: float = 0.5
@@ -81,6 +82,10 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 var health := 0
 var _visual_start_scale := Vector3.ONE
 var _hit_tween: Tween
+var _hit_flash_tween: Tween
+var _hit_flash_material: StandardMaterial3D
+var _hit_flash_meshes: Array[MeshInstance3D] = []
+var _hit_flash_previous_overlays: Array[Material] = []
 var _rng := RandomNumberGenerator.new()
 var _state := "idle"
 var _state_time_left := 0.0
@@ -95,6 +100,12 @@ var _damage_push_distance := 0.0
 var _damage_push_duration := 0.0
 var _damage_push_slowdown_power := 1.0
 var _damage_hold_duration := 0.0
+var _attack_hit_push_direction := Vector3.ZERO
+var _attack_hit_push_elapsed := 0.0
+var _attack_hit_push_distance_ratio := 0.0
+var _attack_hit_push_distance := 0.0
+var _attack_hit_push_duration := 0.0
+var _attack_hit_push_slowdown_power := 1.0
 var _is_dead := false
 var _shoot_elapsed := 0.0
 var _shoot_projectile_was_spawned := false
@@ -107,6 +118,7 @@ func _ready() -> void:
 	health = max_health
 	if visual_root != null:
 		_visual_start_scale = visual_root.scale
+	_cache_hit_flash_meshes()
 	if player_detection != null:
 		player_detection.body_entered.connect(_on_player_detection_body_entered)
 		player_detection.body_exited.connect(_on_player_detection_body_exited)
@@ -126,6 +138,7 @@ func _physics_process(delta: float) -> void:
 	if _state == "dash_damage_hold":
 		_process_dash_damage_hold(delta)
 		return
+	_process_attack_hit_push(delta)
 	_apply_overlap_avoidance(delta)
 	if _state == "retreat_from_hero":
 		_process_retreat_from_hero(delta)
@@ -338,6 +351,7 @@ func _stop_run_away(player: Node3D) -> void:
 
 
 func _start_hit_damage(push_direction: Vector3, push_distance: float, push_duration: float, slowdown_power: float, hold_duration: float) -> void:
+	_clear_attack_hit_push()
 	if push_direction == Vector3.ZERO:
 		push_direction = global_transform.basis.z
 
@@ -352,6 +366,41 @@ func _start_hit_damage(push_direction: Vector3, push_distance: float, push_durat
 	_damage_push_slowdown_power = slowdown_power
 	_damage_hold_duration = hold_duration
 	_play_animation(damage_animation_name, true)
+
+
+func _start_attack_hit_push(push_direction: Vector3, push_distance: float, push_duration: float, slowdown_power: float) -> void:
+	if push_direction == Vector3.ZERO:
+		push_direction = global_transform.basis.z
+
+	_attack_hit_push_direction = push_direction.normalized()
+	_attack_hit_push_elapsed = 0.0
+	_attack_hit_push_distance_ratio = 0.0
+	_attack_hit_push_distance = maxf(push_distance, 0.0)
+	_attack_hit_push_duration = maxf(push_duration, 0.0)
+	_attack_hit_push_slowdown_power = maxf(slowdown_power, 1.0)
+
+
+func _process_attack_hit_push(delta: float) -> void:
+	if _attack_hit_push_duration <= 0.0 or _attack_hit_push_distance <= 0.0:
+		return
+
+	_attack_hit_push_elapsed = minf(_attack_hit_push_elapsed + delta, _attack_hit_push_duration)
+	var progress: float = _attack_hit_push_elapsed / _attack_hit_push_duration
+	var distance_ratio: float = 1.0 - pow(1.0 - progress, _attack_hit_push_slowdown_power)
+	var frame_distance: float = (distance_ratio - _attack_hit_push_distance_ratio) * _attack_hit_push_distance
+
+	global_position += _attack_hit_push_direction * frame_distance
+	_attack_hit_push_distance_ratio = distance_ratio
+	if _attack_hit_push_elapsed >= _attack_hit_push_duration:
+		_clear_attack_hit_push()
+
+
+func _clear_attack_hit_push() -> void:
+	_attack_hit_push_direction = Vector3.ZERO
+	_attack_hit_push_elapsed = 0.0
+	_attack_hit_push_distance_ratio = 0.0
+	_attack_hit_push_distance = 0.0
+	_attack_hit_push_duration = 0.0
 
 
 func _process_dash_damage_push(delta: float) -> void:
@@ -597,7 +646,7 @@ func take_attack_hit(direction: Vector3, damage: int, impact_weight: float = 1.0
 	if health > 0:
 		var push_multiplier: float = maxf(impact_weight, 0.0) / maxf(knockback_resistance, 0.1)
 		var push_distance: float = attack_hit_push_distance * push_multiplier
-		_start_hit_damage(direction, push_distance, attack_hit_push_duration, attack_hit_push_slowdown_power, attack_hit_damage_duration)
+		_start_attack_hit_push(direction, push_distance, attack_hit_push_duration, attack_hit_push_slowdown_power)
 
 
 func take_dash_hit(direction: Vector3, damage: int) -> void:
@@ -623,6 +672,7 @@ func _apply_damage(damage: int) -> void:
 
 
 func _play_hit_feedback() -> void:
+	_play_white_hit_flash()
 	if visual_root == null:
 		return
 
@@ -633,6 +683,48 @@ func _play_hit_feedback() -> void:
 	var hit_scale := Vector3(_visual_start_scale.x * 1.2, _visual_start_scale.y * 0.75, _visual_start_scale.z * 1.2)
 	_hit_tween.tween_property(visual_root, "scale", hit_scale, 0.06)
 	_hit_tween.tween_property(visual_root, "scale", _visual_start_scale, 0.12)
+
+
+func _cache_hit_flash_meshes() -> void:
+	_hit_flash_meshes.clear()
+	_hit_flash_previous_overlays.clear()
+	for child in find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := child as MeshInstance3D
+		if mesh_instance == null:
+			continue
+		_hit_flash_meshes.append(mesh_instance)
+		_hit_flash_previous_overlays.append(mesh_instance.material_overlay)
+
+
+func _play_white_hit_flash() -> void:
+	if hit_flash_duration <= 0.0 or _hit_flash_meshes.is_empty():
+		return
+
+	if _hit_flash_material == null:
+		_hit_flash_material = StandardMaterial3D.new()
+		_hit_flash_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_hit_flash_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_hit_flash_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_hit_flash_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	if _hit_flash_tween != null:
+		_hit_flash_tween.kill()
+
+	_hit_flash_material.albedo_color = Color(1.0, 1.0, 1.0, clampf(hit_flash_power, 0.0, 1.0))
+	for mesh_instance in _hit_flash_meshes:
+		if is_instance_valid(mesh_instance):
+			mesh_instance.material_overlay = _hit_flash_material
+
+	_hit_flash_tween = create_tween()
+	_hit_flash_tween.tween_property(_hit_flash_material, "albedo_color:a", 0.0, hit_flash_duration)
+	_hit_flash_tween.tween_callback(_clear_white_hit_flash)
+
+
+func _clear_white_hit_flash() -> void:
+	for index in range(_hit_flash_meshes.size()):
+		var mesh_instance: MeshInstance3D = _hit_flash_meshes[index]
+		if is_instance_valid(mesh_instance):
+			mesh_instance.material_overlay = _hit_flash_previous_overlays[index]
 
 
 func _show_damage_number(damage: int) -> void:

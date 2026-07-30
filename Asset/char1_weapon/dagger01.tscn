@@ -16,8 +16,9 @@ speed = 25.0
 spawn_delay = 0.01
 emit_quantity = 3
 dash_duration = 0.7
-dash_distance = 7.0
+dash_distance = 9.0
 hit_spark_scene = ExtResource("2_j7ybq")
+hit_spark_height = 0.4
 
 [node name="dagger01" parent="." unique_id=1088331907 instance=ExtResource("1_eysqf")]
 script = ExtResource("4_ovuqa")

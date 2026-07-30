@@ -36,6 +36,15 @@ enum FaceControlMode {
 
 @export_group("")
 
+@export_group("Super Attack")
+@export var super_attack_charge_animation_name: String = "superattack_charge"
+@export var super_attack_shoot_animation_name: String = "superattack_shoot"
+@export var super_attack_charge_time: float = 2.0
+@export var super_attack_projectile_scene: PackedScene
+@export var super_attack_charge_effect_scene: PackedScene
+
+@export_group("")
+
 @export_group("Dash")
 @export var dash_animation_name: String = "dash"
 @export var dash_animation_cycle: PackedStringArray = PackedStringArray(["dash", "dash02"])
@@ -99,6 +108,11 @@ var _queued_attack_animation_name := ""
 var _next_attack_animation_index := 0
 var _attack_projectiles_emitted := 0
 var _attack_projectile_emit_time_left := 0.0
+var _is_super_attacking := false
+var _super_attack_phase := ""
+var _super_attack_time_left := 0.0
+var _resume_auto_shoot_after_super := false
+var _active_super_charge_effect: Node3D
 var _dash_key_was_pressed := false
 var _is_dashing := false
 var _active_dash_animation_name := ""
@@ -158,6 +172,9 @@ func _physics_process(delta: float) -> void:
 	if _is_dead:
 		velocity = Vector3.ZERO
 		return
+	if _is_super_attacking:
+		_process_super_attack(delta)
+		return
 
 	_update_dash_cooldown(delta)
 	_update_animation_tree_blends(delta)
@@ -171,6 +188,10 @@ func _physics_process(delta: float) -> void:
 		_process_dash(delta)
 		return
 
+	_process_locomotion(delta)
+
+
+func _process_locomotion(delta: float) -> void:
 	var input_movement := _get_keyboard_movement()
 	var movement := input_movement
 	var is_sliding := false
@@ -199,6 +220,18 @@ func _physics_process(delta: float) -> void:
 		_reset_walk_pose(delta)
 		if not _is_dashing:
 			_play_animation("idle")
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	var key_event := event as InputEventKey
+	if key_event == null or not key_event.pressed or key_event.echo:
+		return
+	if key_event.physical_keycode != KEY_CTRL:
+		return
+	if key_event.location != KEY_LOCATION_RIGHT:
+		return
+
+	_start_super_attack()
 
 
 func _get_keyboard_movement() -> Vector3:
@@ -245,7 +278,7 @@ func _update_dash_cooldown(delta: float) -> void:
 
 
 func _start_attack() -> void:
-	if _is_dashing:
+	if _is_dashing or _is_super_attacking:
 		return
 
 	if _is_attacking and _queued_attack_animation_name != "":
@@ -273,6 +306,8 @@ func _play_attack_animation(animation_name: String) -> void:
 
 
 func _start_dash() -> void:
+	if _is_super_attacking:
+		return
 	if _is_dashing:
 		return
 	if _dash_cooldown_time_left > 0.0:
@@ -478,6 +513,11 @@ func _start_death() -> void:
 		return
 
 	_is_dead = true
+	_is_super_attacking = false
+	_super_attack_phase = ""
+	_super_attack_time_left = 0.0
+	_resume_auto_shoot_after_super = false
+	_stop_super_charge_effect()
 	_shake_camera_on_death()
 	_auto_shoot_is_enabled = false
 	_resume_auto_shoot_after_dash = false
@@ -504,6 +544,120 @@ func _shake_camera_on_death() -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera != null and camera.has_method("shake"):
 		camera.call("shake", death_camera_shake_duration, death_camera_shake_strength)
+
+
+func _start_super_attack() -> void:
+	if _is_dead or _is_super_attacking:
+		return
+
+	_resume_auto_shoot_after_super = _auto_shoot_is_enabled
+	_auto_shoot_is_enabled = false
+	_resume_auto_shoot_after_dash = false
+	_clear_attack_state(true)
+	if _is_dashing:
+		_stop_dash()
+
+	_is_super_attacking = true
+	_super_attack_phase = "charge"
+	_super_attack_time_left = maxf(super_attack_charge_time, 0.0)
+	_start_super_charge_effect()
+	velocity = Vector3.ZERO
+	_last_movement = Vector3.ZERO
+	_slide_time_left = 0.0
+	_reset_walk_pose(get_physics_process_delta_time())
+
+	if _uses_animation_tree and _animation_tree != null and _runtime_attack_animation_names.has(super_attack_charge_animation_name):
+		_play_upper_body_attack(super_attack_charge_animation_name)
+	elif animation_player != null and animation_player.has_animation(super_attack_charge_animation_name):
+		animation_player.play(super_attack_charge_animation_name, animation_blend_time)
+		_current_animation = super_attack_charge_animation_name
+
+	if _super_attack_time_left <= 0.0:
+		_start_super_attack_shoot()
+
+
+func _process_super_attack(delta: float) -> void:
+	velocity = Vector3.ZERO
+	if _super_attack_phase == "charge":
+		_process_super_attack_locomotion(delta)
+		_super_attack_time_left = maxf(_super_attack_time_left - delta, 0.0)
+		if _super_attack_time_left <= 0.0:
+			_start_super_attack_shoot()
+		return
+
+	if _super_attack_phase == "shoot":
+		_process_super_attack_locomotion(delta)
+		_super_attack_time_left = maxf(_super_attack_time_left - delta, 0.0)
+		if _super_attack_time_left <= 0.0:
+			_finish_super_attack()
+
+
+func _process_super_attack_locomotion(delta: float) -> void:
+	_update_animation_tree_blends(delta)
+	_update_face_direction_input(delta)
+	_process_locomotion(delta)
+
+
+func _start_super_attack_shoot() -> void:
+	_super_attack_phase = "shoot"
+	_stop_super_charge_effect()
+	_spawn_projectile(super_attack_projectile_scene)
+
+	if animation_player == null or not animation_player.has_animation(super_attack_shoot_animation_name):
+		_finish_super_attack()
+		return
+
+	_super_attack_time_left = _get_animation_length(super_attack_shoot_animation_name)
+	if _uses_animation_tree and _animation_tree != null and _runtime_attack_animation_names.has(super_attack_shoot_animation_name):
+		_play_upper_body_attack(super_attack_shoot_animation_name)
+	else:
+		animation_player.play(super_attack_shoot_animation_name, animation_blend_time)
+		_current_animation = super_attack_shoot_animation_name
+	if _super_attack_time_left <= 0.0:
+		_finish_super_attack()
+
+
+func _finish_super_attack() -> void:
+	if not _is_super_attacking:
+		return
+
+	_is_super_attacking = false
+	_super_attack_phase = ""
+	_super_attack_time_left = 0.0
+	_stop_super_charge_effect()
+	_clear_attack_state(true)
+	if _animation_tree != null:
+		_animation_tree.active = true
+	_current_animation = ""
+	_play_animation("idle")
+
+	if _resume_auto_shoot_after_super:
+		_resume_auto_shoot_after_super = false
+		_auto_shoot_is_enabled = true
+		_start_attack()
+	else:
+		_resume_auto_shoot_after_super = false
+
+
+func _start_super_charge_effect() -> void:
+	_stop_super_charge_effect()
+	if super_attack_charge_effect_scene == null:
+		return
+
+	_active_super_charge_effect = super_attack_charge_effect_scene.instantiate() as Node3D
+	if _active_super_charge_effect == null:
+		return
+
+	add_child(_active_super_charge_effect)
+	_active_super_charge_effect.transform = Transform3D.IDENTITY
+
+
+func _stop_super_charge_effect() -> void:
+	if _active_super_charge_effect == null:
+		return
+
+	_active_super_charge_effect.queue_free()
+	_active_super_charge_effect = null
 
 
 func _update_attack_projectile(delta: float) -> void:
@@ -570,10 +724,14 @@ func _finish_attack() -> void:
 
 
 func _spawn_attack_projectile() -> void:
-	if attack_projectile_scene == null:
+	_spawn_projectile(attack_projectile_scene)
+
+
+func _spawn_projectile(projectile_scene: PackedScene) -> void:
+	if projectile_scene == null:
 		return
 
-	var projectile := attack_projectile_scene.instantiate() as Node3D
+	var projectile := projectile_scene.instantiate() as Node3D
 	if projectile == null:
 		return
 
@@ -1003,6 +1161,9 @@ func _on_animation_finished(animation_name: StringName) -> void:
 	if _is_dead and String(animation_name) == death_animation_name:
 		_show_game_over_ui()
 		return
+	if _is_super_attacking and _super_attack_phase == "shoot" and String(animation_name) == super_attack_shoot_animation_name:
+		_finish_super_attack()
+		return
 	if _is_attack_animation(String(animation_name)):
 		_finish_attack()
 	if _is_dash_animation(String(animation_name)):
@@ -1120,6 +1281,16 @@ func _setup_split_body_runtime_animations() -> bool:
 		var runtime_name := attack_name + "_upper"
 		runtime_library.add_animation(runtime_name, _create_body_filtered_animation(attack_name, upper_bones))
 		_runtime_attack_animation_names[attack_name] = "hero_split/" + runtime_name
+
+	if _has_animation(super_attack_charge_animation_name):
+		var super_charge_runtime_name := super_attack_charge_animation_name + "_upper"
+		runtime_library.add_animation(super_charge_runtime_name, _create_body_filtered_animation(super_attack_charge_animation_name, upper_bones))
+		_runtime_attack_animation_names[super_attack_charge_animation_name] = "hero_split/" + super_charge_runtime_name
+
+	if _has_animation(super_attack_shoot_animation_name):
+		var super_shoot_runtime_name := super_attack_shoot_animation_name + "_upper"
+		runtime_library.add_animation(super_shoot_runtime_name, _create_body_filtered_animation(super_attack_shoot_animation_name, upper_bones))
+		_runtime_attack_animation_names[super_attack_shoot_animation_name] = "hero_split/" + super_shoot_runtime_name
 
 	if animation_player.has_animation_library("hero_split"):
 		animation_player.remove_animation_library("hero_split")

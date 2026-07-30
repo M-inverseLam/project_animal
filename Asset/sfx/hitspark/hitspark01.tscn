@@ -6,13 +6,14 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mtrak"]
 transparency = 1
 blend_mode = 1
+cull_mode = 2
 no_depth_test = true
 shading_mode = 0
-cull_mode = 2
 vertex_color_use_as_albedo = true
-albedo_color = Color(2.03982, 2.03982, 2.03982, 1)
+albedo_color = Color(0, 1.43, 3.185, 1)
 albedo_texture = ExtResource("1_lyww6")
 billboard_keep_scale = true
+grow_amount = -4.465
 
 [sub_resource type="Curve" id="Curve_pvq37"]
 _data = [Vector2(0, 0), 0.0, 8.68631, 0, 0, Vector2(0.21122113, 1), -1.339804, -1.339804, 0, 0, Vector2(1, 0), -0.19021758, 0.0, 0, 0]
@@ -44,6 +45,8 @@ use_rotation_3d = true
 rotation_3d_min = Vector3(0, 0, -180)
 rotation_3d_max = Vector3(0, 0, 180)
 gravity = Vector3(0, 0, 0)
+scale_min = 0.5
+scale_max = 2.0
 scale_curve = SubResource("CurveTexture_svfu8")
 alpha_curve = SubResource("CurveTexture_hjok4")
 

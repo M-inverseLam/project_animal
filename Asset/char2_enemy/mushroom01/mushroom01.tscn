@@ -14,17 +14,20 @@ radius = 1.7163622
 
 [node name="mushroom01" type="Node3D" unique_id=1092283170 groups=["enemy"]]
 script = ExtResource("1_44xdi")
-max_health = 100
+max_health = 80
+run_away_speed = 2.0
 use_weighted_ai = true
 ai_idle_weight = 5.0
-ai_chase_weight = 90.0
+ai_chase_weight = 50.0
 ai_shoot_weight = 80.0
-chase_speed = 7.0
+chase_speed = 2.0
 shoot_projectile_scene = ExtResource("2_ufutl")
 shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition1"), NodePath("shootposition2")])
 avoid_enemy_overlap = true
 overlap_avoidance_radius = 2.0
 knockback_resistance = 4.0
+attack_hit_push_duration = 0.8
+hit_flash_power = 0.2
 face_hit_push_direction = false
 damage_number_font = ExtResource("2_a8hjb")
 damage_number_font_size = 120

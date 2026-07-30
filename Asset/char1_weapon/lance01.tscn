@@ -39,6 +39,7 @@ dash_duration = 0.7
 dash_distance = 6.0
 dash_damage = 3
 hit_spark_scene = ExtResource("4_lance")
+hit_spark_height = 0.4
 ignored_groups = PackedStringArray()
 
 [node name="lance01" parent="." unique_id=2013849724 instance=ExtResource("1_t0dif")]
