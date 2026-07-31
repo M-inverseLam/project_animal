@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://btwppao1l811g"
-path.s3tc="res://.godot/imported/gems_get01.tga-80bd643520fc15fea0e8245ab6baecd6.s3tc.ctex"
+uid="uid://4fdk0dwcby2b"
+path.s3tc="res://.godot/imported/hero_face_direction.tga-ee28b0654411cff57c61a26428827c2a.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Asset/sfx/hitspark/gems_get01.tga"
-dest_files=["res://.godot/imported/gems_get01.tga-80bd643520fc15fea0e8245ab6baecd6.s3tc.ctex"]
+source_file="res://Asset/char1_hero/girl/hero_face_direction.tga"
+dest_files=["res://.godot/imported/hero_face_direction.tga-ee28b0654411cff57c61a26428827c2a.s3tc.ctex"]
 
 [params]
 

@@ -21,17 +21,17 @@ shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0.2, -0.1)
 shader_parameter/albedo_noise_tiling = Vector2(2, 2)
 shader_parameter/albedo_distortion_strength = 0.025
 shader_parameter/mask_texture = ExtResource("6_ki1al")
-shader_parameter/mask_uv_scroll_speed = Vector2(0, 0)
-shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
+shader_parameter/mask_uv_scroll_speed = Vector2(1, 0)
+shader_parameter/noise_uv_scroll_speed = Vector2(0, 0)
 shader_parameter/noise_tiling = Vector2(2, 2)
 shader_parameter/mask_distortion_strength = 0.04
-shader_parameter/tint_color = Color(1.5531965e-05, 1.5330559, 2.3190527, 1)
+shader_parameter/tint_color = Color(0, 1.43, 3.185, 1)
 shader_parameter/alpha_multiplier = 1.0
 shader_parameter/emission_multiplier = 1.0
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_unnut"]
 height = 2.3936768
-radius = 0.45410156
+radius = 0.80615234
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wb620"]
 render_priority = 0
@@ -74,6 +74,7 @@ lifetime = 4.0
 damage = 25
 impact_weight = 20.0
 hit_spark_scene = ExtResource("2_ki1al")
+hit_camera_shake_enabled = true
 
 [node name="lance01" parent="." unique_id=417329665 instance=ExtResource("1_b130i")]
 script = ExtResource("2_tpioi")
@@ -92,7 +93,7 @@ shape = SubResource("CylinderShape3D_unnut")
 
 [node name="lance01_effect" parent="." unique_id=1348694647 instance=ExtResource("7_xhu8w")]
 
-[node name="energy" parent="lance01_effect" index="0" unique_id=900589898]
+[node name="energy" parent="lance01_effect" index="0" unique_id=1665682289]
 surface_material_override/0 = SubResource("ShaderMaterial_wb620")
 
 [node name="TrailRenderer" type="Node3D" parent="." unique_id=443486953]

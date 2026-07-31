@@ -1,0 +1,80 @@
+{
+  "auto_start": true,
+  "outside_camera_margin": 3.0,
+  "waves": [
+	{
+	  "name": "Wave 1",
+	  "start_delay": 0.0,
+	  "wait_until_defeated": true,
+	  "enemies": [
+		{
+		  "scene": "res://Asset/char2_enemy/bees/bee01.tscn",
+		  "quantity": 30,
+		  "spawn_time_offset": 0.0,
+		  "spawn_interval": 2.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
+		  "quantity": 2,
+		  "spawn_after_previous_group": true,
+		  "spawn_delay": 3.0,
+		  "spawn_interval": 2.0
+		}
+	  ]
+	},
+	{
+	  "name": "Wave 2",
+	  "start_delay": 1.0,
+	  "wait_until_defeated": true,
+	  "enemies": [
+		{
+		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
+		  "spawn_time_offset": 0.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
+		  "spawn_time_offset": 0.75
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/bees/bee01.tscn",
+		  "spawn_time_offset": 1.5
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/bees/bee01.tscn",
+		  "spawn_time_offset": 2.25
+		}
+	  ]
+	},
+	{
+	  "name": "Wave 3",
+	  "start_delay": 1.0,
+	  "wait_until_defeated": true,
+	  "enemies": [
+		{
+		  "scene": "res://Asset/char2_enemy/bees/bee01.tscn",
+		  "spawn_time_offset": 0.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
+		  "spawn_time_offset": 0.5
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/bees/bee01.tscn",
+		  "spawn_time_offset": 1.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
+		  "spawn_time_offset": 1.5
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/bees/bee01.tscn",
+		  "spawn_time_offset": 2.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
+		  "spawn_time_offset": 2.5
+		}
+	  ]
+	}
+  ]
+}

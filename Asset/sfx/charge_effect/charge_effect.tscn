@@ -2,23 +2,19 @@
 
 [ext_resource type="PackedScene" uid="uid://ckf62jehdqftc" path="res://Asset/sfx/charge_effect/charge_effect.glb" id="1_ld8mv"]
 [ext_resource type="Shader" uid="uid://27g0twyfv3ug" path="res://Asset/shader/sfx_slash_uv_scroll_mask.gdshader" id="2_efnaw"]
+[ext_resource type="Script" uid="uid://clnbvcy7hjkyu" path="res://Asset/sfx/charge_effect/charge_effect.gd" id="2_fade"]
 [ext_resource type="Texture2D" uid="uid://cre5se3dq08v0" path="res://Asset/sfx/weapon_effect01/weapon_effect01.tga" id="3_y1gkg"]
 [ext_resource type="Texture2D" uid="uid://bon3204uy1o05" path="res://Asset/sfx/weapon_trail01/weapon_trail01_mask.tga" id="4_clreb"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_lf6de"]
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_efnaw"]
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ww5hm"]
-width = 64
-height = 64
-noise = SubResource("FastNoiseLite_lf6de")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_c76kl"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_efnaw"]
 render_priority = 0
 shader = ExtResource("2_efnaw")
 shader_parameter/albedo_texture = ExtResource("3_y1gkg")
-shader_parameter/albedo_noise_texture = SubResource("NoiseTexture2D_ww5hm")
-shader_parameter/uv_scroll_speed = Vector2(0, 2)
-shader_parameter/albedo_noise_uv_scroll_speed = Vector2(1, -2)
+shader_parameter/albedo_noise_texture = SubResource("NoiseTexture2D_efnaw")
+shader_parameter/uv_scroll_speed = Vector2(0, 3)
+shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0.2, -0.1)
 shader_parameter/albedo_noise_tiling = Vector2(2, 2)
 shader_parameter/albedo_distortion_strength = 0.025
 shader_parameter/mask_texture = ExtResource("4_clreb")
@@ -26,15 +22,18 @@ shader_parameter/mask_uv_scroll_speed = Vector2(0, 0)
 shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
 shader_parameter/noise_tiling = Vector2(2, 2)
 shader_parameter/mask_distortion_strength = 0.04
-shader_parameter/tint_color = Color(0, 1.2376777, 3.7704818, 1)
+shader_parameter/tint_color = Color(0, 0.881665, 1.462918, 1)
 shader_parameter/alpha_multiplier = 1.0
 shader_parameter/emission_multiplier = 1.0
 
 [node name="Node3D" type="Node3D" unique_id=1710848236]
+script = ExtResource("2_fade")
+fade_in_duration = 0.1
+fade_out_duration = 0.25
 
-[node name="charge_effect2" parent="." unique_id=122965794 instance=ExtResource("1_ld8mv")]
+[node name="charge_effect" parent="." unique_id=558454043 instance=ExtResource("1_ld8mv")]
 
-[node name="charge_effect" parent="charge_effect2" index="0" unique_id=1718608320]
-surface_material_override/0 = SubResource("ShaderMaterial_c76kl")
+[node name="charge_effect" parent="charge_effect" index="0" unique_id=1718608320]
+surface_material_override/0 = SubResource("ShaderMaterial_efnaw")
 
-[editable path="charge_effect2"]
+[editable path="charge_effect"]

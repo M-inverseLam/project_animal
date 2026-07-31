@@ -8,6 +8,9 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @export var damage_animation_name: String = "damage"
 @export var animation_blend_time: float = 0.2
 
+@export_group("Spawn")
+@export var spawn_height: float = 0.0
+
 @export_group("Health")
 @export var max_health: int = 3
 
@@ -26,6 +29,8 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @export var ai_shoot_weight: float = 30.0
 @export var chase_speed: float = 5.0
 @export var chase_time_range: Vector2 = Vector2(1.0, 2.0)
+@export_range(0.0, 45.0, 0.1, "suffix:deg") var chase_direction_angle: float = 12.0
+@export var chase_direction_change_time_range: Vector2 = Vector2(0.4, 0.9)
 @export var shoot_animation_name: String = "idle"
 @export var shoot_time_range: Vector2 = Vector2(0.5, 0.8)
 @export var shoot_projectile_scene: PackedScene
@@ -90,6 +95,8 @@ var _rng := RandomNumberGenerator.new()
 var _state := "idle"
 var _state_time_left := 0.0
 var _walk_direction := Vector3.ZERO
+var _chase_direction_angle_offset := 0.0
+var _chase_direction_change_time_left := 0.0
 var _current_animation := ""
 var _detected_player: Node3D
 var _damage_state_time_left := 0.0
@@ -251,6 +258,7 @@ func _start_chase(player: Node3D) -> void:
 	_detected_player = player
 	_state = "chase"
 	_state_time_left = _rng.randf_range(chase_time_range.x, chase_time_range.y)
+	_randomize_chase_direction()
 	_play_animation(walk_animation_name)
 
 
@@ -261,17 +269,41 @@ func _process_chase(delta: float) -> void:
 		return
 
 	_state_time_left -= delta
+	_chase_direction_change_time_left -= delta
+	if _chase_direction_change_time_left <= 0.0:
+		_randomize_chase_direction()
 
 	var chase_direction := _detected_player.global_position - global_position
 	chase_direction.y = 0.0
 
 	if chase_direction != Vector3.ZERO:
-		chase_direction = chase_direction.normalized()
+		chase_direction = chase_direction.normalized().rotated(
+			Vector3.UP,
+			_chase_direction_angle_offset
+		)
 		global_position += chase_direction * chase_speed * delta
 		_face_direction(chase_direction, delta)
 
 	if _state_time_left <= 0.0:
 		_start_weighted_decision()
+
+
+func _randomize_chase_direction() -> void:
+	var maximum_angle := deg_to_rad(maxf(chase_direction_angle, 0.0))
+	_chase_direction_angle_offset = _rng.randf_range(-maximum_angle, maximum_angle)
+
+	var minimum_change_time := maxf(
+		minf(chase_direction_change_time_range.x, chase_direction_change_time_range.y),
+		0.05
+	)
+	var maximum_change_time := maxf(
+		maxf(chase_direction_change_time_range.x, chase_direction_change_time_range.y),
+		minimum_change_time
+	)
+	_chase_direction_change_time_left = _rng.randf_range(
+		minimum_change_time,
+		maximum_change_time
+	)
 
 
 func _start_shoot(player: Node3D) -> void:

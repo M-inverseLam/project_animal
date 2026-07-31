@@ -32,11 +32,11 @@ radius = 0.45410156
 
 [node name="lance01" type="Node3D" unique_id=24254344 groups=["weapon"]]
 script = ExtResource("3_4kxuq")
-speed = 50.0
-damage = 7
+speed = 40.0
+damage = 4
 impact_weight = 3.0
-dash_duration = 0.7
-dash_distance = 6.0
+dash_duration = 1.0
+dash_distance = 7.0
 dash_damage = 3
 hit_spark_scene = ExtResource("4_lance")
 hit_spark_height = 0.4

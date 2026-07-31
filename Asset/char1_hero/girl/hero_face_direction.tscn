@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://bb351ruxwngbu"]
+
+[ext_resource type="PackedScene" uid="uid://cbipk7emrwuui" path="res://Asset/char1_hero/girl/hero_face_direction.glb" id="1_ako30"]
+[ext_resource type="Texture2D" uid="uid://4fdk0dwcby2b" path="res://Asset/char1_hero/girl/hero_face_direction.tga" id="2_aq1s0"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_apjeo"]
+transparency = 1
+albedo_texture = ExtResource("2_aq1s0")
+
+[node name="hero_face_direction" type="Node3D" unique_id=1811262639]
+
+[node name="hero_face_direction" parent="." unique_id=390151321 instance=ExtResource("1_ako30")]
+
+[node name="hero_direction" parent="hero_face_direction" index="0" unique_id=864133118]
+surface_material_override/0 = SubResource("StandardMaterial3D_apjeo")
+
+[editable path="hero_face_direction"]

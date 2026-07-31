@@ -3,9 +3,8 @@
 [ext_resource type="Script" uid="uid://bbcc5d0litwvb" path="res://Asset/GameplayCamera.gd" id="3_nhh1a"]
 [ext_resource type="PackedScene" uid="uid://ml5v4gxkx6fm" path="res://Asset/stage/castle/stage_castle01.tscn" id="4_cscit"]
 [ext_resource type="PackedScene" uid="uid://qvtqchh8es53" path="res://Asset/ui/ui04/ui04_main.tscn" id="5_7nfr3"]
+[ext_resource type="Script" uid="uid://3e6eh4j2be4v" path="res://Script/enemy_wave_spawner.gd" id="5_njwhd"]
 [ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/char1_hero/girl/hero_girl01.tscn" id="5_s8hmd"]
-[ext_resource type="PackedScene" uid="uid://bh4fxwds670vo" path="res://Asset/char2_enemy/mushroom01/mushroom01.tscn" id="6_in5ka"]
-[ext_resource type="PackedScene" uid="uid://bvclms3oujko6" path="res://Asset/char2_enemy/bees/bee01.tscn" id="6_s8hmd"]
 
 [sub_resource type="Environment" id="Environment_4kxuq"]
 ambient_light_source = 2
@@ -42,30 +41,12 @@ script = ExtResource("3_nhh1a")
 target_path = NodePath("../../hero_girl01")
 follow_offset = Vector3(0, 30, 30)
 spring_strength = 20.0
-shake_strength = 0.05
-
-[node name="OmniLight3D3" type="OmniLight3D" parent="world" unique_id=246914149]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.109726, 3.500535, -18.294634)
-light_color = Color(0.9397441, 0.59574145, 0.053940676, 1)
-light_energy = 10.0
-light_size = 0.379
-omni_range = 16.759138
+camera_shake_duration = 0.7
+camera_shake_strength = 0.07
 
 [node name="stage_castle01" parent="." unique_id=465259332 instance=ExtResource("4_cscit")]
 
 [node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]
 
-[node name="bee01" parent="." unique_id=648269543 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.642235, 0.88091373, -8.323002)
-
-[node name="bee02" parent="." unique_id=1657136805 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.27029, 0.88091373, -27.137426)
-
-[node name="bee03" parent="." unique_id=1111935303 instance=ExtResource("6_s8hmd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1623497, 0.88091373, -32.761726)
-
-[node name="mushroom01" parent="." unique_id=1092283170 instance=ExtResource("6_in5ka")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.692516, 0, -31.874165)
-
-[node name="mushroom02" parent="." unique_id=219853543 instance=ExtResource("6_in5ka")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.39486, 0, -27.085735)
+[node name="EnemyWaveSpawner" type="Node" parent="." unique_id=1774927294]
+script = ExtResource("5_njwhd")

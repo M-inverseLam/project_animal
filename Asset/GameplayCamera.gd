@@ -4,10 +4,14 @@ extends Camera3D
 @export var follow_offset := Vector3(0.0, 26.121084, 25.622486)
 @export var spring_strength: float = 35.0
 @export var spring_damping: float = 10.0
-@export var shake_strength: float = 0.45
+
+@export_group("Camera Shake")
+@export var camera_shake_duration: float = 0.8
+@export var camera_shake_strength: float = 0.3
 
 var _target: Node3D
 var _velocity := Vector3.ZERO
+var _follow_position := Vector3.ZERO
 var _shake_time_left := 0.0
 var _shake_duration := 0.0
 var _shake_strength := 0.0
@@ -20,7 +24,10 @@ func _ready() -> void:
 	current = true
 
 	if _target != null:
-		global_position = _target.global_position + follow_offset
+		_follow_position = _target.global_position + follow_offset
+		global_position = _follow_position
+	else:
+		_follow_position = global_position
 
 
 func _physics_process(delta: float) -> void:
@@ -28,32 +35,46 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var desired_position := _target.global_position + follow_offset
-	var displacement := desired_position - global_position
+	var displacement := desired_position - _follow_position
 	var acceleration := displacement * spring_strength - _velocity * spring_damping
 
 	_velocity += acceleration * delta
-	global_position += _velocity * delta
+	_follow_position += _velocity * delta
 
+	var shake_offset := Vector3.ZERO
 	if _shake_time_left > 0.0:
-		_apply_shake(delta)
+		shake_offset = _calculate_shake_offset(delta)
+
+	global_position = _follow_position + global_transform.basis * shake_offset
 
 
-func shake(duration: float = 0.5, strength: float = -1.0) -> void:
-	_shake_duration = maxf(duration, 0.0)
-	_shake_time_left = _shake_duration
-	_shake_strength = self.shake_strength if strength < 0.0 else strength
-
-
-func _apply_shake(delta: float) -> void:
-	_shake_time_left = maxf(_shake_time_left - delta, 0.0)
-	if _shake_duration <= 0.0:
+func shake(duration: float, strength: float) -> void:
+	var requested_duration := maxf(duration, 0.0)
+	var requested_strength := maxf(strength, 0.0)
+	if requested_duration <= 0.0:
 		return
 
+	if _shake_time_left > requested_duration:
+		_shake_strength = maxf(_shake_strength, requested_strength)
+		return
+
+	_shake_duration = requested_duration
+	_shake_time_left = requested_duration
+	_shake_strength = requested_strength
+
+
+func shake_camera() -> void:
+	shake(camera_shake_duration, camera_shake_strength)
+
+
+func _calculate_shake_offset(delta: float) -> Vector3:
+	_shake_time_left = maxf(_shake_time_left - delta, 0.0)
+	if _shake_duration <= 0.0:
+		return Vector3.ZERO
+
 	var fade := _shake_time_left / _shake_duration
-	var offset := Vector3(
+	return Vector3(
 		_rng.randf_range(-1.0, 1.0),
 		_rng.randf_range(-1.0, 1.0),
 		0.0
 	) * _shake_strength * fade
-
-	global_position += global_transform.basis * offset

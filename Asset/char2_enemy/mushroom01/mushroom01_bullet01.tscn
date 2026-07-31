@@ -42,7 +42,8 @@ shader_parameter/emission_multiplier = 1.0
 
 [node name="mushroom01_bullet01" type="Node3D" unique_id=78531415 groups=["enemy_projectile"]]
 script = ExtResource("1_wl0h3")
-speed = 27.0
+speed = 16.0
+lifetime = 8.0
 damage = 10
 hit_spark_scene = ExtResource("6_spark")
 
@@ -50,7 +51,7 @@ hit_spark_scene = ExtResource("6_spark")
 script = ExtResource("3_mwwao")
 rotation_speed_degrees = 180.0
 
-[node name="missile" parent="mushroom01_bullet01" index="0" unique_id=967010396]
+[node name="missile" parent="mushroom01_bullet01" index="0" unique_id=435952513]
 surface_material_override/0 = ExtResource("2_wl0h3")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1104922385]

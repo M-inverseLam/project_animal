@@ -8,20 +8,15 @@ enum FaceControlMode {
 }
 
 @export var move_speed: float = 4.0
-@export var turn_speed: float = 12.0
+@export var mouse_turn_speed: float = 12.0
 @export var arrow_face_turn_speed: float = 4.0
 @export var arrow_face_turn_step_degrees: float = 15.0
-@export var step_height: float = 0.08
-@export var step_tilt: float = 0.08
-@export var step_speed: float = 10.0
 @export var animation_blend_time: float = 0.2
 @export var slide_duration: float = 0.3
 
 @export_group("Health")
 @export var max_health: int = 500
 @export var death_animation_name: String = "die"
-@export var death_camera_shake_duration: float = 0.8
-@export var death_camera_shake_strength: float = 0.3
 
 @export_group("")
 
@@ -42,6 +37,7 @@ enum FaceControlMode {
 @export var super_attack_charge_time: float = 2.0
 @export var super_attack_projectile_scene: PackedScene
 @export var super_attack_charge_effect_scene: PackedScene
+@export var super_attack_shoot_hit_spark_scene: PackedScene
 
 @export_group("")
 
@@ -52,18 +48,13 @@ enum FaceControlMode {
 @export var dash_hit_camera_shake_duration: float = 0.5
 @export var dash_hit_camera_shake_strength: float = 0.45
 @export var dash_dust_scene: PackedScene
-
-@export_group("")
-
-@export_group("Hit Spark")
-@export var hit_spark_scene: PackedScene
-@export var hit_spark_height: float = 0.8
+@export var dash_hit_spark_scene: PackedScene
+@export var dash_hit_spark_height: float = 0.8
 
 @export_group("")
 
 @onready var animation_player := find_child("AnimationPlayer", true, false) as AnimationPlayer
 @onready var skeleton := find_child("Skeleton3D", true, false) as Skeleton3D
-@onready var visual_root := get_node_or_null("chicken01") as Node3D
 @onready var dash_dust_template := get_node_or_null("DashDust") as Node3D
 @onready var attack_projectile_spawn := get_node_or_null(attack_projectile_spawn_path) as Node3D
 @onready var dash_hitbox := get_node_or_null("DashHitbox") as Area3D
@@ -93,9 +84,6 @@ var _target_attack_layer_blend_amount := 0.0
 var _active_attack_blend_slot := 0
 var _current_health := 0
 var _is_dead := false
-var _visual_start_position := Vector3.ZERO
-var _visual_start_rotation := Vector3.ZERO
-var _walk_time := 0.0
 var _last_movement := Vector3.ZERO
 var _slide_time_left := 0.0
 var _attack_key_was_pressed := false
@@ -103,7 +91,6 @@ var _auto_shoot_is_enabled := true
 var _resume_auto_shoot_after_dash := false
 var _is_attacking := false
 var _attack_time_left := 0.0
-var _active_attack_animation_name := ""
 var _queued_attack_animation_name := ""
 var _next_attack_animation_index := 0
 var _attack_projectiles_emitted := 0
@@ -115,7 +102,6 @@ var _resume_auto_shoot_after_super := false
 var _active_super_charge_effect: Node3D
 var _dash_key_was_pressed := false
 var _is_dashing := false
-var _active_dash_animation_name := ""
 var _next_dash_animation_index := 0
 var _dash_time_left := 0.0
 var _dash_elapsed := 0.0
@@ -153,9 +139,6 @@ func _ready() -> void:
 	_current_health = max_health
 	_update_health_ui()
 	_load_weapon_parameters()
-	if visual_root != null:
-		_visual_start_position = visual_root.position
-		_visual_start_rotation = visual_root.rotation
 	if animation_player != null:
 		animation_player.animation_finished.connect(_on_animation_finished)
 	_setup_animation_tree()
@@ -209,17 +192,10 @@ func _process_locomotion(delta: float) -> void:
 	if movement != Vector3.ZERO:
 		_move_with_collision(movement * move_speed * delta, delta)
 		if not is_sliding:
-			_animate_walk(delta)
-			if not _is_dashing:
-				_play_animation("walk")
-		else:
-			_reset_walk_pose(delta)
-			if not _is_dashing:
-				_play_animation("idle")
-	else:
-		_reset_walk_pose(delta)
-		if not _is_dashing:
-			_play_animation("idle")
+			_play_animation("walk")
+			return
+
+	_play_animation("idle")
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -298,11 +274,10 @@ func _start_attack() -> void:
 func _play_attack_animation(animation_name: String) -> void:
 	_is_attacking = true
 	_attack_time_left = _get_animation_length(animation_name)
-	_active_attack_animation_name = animation_name
 	_attack_projectiles_emitted = 0
 	_attack_projectile_emit_time_left = 0.0
 
-	_play_animation(_active_attack_animation_name, true)
+	_play_animation(animation_name, true)
 
 
 func _start_dash() -> void:
@@ -320,7 +295,6 @@ func _start_dash() -> void:
 	_resume_auto_shoot_after_dash = _auto_shoot_is_enabled
 	_clear_attack_state(true)
 	_is_dashing = true
-	_active_dash_animation_name = selected_dash_animation
 	_dash_time_left = _weapon_dash_duration
 	_dash_elapsed = 0.0
 	_dash_distance_ratio = 0.0
@@ -332,10 +306,9 @@ func _start_dash() -> void:
 	_slide_time_left = 0.0
 	_dash_hit_targets.clear()
 
-	_reset_walk_pose(get_physics_process_delta_time())
 	_set_dash_hitbox_enabled(true)
 	_start_dash_dust()
-	_play_animation(_active_dash_animation_name, true)
+	_play_animation(selected_dash_animation, true)
 
 
 func _process_dash(delta: float) -> void:
@@ -382,7 +355,6 @@ func _process_dash_bounce_back(delta: float) -> void:
 
 func _stop_dash() -> void:
 	_is_dashing = false
-	_active_dash_animation_name = ""
 	_dash_time_left = 0.0
 	_dash_elapsed = 0.0
 	_dash_distance_ratio = 0.0
@@ -394,12 +366,8 @@ func _stop_dash() -> void:
 	_stop_dash_dust()
 	_dash_cooldown_time_left = dash_cooldown
 	_current_animation = ""
-	if _resume_auto_shoot_after_dash:
-		_resume_auto_shoot_after_dash = false
-		_auto_shoot_is_enabled = true
-		_start_attack()
-	else:
-		_resume_auto_shoot_after_dash = false
+	_resume_auto_shoot(_resume_auto_shoot_after_dash)
+	_resume_auto_shoot_after_dash = false
 
 
 func _get_dash_direction() -> Vector3:
@@ -542,8 +510,8 @@ func _start_death() -> void:
 
 func _shake_camera_on_death() -> void:
 	var camera := get_viewport().get_camera_3d()
-	if camera != null and camera.has_method("shake"):
-		camera.call("shake", death_camera_shake_duration, death_camera_shake_strength)
+	if camera != null and camera.has_method("shake_camera"):
+		camera.call("shake_camera")
 
 
 func _start_super_attack() -> void:
@@ -564,7 +532,6 @@ func _start_super_attack() -> void:
 	velocity = Vector3.ZERO
 	_last_movement = Vector3.ZERO
 	_slide_time_left = 0.0
-	_reset_walk_pose(get_physics_process_delta_time())
 
 	if _uses_animation_tree and _animation_tree != null and _runtime_attack_animation_names.has(super_attack_charge_animation_name):
 		_play_upper_body_attack(super_attack_charge_animation_name)
@@ -578,17 +545,15 @@ func _start_super_attack() -> void:
 
 func _process_super_attack(delta: float) -> void:
 	velocity = Vector3.ZERO
-	if _super_attack_phase == "charge":
-		_process_super_attack_locomotion(delta)
-		_super_attack_time_left = maxf(_super_attack_time_left - delta, 0.0)
-		if _super_attack_time_left <= 0.0:
-			_start_super_attack_shoot()
+	if _super_attack_phase != "charge" and _super_attack_phase != "shoot":
 		return
 
-	if _super_attack_phase == "shoot":
-		_process_super_attack_locomotion(delta)
-		_super_attack_time_left = maxf(_super_attack_time_left - delta, 0.0)
-		if _super_attack_time_left <= 0.0:
+	_process_super_attack_locomotion(delta)
+	_super_attack_time_left = maxf(_super_attack_time_left - delta, 0.0)
+	if _super_attack_time_left <= 0.0:
+		if _super_attack_phase == "charge":
+			_start_super_attack_shoot()
+		else:
 			_finish_super_attack()
 
 
@@ -601,6 +566,7 @@ func _process_super_attack_locomotion(delta: float) -> void:
 func _start_super_attack_shoot() -> void:
 	_super_attack_phase = "shoot"
 	_stop_super_charge_effect()
+	_spawn_super_shoot_hit_spark()
 	_spawn_projectile(super_attack_projectile_scene)
 
 	if animation_player == null or not animation_player.has_animation(super_attack_shoot_animation_name):
@@ -631,12 +597,8 @@ func _finish_super_attack() -> void:
 	_current_animation = ""
 	_play_animation("idle")
 
-	if _resume_auto_shoot_after_super:
-		_resume_auto_shoot_after_super = false
-		_auto_shoot_is_enabled = true
-		_start_attack()
-	else:
-		_resume_auto_shoot_after_super = false
+	_resume_auto_shoot(_resume_auto_shoot_after_super)
+	_resume_auto_shoot_after_super = false
 
 
 func _start_super_charge_effect() -> void:
@@ -656,7 +618,10 @@ func _stop_super_charge_effect() -> void:
 	if _active_super_charge_effect == null:
 		return
 
-	_active_super_charge_effect.queue_free()
+	if _active_super_charge_effect.has_method("fade_out_and_free"):
+		_active_super_charge_effect.call("fade_out_and_free")
+	else:
+		_active_super_charge_effect.queue_free()
 	_active_super_charge_effect = null
 
 
@@ -680,16 +645,9 @@ func _update_attack_projectile(delta: float) -> void:
 		_finish_attack()
 
 
-func _stop_attack() -> void:
-	_auto_shoot_is_enabled = false
-	_resume_auto_shoot_after_dash = false
-	_clear_attack_state(true)
-
-
 func _clear_attack_state(abort_animation: bool) -> void:
 	_is_attacking = false
 	_attack_time_left = 0.0
-	_active_attack_animation_name = ""
 	_queued_attack_animation_name = ""
 	_attack_projectiles_emitted = 0
 	_attack_projectile_emit_time_left = 0.0
@@ -721,6 +679,14 @@ func _finish_attack() -> void:
 
 	_clear_attack_state(false)
 	_current_animation = ""
+
+
+func _resume_auto_shoot(should_resume: bool) -> void:
+	if not should_resume:
+		return
+
+	_auto_shoot_is_enabled = true
+	_start_attack()
 
 
 func _spawn_attack_projectile() -> void:
@@ -821,16 +787,20 @@ func _apply_dash_hit(target: Node) -> void:
 		return
 
 	_dash_hit_targets.append(target)
+	var hit_was_applied := false
 	if target.has_method("take_dash_hit"):
 		target.call("take_dash_hit", _dash_direction, _weapon_dash_damage)
-		_spawn_hit_spark(target)
-		_shake_camera_on_dash_hit()
-		_start_dash_bounce_back()
+		hit_was_applied = true
 	elif target.has_method("take_damage"):
 		target.call("take_damage", _weapon_dash_damage)
-		_spawn_hit_spark(target)
-		_shake_camera_on_dash_hit()
-		_start_dash_bounce_back()
+		hit_was_applied = true
+
+	if not hit_was_applied:
+		return
+
+	_spawn_dash_hit_spark(target)
+	_shake_camera_on_dash_hit()
+	_start_dash_bounce_back()
 
 
 func _start_dash_bounce_back() -> void:
@@ -850,13 +820,31 @@ func _shake_camera_on_dash_hit() -> void:
 		camera.call("shake", dash_hit_camera_shake_duration, dash_hit_camera_shake_strength)
 
 
-func _spawn_hit_spark(target: Node) -> void:
-	if hit_spark_scene == null:
-		return
+func _spawn_dash_hit_spark(target: Node) -> void:
 	if not target is Node3D:
 		return
 
-	var hit_spark := hit_spark_scene.instantiate() as Node3D
+	_spawn_hit_spark_at_position(
+		dash_hit_spark_scene,
+		(target as Node3D).global_position + Vector3.UP * dash_hit_spark_height
+	)
+
+
+func _spawn_super_shoot_hit_spark() -> void:
+	if attack_projectile_spawn == null:
+		return
+
+	_spawn_hit_spark_at_position(
+		super_attack_shoot_hit_spark_scene,
+		attack_projectile_spawn.global_position
+	)
+
+
+func _spawn_hit_spark_at_position(spark_scene: PackedScene, spawn_position: Vector3) -> void:
+	if spark_scene == null:
+		return
+
+	var hit_spark := spark_scene.instantiate() as Node3D
 	if hit_spark == null:
 		return
 
@@ -865,16 +853,10 @@ func _spawn_hit_spark(target: Node) -> void:
 		spark_parent = self
 
 	spark_parent.add_child(hit_spark)
-	hit_spark.global_position = (target as Node3D).global_position + Vector3.UP * hit_spark_height
+	hit_spark.global_position = spawn_position
 
-	var particles := hit_spark.find_child("GPUParticles3D", true, false) as GPUParticles3D
-	if particles != null:
-		particles.emitting = false
-		particles.restart()
-		particles.emitting = true
-		hit_spark.get_tree().create_timer(particles.lifetime + 0.1).timeout.connect(hit_spark.queue_free)
-	else:
-		hit_spark.get_tree().create_timer(1.0).timeout.connect(hit_spark.queue_free)
+	var longest_lifetime := _restart_particles_recursive(hit_spark)
+	hit_spark.get_tree().create_timer(longest_lifetime + 0.1).timeout.connect(hit_spark.queue_free)
 
 
 func _start_dash_dust() -> void:
@@ -996,7 +978,7 @@ func _face_direction(direction: Vector3, delta: float, face_turn_speed: float = 
 
 	var current_yaw := atan2(current_direction.x, current_direction.z)
 	var target_yaw := atan2(target_direction.x, target_direction.z)
-	var rotation_speed := turn_speed
+	var rotation_speed := mouse_turn_speed
 	if face_turn_speed >= 0.0:
 		rotation_speed = face_turn_speed
 
@@ -1112,7 +1094,7 @@ func _face_mouse_cursor(delta: float) -> void:
 
 	var face_direction := _mouse_world_position - global_position
 	face_direction.y = 0.0
-	_face_direction(face_direction.normalized(), delta, turn_speed)
+	_face_direction(face_direction.normalized(), delta, mouse_turn_speed)
 
 
 func is_mouse_face_control_enabled() -> bool:
@@ -1136,25 +1118,6 @@ func _update_mouse_world_position_on_plane(plane_y: float) -> bool:
 
 	_mouse_world_position = ray_origin + ray_direction * distance_to_plane
 	return true
-
-
-func _animate_walk(delta: float) -> void:
-	if visual_root == null:
-		return
-
-	_walk_time += delta * step_speed
-	visual_root.position = _visual_start_position + Vector3.UP * absf(sin(_walk_time)) * step_height
-	visual_root.rotation = _visual_start_rotation + Vector3(0.0, 0.0, sin(_walk_time) * step_tilt)
-
-
-func _reset_walk_pose(delta: float) -> void:
-	if visual_root == null:
-		return
-
-	_walk_time = 0.0
-	var blend := clampf(delta * step_speed, 0.0, 1.0)
-	visual_root.position = visual_root.position.lerp(_visual_start_position, blend)
-	visual_root.rotation = visual_root.rotation.lerp(_visual_start_rotation, blend)
 
 
 func _on_animation_finished(animation_name: StringName) -> void:
@@ -1407,15 +1370,7 @@ func _get_next_attack_animation_name() -> String:
 
 
 func _get_valid_attack_animation_names() -> PackedStringArray:
-	var attack_names := PackedStringArray()
-	for animation_name in attack_animation_cycle:
-		if animation_name != "" and _has_animation(animation_name):
-			attack_names.append(animation_name)
-
-	if attack_names.is_empty() and attack_animation_name != "" and _has_animation(attack_animation_name):
-		attack_names.append(attack_animation_name)
-
-	return attack_names
+	return _get_valid_animation_names(attack_animation_cycle, attack_animation_name)
 
 
 func _get_next_dash_animation_name() -> String:
@@ -1432,37 +1387,27 @@ func _get_next_dash_animation_name() -> String:
 
 
 func _get_valid_dash_animation_names() -> PackedStringArray:
-	var dash_names := PackedStringArray()
-	for animation_name in dash_animation_cycle:
+	return _get_valid_animation_names(dash_animation_cycle, dash_animation_name)
+
+
+func _get_valid_animation_names(animation_cycle: PackedStringArray, fallback_animation_name: String) -> PackedStringArray:
+	var valid_names := PackedStringArray()
+	for animation_name in animation_cycle:
 		if animation_name != "" and _has_animation(animation_name):
-			dash_names.append(animation_name)
+			valid_names.append(animation_name)
 
-	if dash_names.is_empty() and dash_animation_name != "" and _has_animation(dash_animation_name):
-		dash_names.append(dash_animation_name)
+	if valid_names.is_empty() and fallback_animation_name != "" and _has_animation(fallback_animation_name):
+		valid_names.append(fallback_animation_name)
 
-	return dash_names
+	return valid_names
 
 
 func _is_attack_animation(animation_name: String) -> bool:
-	if animation_name == attack_animation_name:
-		return true
-
-	for cycle_animation_name in attack_animation_cycle:
-		if animation_name == cycle_animation_name:
-			return true
-
-	return false
+	return animation_name == attack_animation_name or attack_animation_cycle.has(animation_name)
 
 
 func _is_dash_animation(animation_name: String) -> bool:
-	if animation_name == dash_animation_name:
-		return true
-
-	for cycle_animation_name in dash_animation_cycle:
-		if animation_name == cycle_animation_name:
-			return true
-
-	return false
+	return animation_name == dash_animation_name or dash_animation_cycle.has(animation_name)
 
 
 func _play_animation(animation_name: String, force_restart := false) -> void:

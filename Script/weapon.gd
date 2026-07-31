@@ -24,6 +24,9 @@ extends Node3D
 @export var hit_spark_height: float = 0.8
 @export var ignored_groups: PackedStringArray = PackedStringArray(["enemy_projectile"])
 
+@export_group("Hit Camera Shake")
+@export var hit_camera_shake_enabled: bool = false
+
 @onready var hit_area := get_node_or_null("Area3D") as Area3D
 
 var _direction := Vector3.FORWARD
@@ -84,10 +87,12 @@ func _apply_hit(target: Node) -> void:
 	if target.has_method("take_attack_hit"):
 		target.call("take_attack_hit", _direction, damage, impact_weight)
 		_spawn_hit_spark(target)
+		_shake_camera_on_hit()
 		queue_free()
 	elif target.has_method("take_damage"):
 		target.call("take_damage", damage)
 		_spawn_hit_spark(target)
+		_shake_camera_on_hit()
 		queue_free()
 
 
@@ -138,6 +143,15 @@ func _spawn_hit_spark(target: Node) -> void:
 
 	var longest_lifetime := _restart_particles_recursive(hit_spark)
 	hit_spark.get_tree().create_timer(longest_lifetime + 0.1).timeout.connect(hit_spark.queue_free)
+
+
+func _shake_camera_on_hit() -> void:
+	if not hit_camera_shake_enabled:
+		return
+
+	var camera := get_viewport().get_camera_3d()
+	if camera != null and camera.has_method("shake_camera"):
+		camera.call("shake_camera")
 
 
 func _restart_particles_recursive(node: Node) -> float:

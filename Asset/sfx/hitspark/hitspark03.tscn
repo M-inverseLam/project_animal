@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c1ol733kky3xl"]
 
-[ext_resource type="Script" uid="uid://csxqxjwn4ghtk" path="res://Asset/sfx/hitspark/hitspark01_random_rotation.gd" id="1_1i75s"]
+[ext_resource type="Script" uid="uid://csxqxjwn4ghtk" path="res://Script/hitspark01_random_rotation.gd" id="1_1i75s"]
 [ext_resource type="Texture2D" uid="uid://ch0imw8kppwwr" path="res://Asset/sfx/hitspark/hitspark03.tga" id="2_1i75s"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_61m4u"]
