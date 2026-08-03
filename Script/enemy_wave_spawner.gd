@@ -7,11 +7,12 @@ signal all_waves_completed
 
 const WAVE_CONFIG_PATH := "res://Asset/enemywave/enemy_waves.json"
 const SPAWN_PARENT_PATH := NodePath("..")
+const SPAWN_AREA_NAME := "spawnArea"
+const SPAWN_POSITION_ATTEMPTS := 64
 
 class SpawnEntry:
 	var enemy_scene_path: String
 	var spawn_time_offset: float
-	var spawn_marker_path: NodePath
 
 
 class WaveData:
@@ -22,17 +23,21 @@ class WaveData:
 
 
 var _auto_start := true
-var _outside_camera_margin := 3.0
+var _outside_camera_margin_pixels := 80.0
 var _waves: Array[WaveData] = []
 var _is_running := false
 var _active_enemies: Array[Node3D] = []
 var _enemy_scene_cache: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
+var _spawn_area: Area3D
+var _spawn_area_shape: CollisionShape3D
 
 
 func _ready() -> void:
 	_rng.randomize()
 	if not _load_wave_config():
+		return
+	if not _cache_spawn_area():
 		return
 	if _auto_start:
 		start_waves.call_deferred()
@@ -110,13 +115,7 @@ func _spawn_enemy(spawn_entry: SpawnEntry, wave_index: int, enemy_index: int) ->
 		return
 
 	var spawn_height := _get_enemy_spawn_height(enemy)
-	var spawn_transform := Transform3D(Basis.IDENTITY, _get_random_offscreen_position(spawn_height))
-	if not spawn_entry.spawn_marker_path.is_empty():
-		var spawn_marker := get_node_or_null(spawn_entry.spawn_marker_path) as Node3D
-		if spawn_marker != null:
-			spawn_transform = spawn_marker.global_transform
-		else:
-			push_warning("Enemy spawn marker not found: " + String(spawn_entry.spawn_marker_path))
+	var spawn_transform := Transform3D(Basis.IDENTITY, _get_random_spawn_area_position(spawn_height))
 
 	spawn_parent.add_child(enemy, true)
 	enemy.global_transform = spawn_transform
@@ -153,7 +152,10 @@ func _load_wave_config() -> bool:
 
 	var root_data: Dictionary = root_value
 	_auto_start = bool(root_data.get("auto_start", true))
-	_outside_camera_margin = maxf(float(root_data.get("outside_camera_margin", 3.0)), 0.0)
+	_outside_camera_margin_pixels = maxf(
+		float(root_data.get("outside_camera_margin_pixels", 80.0)),
+		0.0
+	)
 	var raw_waves_value: Variant = root_data.get("waves", [])
 	if not raw_waves_value is Array:
 		push_error("Enemy wave file 'waves' must be an array.")
@@ -204,12 +206,10 @@ func _load_enemy_list(wave: WaveData, raw_wave: Dictionary, wave_index: int) -> 
 		if spawn_after_previous_group:
 			var spawn_delay := maxf(float(raw_enemy.get("spawn_delay", 0.0)), 0.0)
 			first_spawn_offset = previous_group_last_spawn_offset + spawn_delay
-		var spawn_marker_path := NodePath(String(raw_enemy.get("spawn_marker_path", "")))
 		for quantity_index in range(quantity):
 			var spawn_entry := SpawnEntry.new()
 			spawn_entry.enemy_scene_path = scene_path
 			spawn_entry.spawn_time_offset = first_spawn_offset + spawn_interval * quantity_index
-			spawn_entry.spawn_marker_path = spawn_marker_path
 			wave.enemy_list.append(spawn_entry)
 
 		previous_group_last_spawn_offset = first_spawn_offset + spawn_interval * (quantity - 1)
@@ -256,55 +256,60 @@ func _get_enemy_spawn_height(enemy: Node3D) -> float:
 	return 0.0
 
 
-func _get_random_offscreen_position(spawn_height: float) -> Vector3:
-	var camera := get_viewport().get_camera_3d()
-	if camera == null:
-		return _get_fallback_offscreen_position(spawn_height)
+func _cache_spawn_area() -> bool:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		push_error("Enemy wave spawner could not find the current scene.")
+		return false
 
-	var viewport_size := get_viewport().get_visible_rect().size
-	var screen_corners := PackedVector2Array([
-		Vector2.ZERO,
-		Vector2(viewport_size.x, 0.0),
-		viewport_size,
-		Vector2(0.0, viewport_size.y),
-	])
-	var ground_corners: Array[Vector3] = []
-	for screen_corner in screen_corners:
-		var ray_origin := camera.project_ray_origin(screen_corner)
-		var ray_direction := camera.project_ray_normal(screen_corner)
-		if absf(ray_direction.y) <= 0.001:
-			return _get_fallback_offscreen_position(spawn_height)
+	_spawn_area = scene_root.find_child(SPAWN_AREA_NAME, true, false) as Area3D
+	if _spawn_area == null:
+		push_error("Enemy spawn area not found: " + SPAWN_AREA_NAME)
+		return false
 
-		var distance_to_plane := (spawn_height - ray_origin.y) / ray_direction.y
-		if distance_to_plane <= 0.0:
-			return _get_fallback_offscreen_position(spawn_height)
+	_spawn_area_shape = _spawn_area.find_child("CollisionShape3D", true, false) as CollisionShape3D
+	if _spawn_area_shape == null or not _spawn_area_shape.shape is BoxShape3D:
+		push_error("Enemy spawn area requires a BoxShape3D CollisionShape3D.")
+		return false
 
-		ground_corners.append(ray_origin + ray_direction * distance_to_plane)
+	return true
 
-	var edge_index := _rng.randi_range(0, ground_corners.size() - 1)
-	var edge_start := ground_corners[edge_index]
-	var edge_end := ground_corners[(edge_index + 1) % ground_corners.size()]
-	var spawn_position := edge_start.lerp(edge_end, _rng.randf())
-	var view_center := Vector3.ZERO
-	for corner in ground_corners:
-		view_center += corner
-	view_center /= float(ground_corners.size())
 
-	var outward_direction := spawn_position - view_center
-	outward_direction.y = 0.0
-	if outward_direction != Vector3.ZERO:
-		spawn_position += outward_direction.normalized() * _outside_camera_margin
-	spawn_position.y = spawn_height
+func _get_random_spawn_area_position(spawn_height: float) -> Vector3:
+	var fallback_position := Vector3.ZERO
+	for attempt in range(SPAWN_POSITION_ATTEMPTS):
+		var candidate := _get_random_position_inside_spawn_area(spawn_height)
+		fallback_position = candidate
+		if _is_outside_camera_view(candidate):
+			return candidate
+
+	push_warning("Could not find an offscreen position inside " + SPAWN_AREA_NAME + ".")
+	return fallback_position
+
+
+func _get_random_position_inside_spawn_area(spawn_height: float) -> Vector3:
+	var box_shape := _spawn_area_shape.shape as BoxShape3D
+	var half_size := box_shape.size * 0.5
+	var local_position := Vector3(
+		_rng.randf_range(-half_size.x, half_size.x),
+		0.0,
+		_rng.randf_range(-half_size.z, half_size.z)
+	)
+	var spawn_position := _spawn_area_shape.global_transform * local_position
+	spawn_position.y = _spawn_area.global_position.y + spawn_height
 	return spawn_position
 
 
-func _get_fallback_offscreen_position(spawn_height: float) -> Vector3:
+func _is_outside_camera_view(world_position: Vector3) -> bool:
 	var camera := get_viewport().get_camera_3d()
-	var center := Vector3.ZERO
-	if camera != null:
-		center = camera.global_position
-	center.y = spawn_height
+	if camera == null or camera.is_position_behind(world_position):
+		return true
 
-	var angle := _rng.randf_range(0.0, TAU)
-	var direction := Vector3(sin(angle), 0.0, cos(angle))
-	return center + direction * (30.0 + _outside_camera_margin)
+	var viewport_size := get_viewport().get_visible_rect().size
+	var screen_position := camera.unproject_position(world_position)
+	return (
+		screen_position.x < -_outside_camera_margin_pixels
+		or screen_position.y < -_outside_camera_margin_pixels
+		or screen_position.x > viewport_size.x + _outside_camera_margin_pixels
+		or screen_position.y > viewport_size.y + _outside_camera_margin_pixels
+	)

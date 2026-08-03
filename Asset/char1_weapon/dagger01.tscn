@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://mtqqchcmvu4d" path="res://Asset/char1_weapon/dagger01.glb" id="1_eysqf"]
 [ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_conir"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_j7ybq"]
-[ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="4_ovuqa"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_j7ybq"]
 height = 1.1919556
@@ -13,6 +12,7 @@ radius = 0.22167969
 [node name="dagger01" type="Node3D" unique_id=1150611158 groups=["weapon"]]
 script = ExtResource("1_conir")
 speed = 25.0
+lifetime = 0.7
 spawn_delay = 0.01
 emit_quantity = 3
 dash_duration = 0.7
@@ -21,7 +21,6 @@ hit_spark_scene = ExtResource("2_j7ybq")
 hit_spark_height = 0.4
 
 [node name="dagger01" parent="." unique_id=1088331907 instance=ExtResource("1_eysqf")]
-script = ExtResource("4_ovuqa")
 
 [node name="dagger01" parent="dagger01" index="0" unique_id=1938629363]
 surface_material_override/0 = ExtResource("2_conir")

@@ -9,11 +9,14 @@ extends Node3D
 @export var bounce_height: float = 0.22
 @export var bounce_duration: float = 0.16
 @export var spin_turns: float = 1.5
+@export var fly_speed: float = 12.0
+@export var collect_distance: float = 0.3
 
 var _rng := RandomNumberGenerator.new()
 var _motion_tween: Tween
 var _spin_tween: Tween
 var _is_picked_up := false
+var _attraction_target: Area3D
 
 @onready var pickup_area := get_node_or_null("PickupArea") as Area3D
 
@@ -21,7 +24,22 @@ var _is_picked_up := false
 func _ready() -> void:
 	_rng.randomize()
 	if pickup_area != null:
-		pickup_area.body_entered.connect(_on_pickup_area_body_entered)
+		pickup_area.area_entered.connect(_on_pickup_area_area_entered)
+
+
+func _physics_process(delta: float) -> void:
+	if _is_picked_up or _attraction_target == null:
+		return
+	if not is_instance_valid(_attraction_target):
+		_attraction_target = null
+		return
+
+	global_position = global_position.move_toward(
+		_attraction_target.global_position,
+		maxf(fly_speed, 0.0) * delta
+	)
+	if global_position.distance_to(_attraction_target.global_position) <= maxf(collect_distance, 0.0):
+		_collect_gem()
 
 
 func pop_from_ground(spawn_position: Vector3) -> void:
@@ -60,24 +78,27 @@ func _get_random_ground_direction() -> Vector3:
 	return Vector3(cos(angle), 0.0, sin(angle)).normalized()
 
 
-func _on_pickup_area_body_entered(body: Node3D) -> void:
-	if _is_picked_up:
+func _on_pickup_area_area_entered(area: Area3D) -> void:
+	if _is_picked_up or _attraction_target != null:
 		return
-	if not _is_hero_body(body):
+	if not area.is_in_group("gem_attractor"):
+		return
+
+	_attraction_target = area
+	if _motion_tween != null:
+		_motion_tween.kill()
+	if _spin_tween != null:
+		_spin_tween.kill()
+
+
+func _collect_gem() -> void:
+	if _is_picked_up:
 		return
 
 	_is_picked_up = true
 	_add_gems_to_ui()
 	_spawn_pickup_effect()
 	queue_free()
-
-
-func _is_hero_body(body: Node) -> bool:
-	if body.name == "hero_girl01":
-		return true
-
-	var script := body.get_script() as Script
-	return script != null and script.resource_path == "res://Script/hero01.gd"
 
 
 func _add_gems_to_ui() -> void:

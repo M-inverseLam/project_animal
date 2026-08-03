@@ -37,6 +37,5 @@ enabled=PackedStringArray("res://addons/enemy_ai_inspector/plugin.cfg")
 
 [rendering]
 
-rendering_device/driver.windows="d3d12"
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 anti_aliasing/quality/screen_space_aa=1

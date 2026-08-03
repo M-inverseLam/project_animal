@@ -6,15 +6,6 @@
 [ext_resource type="Script" uid="uid://3e6eh4j2be4v" path="res://Script/enemy_wave_spawner.gd" id="5_njwhd"]
 [ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/char1_hero/girl/hero_girl01.tscn" id="5_s8hmd"]
 
-[sub_resource type="Environment" id="Environment_4kxuq"]
-ambient_light_source = 2
-ambient_light_color = Color(0.5346019, 0.6110975, 0.7413434, 1)
-ssao_enabled = true
-ssao_intensity = 4.0
-glow_enabled = true
-glow_strength = 0.16
-glow_bloom = 0.1
-
 [node name="Node3D" type="Node3D" unique_id=129724868]
 
 [node name="Interface" type="CanvasLayer" parent="." unique_id=1988135452]
@@ -23,16 +14,6 @@ layer = 10
 [node name="ui04_main" parent="Interface" unique_id=619611884 instance=ExtResource("5_7nfr3")]
 
 [node name="world" type="Node3D" parent="." unique_id=580497908]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="world" unique_id=171121612]
-environment = SubResource("Environment_4kxuq")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="world" unique_id=1416725517]
-transform = Transform3D(0.8660252, 0.3535533, 0.35355338, -0.35355332, -0.066987306, 0.93301255, 0.35355335, -0.93301255, 0.06698722, 0, 6.4843073, 0)
-light_color = Color(0.92535293, 0.9253528, 0.9253529, 1)
-light_specular = 2.0
-shadow_enabled = true
-shadow_opacity = 0.9
 
 [node name="Camera3D" type="Camera3D" parent="world" unique_id=1915048110]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.70710677, 0, 26.15118, 25.622486)
@@ -47,6 +28,7 @@ camera_shake_strength = 0.07
 [node name="stage_castle01" parent="." unique_id=465259332 instance=ExtResource("4_cscit")]
 
 [node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]
+collision_layer = 17
 
 [node name="EnemyWaveSpawner" type="Node" parent="." unique_id=1774927294]
 script = ExtResource("5_njwhd")

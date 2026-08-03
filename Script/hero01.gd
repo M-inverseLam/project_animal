@@ -17,6 +17,17 @@ enum FaceControlMode {
 @export_group("Health")
 @export var max_health: int = 500
 @export var death_animation_name: String = "die"
+@export var game_over_delay: float = 1.0
+@export var hit_flash_duration: float = 0.25
+@export var hit_flash_power: float = 0.5
+@export var hit_flash_color: Color = Color(1.0, 0.0, 0.0, 1.0)
+@export var damage_camera_shake_duration: float = 0.2
+@export var damage_camera_shake_strength: float = 0.15
+
+@export_group("")
+
+@export_group("Gem Pickup")
+@export_range(0.1, 50.0, 0.1, "suffix:m") var gem_attraction_radius: float = 4.0
 
 @export_group("")
 
@@ -55,10 +66,12 @@ enum FaceControlMode {
 
 @onready var animation_player := find_child("AnimationPlayer", true, false) as AnimationPlayer
 @onready var skeleton := find_child("Skeleton3D", true, false) as Skeleton3D
+@onready var visual_root := get_node_or_null("hero_girl01") as Node3D
 @onready var dash_dust_template := get_node_or_null("DashDust") as Node3D
 @onready var attack_projectile_spawn := get_node_or_null(attack_projectile_spawn_path) as Node3D
 @onready var dash_hitbox := get_node_or_null("DashHitbox") as Area3D
 @onready var dash_hitbox_shape := get_node_or_null("DashHitbox/CollisionShape3D") as CollisionShape3D
+@onready var gem_attraction_shape := get_node_or_null("GemAttractionArea/CollisionShape3D") as CollisionShape3D
 
 var _current_animation := ""
 var _animation_tree: AnimationTree
@@ -84,6 +97,11 @@ var _target_attack_layer_blend_amount := 0.0
 var _active_attack_blend_slot := 0
 var _current_health := 0
 var _is_dead := false
+var _game_over_was_scheduled := false
+var _hit_flash_tween: Tween
+var _hit_flash_material: StandardMaterial3D
+var _hit_flash_meshes: Array[MeshInstance3D] = []
+var _hit_flash_previous_overlays: Array[Material] = []
 var _last_movement := Vector3.ZERO
 var _slide_time_left := 0.0
 var _attack_key_was_pressed := false
@@ -138,6 +156,8 @@ func _ready() -> void:
 	_has_keyboard_face_target = false
 	_current_health = max_health
 	_update_health_ui()
+	_update_gem_attraction_radius()
+	_cache_hit_flash_meshes()
 	_load_weapon_parameters()
 	if animation_player != null:
 		animation_player.animation_finished.connect(_on_animation_finished)
@@ -149,6 +169,22 @@ func _ready() -> void:
 	_stop_dash_dust()
 	_play_animation("idle")
 	_start_attack()
+
+
+func set_gem_attraction_radius(radius: float) -> void:
+	gem_attraction_radius = maxf(radius, 0.1)
+	_update_gem_attraction_radius()
+
+
+func _update_gem_attraction_radius() -> void:
+	if gem_attraction_shape == null:
+		return
+
+	var sphere := gem_attraction_shape.shape as SphereShape3D
+	if sphere == null:
+		return
+
+	sphere.radius = gem_attraction_radius
 
 
 func _physics_process(delta: float) -> void:
@@ -447,8 +483,63 @@ func take_damage(damage: int) -> void:
 	var previous_health: int = _current_health
 	_current_health = maxi(_current_health - damage, 0)
 	_update_health_ui()
+	_play_hit_flash()
+	_shake_camera_on_damage()
 	if previous_health > 0 and _current_health == 0:
 		_start_death()
+
+
+func _cache_hit_flash_meshes() -> void:
+	_hit_flash_meshes.clear()
+	_hit_flash_previous_overlays.clear()
+	if visual_root == null:
+		return
+
+	for child in visual_root.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := child as MeshInstance3D
+		if mesh_instance == null:
+			continue
+		_hit_flash_meshes.append(mesh_instance)
+		_hit_flash_previous_overlays.append(mesh_instance.material_overlay)
+
+
+func _play_hit_flash() -> void:
+	if hit_flash_duration <= 0.0 or _hit_flash_meshes.is_empty():
+		return
+
+	if _hit_flash_material == null:
+		_hit_flash_material = StandardMaterial3D.new()
+		_hit_flash_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_hit_flash_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_hit_flash_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_hit_flash_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	if _hit_flash_tween != null:
+		_hit_flash_tween.kill()
+
+	var flash_color := hit_flash_color
+	flash_color.a = clampf(hit_flash_power, 0.0, 1.0)
+	_hit_flash_material.albedo_color = flash_color
+	for mesh_instance in _hit_flash_meshes:
+		if is_instance_valid(mesh_instance):
+			mesh_instance.material_overlay = _hit_flash_material
+
+	_hit_flash_tween = create_tween()
+	_hit_flash_tween.tween_property(_hit_flash_material, "albedo_color:a", 0.0, hit_flash_duration)
+	_hit_flash_tween.tween_callback(_clear_hit_flash)
+
+
+func _clear_hit_flash() -> void:
+	for index in range(_hit_flash_meshes.size()):
+		var mesh_instance: MeshInstance3D = _hit_flash_meshes[index]
+		if is_instance_valid(mesh_instance):
+			mesh_instance.material_overlay = _hit_flash_previous_overlays[index]
+
+
+func _shake_camera_on_damage() -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera != null and camera.has_method("shake"):
+		camera.call("shake", damage_camera_shake_duration, damage_camera_shake_strength)
 
 
 func _update_health_ui() -> void:
@@ -476,6 +567,19 @@ func _show_game_over_ui() -> void:
 		main_ui.call("show_game_over")
 
 
+func _schedule_game_over_ui() -> void:
+	if _game_over_was_scheduled:
+		return
+	_game_over_was_scheduled = true
+
+	var delay := maxf(game_over_delay, 0.0)
+	if delay <= 0.0:
+		_show_game_over_ui()
+		return
+
+	get_tree().create_timer(delay).timeout.connect(_show_game_over_ui)
+
+
 func _start_death() -> void:
 	if _is_dead:
 		return
@@ -499,7 +603,7 @@ func _start_death() -> void:
 	_slide_time_left = 0.0
 
 	if animation_player == null or not animation_player.has_animation(death_animation_name):
-		_show_game_over_ui()
+		_schedule_game_over_ui()
 		return
 
 	if _animation_tree != null:
@@ -1122,7 +1226,7 @@ func _update_mouse_world_position_on_plane(plane_y: float) -> bool:
 
 func _on_animation_finished(animation_name: StringName) -> void:
 	if _is_dead and String(animation_name) == death_animation_name:
-		_show_game_over_ui()
+		_schedule_game_over_ui()
 		return
 	if _is_super_attacking and _super_attack_phase == "shoot" and String(animation_name) == super_attack_shoot_animation_name:
 		_finish_super_attack()

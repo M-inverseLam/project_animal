@@ -14,17 +14,19 @@ radius = 1.7163622
 
 [node name="mushroom01" type="Node3D" unique_id=1092283170 groups=["enemy"]]
 script = ExtResource("1_44xdi")
+attack_animation_name = "attack"
 max_health = 80
 walk_speed = 4.0
 run_away_speed = 2.0
 use_weighted_ai = true
 ai_idle_weight = 5.0
 ai_chase_weight = 50.0
-ai_shoot_weight = 70.0
+ai_attack_weight = 70.0
 chase_speed = 4.0
 chase_direction_angle = 45.0
 shoot_projectile_scene = ExtResource("2_ufutl")
 shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition1"), NodePath("shootposition2")])
+shoot_along_face_direction = true
 avoid_enemy_overlap = true
 overlap_avoidance_radius = 2.0
 knockback_resistance = 4.0

@@ -8,6 +8,18 @@
 [ext_resource type="PackedScene" uid="uid://8v2e68i4lfde" path="res://Asset/stage/castle/wall_pillar01.tscn" id="6_g4s6y"]
 [ext_resource type="PackedScene" uid="uid://da5yh46ydjthk" path="res://Asset/stage/castle/entrance_arch.tscn" id="7_8six8"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_4kxuq"]
+size = Vector3(95, 1.7055664, 95)
+
+[sub_resource type="Environment" id="Environment_8six8"]
+ambient_light_source = 2
+ambient_light_color = Color(0.5346019, 0.6110975, 0.7413434, 1)
+ssao_enabled = true
+ssao_intensity = 4.0
+glow_enabled = true
+glow_strength = 0.16
+glow_bloom = 0.1
+
 [sub_resource type="QuadMesh" id="QuadMesh_4kxuq"]
 size = Vector2(300, 300)
 subdivide_width = 50
@@ -49,53 +61,118 @@ albedo_color = Color(0.012660409, 0.23258099, 0.54830915, 1)
 
 [node name="stage_castle01" type="Node3D" unique_id=465259332]
 
-[node name="water" type="MeshInstance3D" parent="." unique_id=1294475863]
+[node name="spawnArea" type="Area3D" parent="." unique_id=738428760]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="spawnArea" unique_id=679581635]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3527832, 0)
+shape = SubResource("BoxShape3D_4kxuq")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=226979770]
+environment = SubResource("Environment_8six8")
+
+[node name="Node3D" type="Node3D" parent="." unique_id=757689113]
+
+[node name="wall_pillar01" parent="Node3D" unique_id=748420639 instance=ExtResource("6_g4s6y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 0, -49.5)
+
+[node name="wall_pillar02" parent="Node3D" unique_id=1167177513 instance=ExtResource("6_g4s6y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 0, -49.5)
+
+[node name="wall_pillar03" parent="Node3D" unique_id=495858650 instance=ExtResource("6_g4s6y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 0, 49.5)
+
+[node name="wall_pillar04" parent="Node3D" unique_id=284078158 instance=ExtResource("6_g4s6y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 0, 49.5)
+
+[node name="entrance_arch" parent="Node3D" unique_id=1138955613 instance=ExtResource("7_8six8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -49.5)
+
+[node name="wall01" parent="Node3D" unique_id=669750281 instance=ExtResource("5_iry3h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48, 0, -49.5)
+
+[node name="wall02" parent="Node3D" unique_id=1962017135 instance=ExtResource("5_iry3h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -49.5)
+
+[node name="wall03" parent="Node3D" unique_id=2138316111 instance=ExtResource("5_iry3h")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 49.5, 0, -47.5)
+
+[node name="wall04" parent="Node3D" unique_id=2016299215 instance=ExtResource("5_iry3h")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 49.5, 0, 8)
+
+[node name="wall05" parent="Node3D" unique_id=831585292 instance=ExtResource("5_iry3h")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 47.499996, 0, 49)
+
+[node name="wall06" parent="Node3D" unique_id=986334875 instance=ExtResource("5_iry3h")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -8, 0, 49)
+
+[node name="wall07" parent="Node3D" unique_id=1714849963 instance=ExtResource("5_iry3h")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -49.5, 0, -47.5)
+
+[node name="wall08" parent="Node3D" unique_id=55708212 instance=ExtResource("5_iry3h")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -49.5, 0, 7.9999957)
+
+[node name="water" type="MeshInstance3D" parent="Node3D" unique_id=1294475863]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10.510211, 0)
 mesh = SubResource("QuadMesh_4kxuq")
 surface_material_override/0 = SubResource("ShaderMaterial_mti6b")
 
-[node name="waterFloor" type="MeshInstance3D" parent="." unique_id=1993428324]
+[node name="waterFloor" type="MeshInstance3D" parent="Node3D" unique_id=1993428324]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -27.92614, 0)
 mesh = SubResource("QuadMesh_mti6b")
 surface_material_override/0 = SubResource("StandardMaterial3D_mm1bc")
 
-[node name="floor01" parent="." unique_id=1187278167 instance=ExtResource("4_p8p76")]
+[node name="floor01" parent="Node3D" unique_id=1187278167 instance=ExtResource("4_p8p76")]
 
-[node name="wall01" parent="." unique_id=669750281 instance=ExtResource("5_iry3h")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48, 0, -49.5)
+[node name="lighting" type="Node3D" parent="." unique_id=1203651227]
 
-[node name="wall02" parent="." unique_id=1962017135 instance=ExtResource("5_iry3h")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -49.5)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="lighting" unique_id=1849942378]
+transform = Transform3D(0.8660254, 0.35355347, 0.3535534, -0.3535534, -0.06698735, 0.9330127, 0.35355344, -0.9330127, 0.0669873, 0, 6.4843073, 0)
+light_color = Color(0.03053783, 0.27543166, 0.42527652, 1)
+light_energy = 2.0
+light_indirect_energy = 0.2
+light_specular = 2.0
+shadow_enabled = true
 
-[node name="wall03" parent="." unique_id=2138316111 instance=ExtResource("5_iry3h")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 49.5, 0, -47.5)
+[node name="OmniLight3D" type="OmniLight3D" parent="lighting" unique_id=212424013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4843073, 0)
+light_color = Color(0.8857965, 1.2143227, 1.624, 1)
+light_energy = 6.0
+light_size = 1.0
+omni_range = 16.52294
 
-[node name="wall04" parent="." unique_id=2016299215 instance=ExtResource("5_iry3h")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 49.5, 0, 8)
+[node name="OmniLight3D2" type="OmniLight3D" parent="lighting" unique_id=2029103965]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.930912, 6.4843073, -25.741798)
+light_color = Color(1.6241138, 1.0458328, 0, 1)
+light_energy = 6.0
+light_size = 1.0
+omni_range = 16.52294
 
-[node name="wall05" parent="." unique_id=831585292 instance=ExtResource("5_iry3h")]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 47.499996, 0, 49)
+[node name="OmniLight3D3" type="OmniLight3D" parent="lighting" unique_id=1524835736]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 27.930912, 6.4843073, 23.51508)
+light_color = Color(1.6241138, 1.0458328, 0, 1)
+light_energy = 6.0
+light_size = 1.0
+shadow_enabled = true
+omni_range = 16.52294
 
-[node name="wall06" parent="." unique_id=986334875 instance=ExtResource("5_iry3h")]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -8, 0, 49)
+[node name="OmniLight3D4" type="OmniLight3D" parent="lighting" unique_id=1025103044]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.124825, 6.4843073, 23.51508)
+light_color = Color(1.6241138, 1.0458328, 0, 1)
+light_energy = 6.0
+light_size = 1.0
+shadow_enabled = true
+shadow_reverse_cull_face = true
+omni_range = 16.52294
 
-[node name="wall07" parent="." unique_id=1714849963 instance=ExtResource("5_iry3h")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -49.5, 0, -47.5)
-
-[node name="wall08" parent="." unique_id=55708212 instance=ExtResource("5_iry3h")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -49.5, 0, 7.9999957)
-
-[node name="wall_pillar01" parent="." unique_id=748420639 instance=ExtResource("6_g4s6y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 0, -49.5)
-
-[node name="wall_pillar02" parent="." unique_id=1167177513 instance=ExtResource("6_g4s6y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 0, -49.5)
-
-[node name="wall_pillar03" parent="." unique_id=495858650 instance=ExtResource("6_g4s6y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 0, 49.5)
-
-[node name="wall_pillar04" parent="." unique_id=284078158 instance=ExtResource("6_g4s6y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 0, 49.5)
-
-[node name="entrance_arch" parent="." unique_id=1138955613 instance=ExtResource("7_8six8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -49.5)
+[node name="OmniLight3D5" type="OmniLight3D" parent="lighting" unique_id=680170146]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.124825, 6.4843073, -22.452576)
+light_color = Color(1.6241138, 1.0458328, 0, 1)
+light_energy = 6.0
+light_size = 1.0
+shadow_enabled = true
+shadow_reverse_cull_face = true
+omni_range = 16.52294

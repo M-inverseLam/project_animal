@@ -22,12 +22,13 @@ idle_time_range = Vector2(0.2, 0.5)
 use_weighted_ai = true
 ai_idle_weight = 3.0
 ai_chase_weight = 50.0
-ai_shoot_weight = 75.0
+ai_attack_weight = 75.0
 chase_speed = 4.0
 chase_time_range = Vector2(0.8, 1.6)
 chase_direction_angle = 45.0
 shoot_projectile_scene = ExtResource("5_bullet")
 shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
+minimum_hero_distance = 4.0
 retreat_from_hero_duration = 2.0
 avoid_enemy_overlap = true
 overlap_avoidance_strength = 10.0
@@ -37,13 +38,22 @@ face_hit_push_direction = false
 damage_number_duration = 1.0
 damage_number_font = ExtResource("2_jfhy1")
 damage_number_font_size = 120
-damage_number_color = Color(1, 1, 1, 1)
+damage_number_color = Color(1, 0.5294118, 0.2509804, 1)
 death_spark_scene = ExtResource("3_m4aol")
 death_drop_scene = ExtResource("5_omjav")
 
 [node name="bee01" parent="." unique_id=1863990590 instance=ExtResource("1_vx0fs")]
 
-[node name="body" parent="bee01/Armature/Skeleton3D" parent_id_path=PackedInt32Array(1863990590, 371037396) index="0" unique_id=150806956]
+[node name="Skeleton3D" parent="bee01/Armature" parent_id_path=PackedInt32Array(1863990590, 1061176934) index="0" unique_id=1440778284]
+bones/0/position = Vector3(0, -0.006949913, 0.0011218054)
+bones/0/rotation = Quaternion(-1.2549892e-17, 0.76136404, 0.64832467, -1.2549892e-17)
+bones/1/rotation = Quaternion(0, -8.142559e-25, 5.169879e-26, 1)
+bones/2/rotation = Quaternion(0.69990265, 0.10067895, 0.10067895, 0.69990265)
+bones/3/rotation = Quaternion(0.69990265, -0.10067895, -0.10067895, 0.69990265)
+bones/4/rotation = Quaternion(-0.2721423, 0.5314941, 0.78045183, 0.18533099)
+bones/5/rotation = Quaternion(0.2721423, 0.5314941, 0.78045183, -0.18533097)
+
+[node name="body" parent="bee01/Armature/Skeleton3D" index="0" unique_id=128688861]
 surface_material_override/0 = ExtResource("2_um2gp")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1150994528]
