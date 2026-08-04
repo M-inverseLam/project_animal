@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cl5661ghjvers" path="res://Asset/char1_weapon/dagger01.tscn" id="2_y6j7j"]
 [ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/char1_hero/girl/hero_girl_body.material" id="3_5dmvc"]
 [ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/char1_hero/girl/hero_girl_hair.material" id="4_b2opn"]
-[ext_resource type="PackedScene" uid="uid://dp07kss8fb7yu" path="res://Asset/sfx/charge_effect/charge_shoot.tscn" id="5_2hsuf"]
+[ext_resource type="PackedScene" uid="uid://dcl60mrlnabym" path="res://Asset/sfx/hitspark/hitspark_superattack_shoot.tscn" id="5_2hsuf"]
 [ext_resource type="PackedScene" uid="uid://c2j70j25dh160" path="res://Asset/sfx/dust/dust.tscn" id="5_b2opn"]
 [ext_resource type="PackedScene" uid="uid://bl7o4s7lklpt6" path="res://Asset/char1_weapon/lance01_super.tscn" id="6_super"]
 [ext_resource type="PackedScene" uid="uid://cxlkst1mymp1w" path="res://Asset/sfx/charge_effect/charge_effect.tscn" id="7_charge"]
@@ -24,7 +24,7 @@ radius = 1.9805894
 
 [node name="hero_girl01" type="CharacterBody3D" unique_id=2135685820]
 script = ExtResource("1_b2opn")
-move_speed = 5.0
+move_speed = 3.5
 mouse_turn_speed = 20.0
 arrow_face_turn_speed = 5.0
 arrow_face_turn_step_degrees = 2.0

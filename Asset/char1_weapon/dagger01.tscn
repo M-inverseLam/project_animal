@@ -17,6 +17,7 @@ spawn_delay = 0.01
 emit_quantity = 3
 dash_duration = 0.7
 dash_distance = 9.0
+dash_damage = 4
 hit_spark_scene = ExtResource("2_j7ybq")
 hit_spark_height = 0.4
 

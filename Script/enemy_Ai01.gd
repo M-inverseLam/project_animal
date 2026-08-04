@@ -1,6 +1,47 @@
 extends Node3D
 
 const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
+const HEALTH_BAR_SIZE := Vector2(1.6, 0.18)
+const HEALTH_BAR_SHADER_CODE := """
+shader_type spatial;
+render_mode unshaded, cull_disabled, depth_test_disabled;
+
+uniform float fill_ratio : hint_range(0.0, 1.0) = 1.0;
+uniform vec4 background_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform vec4 fill_color : source_color = vec4(0.9, 0.02, 0.02, 1.0);
+uniform vec4 outline_color : source_color = vec4(0.45, 0.45, 0.45, 1.0);
+uniform float outline_width_pixels = 2.0;
+
+void vertex() {
+	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
+		INV_VIEW_MATRIX[0],
+		INV_VIEW_MATRIX[1],
+		INV_VIEW_MATRIX[2],
+		MODEL_MATRIX[3]
+	);
+}
+
+void fragment() {
+	vec2 outline_size = min(fwidth(UV) * outline_width_pixels, vec2(0.49));
+	bool inside_bar = UV.x >= outline_size.x
+		&& UV.x <= 1.0 - outline_size.x
+		&& UV.y >= outline_size.y
+		&& UV.y <= 1.0 - outline_size.y;
+	float interior_x = clamp(
+		(UV.x - outline_size.x) / max(1.0 - outline_size.x * 2.0, 0.001),
+		0.0,
+		1.0
+	);
+	if (!inside_bar) {
+		ALBEDO = outline_color.rgb;
+	} else {
+		ALBEDO = interior_x <= fill_ratio ? fill_color.rgb : background_color.rgb;
+	}
+	ALPHA = 1.0;
+}
+"""
+
+static var _shared_health_bar_shader: Shader
 
 @export_group("Animation")
 @export var idle_animation_name: String = "idle"
@@ -14,6 +55,7 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 
 @export_group("Health")
 @export var max_health: int = 3
+@export var health_bar_height: float = 2.2
 
 @export_group("Movement")
 @export var walk_speed: float = 2.0
@@ -88,6 +130,8 @@ const OVERLAP_AVOIDANCE_GROUP := "enemy_ai_overlap_avoidance"
 @onready var player_detection := get_node_or_null("playerdetection") as Area3D
 
 var health := 0
+var _health_bar: MeshInstance3D
+var _health_bar_material: ShaderMaterial
 var _visual_start_scale := Vector3.ONE
 var _hit_tween: Tween
 var _hit_flash_tween: Tween
@@ -126,6 +170,7 @@ var _retreat_target: Node3D
 func _ready() -> void:
 	_rng.randomize()
 	health = max_health
+	_create_enemy_health_bar()
 	if visual_root != null:
 		_visual_start_scale = visual_root.scale
 	_cache_hit_flash_meshes()
@@ -695,6 +740,7 @@ func _apply_damage(damage: int) -> void:
 		return
 
 	health = maxi(health - damage, 0)
+	_show_enemy_health_bar()
 	print("mouse01 took ", damage, " damage. HP: ", health, "/", max_health)
 	_show_damage_number(damage)
 	_play_hit_feedback()
@@ -704,6 +750,42 @@ func _apply_damage(damage: int) -> void:
 		_spawn_death_spark()
 		_spawn_death_drop()
 		queue_free()
+
+
+func _create_enemy_health_bar() -> void:
+	if _shared_health_bar_shader == null:
+		_shared_health_bar_shader = Shader.new()
+		_shared_health_bar_shader.code = HEALTH_BAR_SHADER_CODE
+
+	var quad := QuadMesh.new()
+	quad.size = HEALTH_BAR_SIZE
+
+	_health_bar_material = ShaderMaterial.new()
+	_health_bar_material.shader = _shared_health_bar_shader
+	_health_bar_material.render_priority = 10
+	_health_bar_material.set_shader_parameter("fill_ratio", 1.0)
+	_health_bar_material.set_shader_parameter("background_color", Color.BLACK)
+	_health_bar_material.set_shader_parameter("fill_color", Color(0.9, 0.02, 0.02, 1.0))
+	_health_bar_material.set_shader_parameter("outline_color", Color(0.45, 0.45, 0.45, 1.0))
+	_health_bar_material.set_shader_parameter("outline_width_pixels", 2.0)
+
+	_health_bar = MeshInstance3D.new()
+	_health_bar.name = "EnemyHealthBar"
+	_health_bar.mesh = quad
+	_health_bar.material_override = _health_bar_material
+	_health_bar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_health_bar.position = Vector3.UP * health_bar_height
+	_health_bar.visible = false
+	add_child(_health_bar)
+
+
+func _show_enemy_health_bar() -> void:
+	if _health_bar == null or _health_bar_material == null:
+		return
+
+	var health_ratio := clampf(float(health) / float(maxi(max_health, 1)), 0.0, 1.0)
+	_health_bar_material.set_shader_parameter("fill_ratio", health_ratio)
+	_health_bar.visible = true
 
 
 func _play_hit_feedback() -> void:
@@ -726,6 +808,8 @@ func _cache_hit_flash_meshes() -> void:
 	for child in find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := child as MeshInstance3D
 		if mesh_instance == null:
+			continue
+		if mesh_instance == _health_bar:
 			continue
 		_hit_flash_meshes.append(mesh_instance)
 		_hit_flash_previous_overlays.append(mesh_instance.material_overlay)

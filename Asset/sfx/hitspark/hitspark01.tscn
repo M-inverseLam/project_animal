@@ -30,6 +30,12 @@ point_count = 2
 [sub_resource type="CurveTexture" id="CurveTexture_045xd"]
 curve = SubResource("Curve_angle")
 
+[sub_resource type="Gradient" id="Gradient_72e4x"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_72e4x"]
+gradient = SubResource("Gradient_72e4x")
+
 [sub_resource type="Curve" id="Curve_bmp2w"]
 _data = [Vector2(0, 0), 0.0, 3.8148131, 0, 1, Vector2(0.21782178, 0.8309493), 0.62087697, 0.62087697, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 3
@@ -45,7 +51,9 @@ use_rotation_3d = true
 rotation_3d_min = Vector3(0, 0, -180)
 rotation_3d_max = Vector3(0, 0, 180)
 gravity = Vector3(0, 0, 0)
+scale_max = 1.5
 scale_curve = SubResource("CurveTexture_krbaf")
+color_ramp = SubResource("GradientTexture1D_72e4x")
 alpha_curve = SubResource("CurveTexture_77ytl")
 
 [sub_resource type="QuadMesh" id="QuadMesh_svfu8"]

@@ -8,8 +8,22 @@
 	  "wait_until_defeated": true,
 	  "enemies": [
 		{
-		  "scene": "res://Asset/char2_enemy/skeleton01/skeleton02.tscn",
-		  "quantity": 30,
+		  "scene": "res://Asset/char2_enemy/skeleton/skeleton01.tscn",
+		  "quantity": 20,
+		  "spawn_time_offset": 0.0,
+		  "spawn_interval": 2.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/skeleton/skeleton02.tscn",
+		  "quantity": 20,
+		  "spawn_after_previous_group": true,
+		  "spawn_time_offset": 0.0,
+		  "spawn_interval": 2.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/skeleton/skeleton03.tscn",
+		  "quantity": 20,
+		  "spawn_after_previous_group": true,
 		  "spawn_time_offset": 0.0,
 		  "spawn_interval": 2.0
 		},

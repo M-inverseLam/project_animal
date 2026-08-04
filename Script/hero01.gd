@@ -111,8 +111,6 @@ var _is_attacking := false
 var _attack_time_left := 0.0
 var _queued_attack_animation_name := ""
 var _next_attack_animation_index := 0
-var _attack_projectiles_emitted := 0
-var _attack_projectile_emit_time_left := 0.0
 var _is_super_attacking := false
 var _super_attack_phase := ""
 var _super_attack_time_left := 0.0
@@ -138,8 +136,12 @@ var _weapon_dash_slowdown_power := 4.0
 var _weapon_dash_bounce_back_distance := 1.4
 var _weapon_dash_bounce_back_duration := 0.25
 var _weapon_dash_bounce_back_slowdown_power := 2.5
+var _weapon_shoot_interval_time := 0.5
 var _weapon_emit_quantity := 1
 var _weapon_emit_projectile_offset_time := 0.1
+var _weapon_shoot_time_left := 0.0
+var _weapon_burst_projectiles_remaining := 0
+var _weapon_burst_emit_time_left := 0.0
 var _mouse_world_position := Vector3.ZERO
 var _face_control_mode: int = FaceControlMode.KEY_ARROW
 var _face_control_toggle_was_pressed := false
@@ -199,7 +201,8 @@ func _physics_process(delta: float) -> void:
 	_update_animation_tree_blends(delta)
 	_update_attack_input()
 	_update_face_direction_input(delta)
-	_update_attack_projectile(delta)
+	_update_weapon_shooting(delta)
+	_update_attack_animation(delta)
 
 	_update_dash_input()
 
@@ -267,7 +270,10 @@ func _update_attack_input() -> void:
 	if attack_key_is_pressed and not _attack_key_was_pressed:
 		_auto_shoot_is_enabled = not _auto_shoot_is_enabled
 		if _auto_shoot_is_enabled:
+			_reset_weapon_shooting()
 			_start_attack()
+		else:
+			_cancel_weapon_burst()
 
 	if _auto_shoot_is_enabled and not _is_attacking:
 		_start_attack()
@@ -310,8 +316,6 @@ func _start_attack() -> void:
 func _play_attack_animation(animation_name: String) -> void:
 	_is_attacking = true
 	_attack_time_left = _get_animation_length(animation_name)
-	_attack_projectiles_emitted = 0
-	_attack_projectile_emit_time_left = 0.0
 
 	_play_animation(animation_name, true)
 
@@ -329,6 +333,7 @@ func _start_dash() -> void:
 		return
 
 	_resume_auto_shoot_after_dash = _auto_shoot_is_enabled
+	_cancel_weapon_burst()
 	_clear_attack_state(true)
 	_is_dashing = true
 	_dash_time_left = _weapon_dash_duration
@@ -429,6 +434,7 @@ func _load_weapon_parameters() -> void:
 	_weapon_dash_bounce_back_distance = _get_float_property(weapon, "dash_bounce_back_distance", _weapon_dash_bounce_back_distance)
 	_weapon_dash_bounce_back_duration = _get_float_property(weapon, "dash_bounce_back_duration", _weapon_dash_bounce_back_duration)
 	_weapon_dash_bounce_back_slowdown_power = _get_float_property(weapon, "dash_bounce_back_slowdown_power", _weapon_dash_bounce_back_slowdown_power)
+	_weapon_shoot_interval_time = maxf(_get_float_property(weapon, "shoot_interval_time", _weapon_shoot_interval_time), 0.01)
 	_weapon_emit_quantity = maxi(_get_int_property(weapon, "emit_quantity", _weapon_emit_quantity), 1)
 	_weapon_emit_projectile_offset_time = maxf(_get_float_property(weapon, "emit_each_projectile_offset_time", _weapon_emit_projectile_offset_time), 0.0)
 	weapon.free()
@@ -593,6 +599,7 @@ func _start_death() -> void:
 	_shake_camera_on_death()
 	_auto_shoot_is_enabled = false
 	_resume_auto_shoot_after_dash = false
+	_cancel_weapon_burst()
 	_clear_attack_state(true)
 	if _is_dashing:
 		_stop_dash()
@@ -729,32 +736,56 @@ func _stop_super_charge_effect() -> void:
 	_active_super_charge_effect = null
 
 
-func _update_attack_projectile(delta: float) -> void:
+func _update_attack_animation(delta: float) -> void:
 	if not _is_attacking:
 		return
 
-	if _attack_projectiles_emitted < _weapon_emit_quantity:
-		_attack_projectile_emit_time_left -= delta
-		while _attack_projectiles_emitted < _weapon_emit_quantity and _attack_projectile_emit_time_left <= 0.0:
-			_spawn_attack_projectile()
-			_attack_projectiles_emitted += 1
-			if _attack_projectiles_emitted >= _weapon_emit_quantity:
-				break
-			if _weapon_emit_projectile_offset_time > 0.0:
-				_attack_projectile_emit_time_left += _weapon_emit_projectile_offset_time
-
 	if _attack_time_left > 0.0:
 		_attack_time_left = maxf(_attack_time_left - delta, 0.0)
-	if _attack_time_left <= 0.0 and _attack_projectiles_emitted >= _weapon_emit_quantity:
+	if _attack_time_left <= 0.0:
 		_finish_attack()
+
+
+func _update_weapon_shooting(delta: float) -> void:
+	if not _auto_shoot_is_enabled or _is_dashing or _is_super_attacking or _is_dead:
+		return
+
+	_weapon_shoot_time_left -= delta
+	if _weapon_burst_projectiles_remaining > 0:
+		_weapon_burst_emit_time_left -= delta
+		_emit_due_weapon_projectiles()
+
+	if _weapon_burst_projectiles_remaining <= 0 and _weapon_shoot_time_left <= 0.0:
+		_weapon_burst_projectiles_remaining = _weapon_emit_quantity
+		_weapon_burst_emit_time_left = 0.0
+		_weapon_shoot_time_left += maxf(_weapon_shoot_interval_time, 0.01)
+		_emit_due_weapon_projectiles()
+
+
+func _emit_due_weapon_projectiles() -> void:
+	while _weapon_burst_projectiles_remaining > 0 and _weapon_burst_emit_time_left <= 0.0:
+		_spawn_attack_projectile()
+		_weapon_burst_projectiles_remaining -= 1
+		if _weapon_burst_projectiles_remaining <= 0:
+			return
+		if _weapon_emit_projectile_offset_time > 0.0:
+			_weapon_burst_emit_time_left += _weapon_emit_projectile_offset_time
+
+
+func _reset_weapon_shooting() -> void:
+	_weapon_shoot_time_left = 0.0
+	_cancel_weapon_burst()
+
+
+func _cancel_weapon_burst() -> void:
+	_weapon_burst_projectiles_remaining = 0
+	_weapon_burst_emit_time_left = 0.0
 
 
 func _clear_attack_state(abort_animation: bool) -> void:
 	_is_attacking = false
 	_attack_time_left = 0.0
 	_queued_attack_animation_name = ""
-	_attack_projectiles_emitted = 0
-	_attack_projectile_emit_time_left = 0.0
 	if _uses_animation_tree and _animation_tree != null:
 		_target_attack_layer_blend_amount = 0.0
 		if abort_animation:
@@ -764,8 +795,6 @@ func _clear_attack_state(abort_animation: bool) -> void:
 
 func _finish_attack() -> void:
 	if not _is_attacking:
-		return
-	if _attack_projectiles_emitted < _weapon_emit_quantity:
 		return
 
 	var next_attack_animation := _queued_attack_animation_name
@@ -790,6 +819,7 @@ func _resume_auto_shoot(should_resume: bool) -> void:
 		return
 
 	_auto_shoot_is_enabled = true
+	_reset_weapon_shooting()
 	_start_attack()
 
 

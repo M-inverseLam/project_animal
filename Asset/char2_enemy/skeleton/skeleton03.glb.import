@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://kaf4g0fmog8k"
-path="res://.godot/imported/skeleton01.glb-b56f90ceb00e8406b298d8a7842a3e63.scn"
+uid="uid://k3j6uaukbgtt"
+path="res://.godot/imported/skeleton03.glb-1f7e31a9bb71453e24f923aea1f82fe7.scn"
 
 [deps]
 
-source_file="res://Asset/char2_enemy/skeleton01/skeleton01.glb"
-dest_files=["res://.godot/imported/skeleton01.glb-b56f90ceb00e8406b298d8a7842a3e63.scn"]
+source_file="res://Asset/char2_enemy/skeleton/skeleton03.glb"
+dest_files=["res://.godot/imported/skeleton03.glb-1f7e31a9bb71453e24f923aea1f82fe7.scn"]
 
 [params]
 
@@ -4152,13 +4152,6 @@ _subresources={
 "slice_99/save_to_file/path": "",
 "slice_99/start_frame": 0,
 "slices/amount": 0
-}
-},
-"materials": {
-"Material": {
-"use_external/enabled": false,
-"use_external/fallback_path": "",
-"use_external/path": ""
 }
 }
 }

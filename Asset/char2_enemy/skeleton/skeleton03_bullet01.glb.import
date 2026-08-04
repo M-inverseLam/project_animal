@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bbmipkqkt3ri0"
-path="res://.godot/imported/skeleton01_bullet01.glb-0f524101a41e883409f5d28ce7cb1fee.scn"
+uid="uid://x7cbfg6n0cdv"
+path="res://.godot/imported/skeleton03_bullet01.glb-9741c6a0b6139dc4f710fb1e1a89137c.scn"
 
 [deps]
 
-source_file="res://Asset/char2_enemy/skeleton01/skeleton01_bullet01.glb"
-dest_files=["res://.godot/imported/skeleton01_bullet01.glb-0f524101a41e883409f5d28ce7cb1fee.scn"]
+source_file="res://Asset/char2_enemy/skeleton/skeleton03_bullet01.glb"
+dest_files=["res://.godot/imported/skeleton03_bullet01.glb-9741c6a0b6139dc4f710fb1e1a89137c.scn"]
 
 [params]
 

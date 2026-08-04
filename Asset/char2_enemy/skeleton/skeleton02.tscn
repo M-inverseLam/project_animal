@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://87pi0i7d553m"]
 
 [ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Script/enemy_Ai01.gd" id="1_4tafl"]
-[ext_resource type="PackedScene" uid="uid://dna1088rpt3rb" path="res://Asset/char2_enemy/skeleton01/skeleton02.glb" id="1_xfvsa"]
+[ext_resource type="PackedScene" uid="uid://dna1088rpt3rb" path="res://Asset/char2_enemy/skeleton/skeleton02.glb" id="1_xfvsa"]
 [ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="2_2l4vn"]
 [ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_4tafl"]
-[ext_resource type="PackedScene" uid="uid://dp4hxqno47h6t" path="res://Asset/char2_enemy/skeleton01/skeleton01_bullet01.tscn" id="2_df0ii"]
+[ext_resource type="PackedScene" uid="uid://dp4hxqno47h6t" path="res://Asset/char2_enemy/skeleton/skeleton01_bullet01.tscn" id="2_df0ii"]
 [ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark/hitspark02.tscn" id="3_yyroo"]
 [ext_resource type="PackedScene" uid="uid://c5svw8lgdf8um" path="res://Asset/item/gems01.tscn" id="4_0r2x2"]
 [ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Script/enemy_damage_receiver.gd" id="4_g21mx"]
@@ -16,19 +16,24 @@ height = 2.8572388
 [node name="skeleton02" type="Node3D" unique_id=1181866737 groups=["enemy"]]
 script = ExtResource("1_4tafl")
 attack_animation_name = "attack"
-max_health = 80
+max_health = 40
+health_bar_height = 2.8
 chase_speed = 2.0
+run_away_speed = 3.0
 use_weighted_ai = true
 ai_idle_weight = 20.0
 ai_chase_weight = 80.0
-ai_attack_weight = 50.0
+ai_attack_weight = 25.0
 chase_time_range = Vector2(1, 3)
+chase_direction_angle = 45.0
 shoot_projectile_scene = ExtResource("2_df0ii")
 shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
+shoot_projectile_spawn_delay = 0.35
 avoid_enemy_overlap = true
 overlap_avoidance_radius = 2.0
 knockback_resistance = 4.0
 attack_hit_push_distance = 0.0
+face_hit_push_direction = false
 damage_number_font = ExtResource("2_2l4vn")
 damage_number_font_size = 120
 damage_number_color = Color(1, 0.5294118, 0.2509804, 1)
@@ -37,7 +42,7 @@ death_drop_scene = ExtResource("4_0r2x2")
 
 [node name="skeleton02" parent="." unique_id=2010106227 instance=ExtResource("1_xfvsa")]
 
-[node name="shield_skeleton" parent="skeleton02/rig/Skeleton3D" parent_id_path=PackedInt32Array(2010106227, 1820522771) index="0" unique_id=1873378140]
+[node name="shield_skeleton" parent="skeleton02/rig/Skeleton3D" parent_id_path=PackedInt32Array(2010106227, 489852285) index="0" unique_id=503736742]
 surface_material_override/0 = ExtResource("2_4tafl")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=2102212111]

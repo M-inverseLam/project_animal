@@ -7,6 +7,7 @@ extends Node3D
 @export var impact_weight: float = 1.0
 
 @export_group("Emission")
+@export var shoot_interval_time: float = 0.5
 @export var emit_quantity: int = 1
 @export var emit_each_projectile_offset_time: float = 0.1
 
