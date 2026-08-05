@@ -6,21 +6,6 @@ extends Node3D
 @export var damage: int = 1
 @export var impact_weight: float = 1.0
 
-@export_group("Emission")
-@export var shoot_interval_time: float = 0.5
-@export var emit_quantity: int = 1
-@export var emit_each_projectile_offset_time: float = 0.1
-
-@export_group("Dash")
-@export var dash_duration: float = 0.5
-@export var dash_distance: float = 5.0
-@export var dash_damage: int = 1
-@export var dash_slowdown_power: float = 2.5
-@export var dash_bounce_back_distance: float = 1.4
-@export var dash_bounce_back_duration: float = 0.25
-@export var dash_bounce_back_slowdown_power: float = 2.5
-
-@export_group("")
 @export var hit_spark_scene: PackedScene
 @export var hit_spark_height: float = 0.8
 @export var ignored_groups: PackedStringArray = PackedStringArray(["enemy_projectile"])

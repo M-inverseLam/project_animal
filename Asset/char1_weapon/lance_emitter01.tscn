@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Script/weapon_emitter.gd" id="1_emitter"]
+[ext_resource type="PackedScene" path="res://Asset/char1_weapon/lance01.tscn" id="2_projectile"]
+
+[node name="LanceEmitter" type="Node3D"]
+script = ExtResource("1_emitter")
+projectile_scene = ExtResource("2_projectile")
+dash_duration = 1.0
+dash_distance = 7.0
+dash_damage = 3
+
+[node name="Muzzle" type="Marker3D" parent="."]

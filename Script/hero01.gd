@@ -35,8 +35,8 @@ enum FaceControlMode {
 @export var attack_animation_name: String = "attack01"
 @export var attack_idle_animation_name: String = "attack_idle"
 @export var attack_animation_cycle: PackedStringArray = PackedStringArray(["attack01", "attack02"])
-@export var attack_projectile_scene: PackedScene
-@export var attack_projectile_spawn_path: NodePath = NodePath("shootposition")
+@export var weapon_emitter_scene: PackedScene
+@export var weapon_socket_path: NodePath = NodePath("shootposition")
 @export var attack_upper_body_bone_name: String = "spline1"
 @export var attack_lower_body_bone_name: String = "pelvis"
 
@@ -68,7 +68,7 @@ enum FaceControlMode {
 @onready var skeleton := find_child("Skeleton3D", true, false) as Skeleton3D
 @onready var visual_root := get_node_or_null("hero_girl01") as Node3D
 @onready var dash_dust_template := get_node_or_null("DashDust") as Node3D
-@onready var attack_projectile_spawn := get_node_or_null(attack_projectile_spawn_path) as Node3D
+@onready var weapon_socket := get_node_or_null(weapon_socket_path) as Node3D
 @onready var dash_hitbox := get_node_or_null("DashHitbox") as Area3D
 @onready var dash_hitbox_shape := get_node_or_null("DashHitbox/CollisionShape3D") as CollisionShape3D
 @onready var gem_attraction_shape := get_node_or_null("GemAttractionArea/CollisionShape3D") as CollisionShape3D
@@ -136,12 +136,7 @@ var _weapon_dash_slowdown_power := 4.0
 var _weapon_dash_bounce_back_distance := 1.4
 var _weapon_dash_bounce_back_duration := 0.25
 var _weapon_dash_bounce_back_slowdown_power := 2.5
-var _weapon_shoot_interval_time := 0.5
-var _weapon_emit_quantity := 1
-var _weapon_emit_projectile_offset_time := 0.1
-var _weapon_shoot_time_left := 0.0
-var _weapon_burst_projectiles_remaining := 0
-var _weapon_burst_emit_time_left := 0.0
+var _active_weapon_emitter: WeaponEmitter
 var _mouse_world_position := Vector3.ZERO
 var _face_control_mode: int = FaceControlMode.KEY_ARROW
 var _face_control_toggle_was_pressed := false
@@ -160,7 +155,7 @@ func _ready() -> void:
 	_update_health_ui()
 	_update_gem_attraction_radius()
 	_cache_hit_flash_meshes()
-	_load_weapon_parameters()
+	equip_weapon(weapon_emitter_scene)
 	if animation_player != null:
 		animation_player.animation_finished.connect(_on_animation_finished)
 	_setup_animation_tree()
@@ -419,57 +414,37 @@ func _get_dash_direction() -> Vector3:
 	return global_transform.basis.z.normalized()
 
 
+func equip_weapon(emitter_scene: PackedScene) -> void:
+	if _active_weapon_emitter != null:
+		_active_weapon_emitter.stop_firing()
+		_active_weapon_emitter.queue_free()
+		_active_weapon_emitter = null
+
+	weapon_emitter_scene = emitter_scene
+	if weapon_emitter_scene == null or weapon_socket == null:
+		return
+
+	var emitter := weapon_emitter_scene.instantiate() as WeaponEmitter
+	if emitter == null:
+		return
+
+	weapon_socket.add_child(emitter)
+	emitter.transform = Transform3D.IDENTITY
+	_active_weapon_emitter = emitter
+	_load_weapon_parameters()
+
+
 func _load_weapon_parameters() -> void:
-	if attack_projectile_scene == null:
+	if _active_weapon_emitter == null:
 		return
 
-	var weapon: Node = attack_projectile_scene.instantiate()
-	if weapon == null:
-		return
-
-	_weapon_dash_duration = _get_float_property(weapon, "dash_duration", _weapon_dash_duration)
-	_weapon_dash_distance = _get_float_property(weapon, "dash_distance", _weapon_dash_distance)
-	_weapon_dash_damage = _get_int_property(weapon, "dash_damage", _weapon_dash_damage)
-	_weapon_dash_slowdown_power = _get_float_property(weapon, "dash_slowdown_power", _weapon_dash_slowdown_power)
-	_weapon_dash_bounce_back_distance = _get_float_property(weapon, "dash_bounce_back_distance", _weapon_dash_bounce_back_distance)
-	_weapon_dash_bounce_back_duration = _get_float_property(weapon, "dash_bounce_back_duration", _weapon_dash_bounce_back_duration)
-	_weapon_dash_bounce_back_slowdown_power = _get_float_property(weapon, "dash_bounce_back_slowdown_power", _weapon_dash_bounce_back_slowdown_power)
-	_weapon_shoot_interval_time = maxf(_get_float_property(weapon, "shoot_interval_time", _weapon_shoot_interval_time), 0.01)
-	_weapon_emit_quantity = maxi(_get_int_property(weapon, "emit_quantity", _weapon_emit_quantity), 1)
-	_weapon_emit_projectile_offset_time = maxf(_get_float_property(weapon, "emit_each_projectile_offset_time", _weapon_emit_projectile_offset_time), 0.0)
-	weapon.free()
-
-
-func _get_float_property(object: Object, property_name: String, fallback: float) -> float:
-	if not _has_property(object, property_name):
-		return fallback
-
-	var value: Variant = object.get(property_name)
-	if value is float or value is int:
-		return float(value)
-
-	return fallback
-
-
-func _get_int_property(object: Object, property_name: String, fallback: int) -> int:
-	if not _has_property(object, property_name):
-		return fallback
-
-	var value: Variant = object.get(property_name)
-	if value is int:
-		return int(value)
-	if value is float:
-		return int(value)
-
-	return fallback
-
-
-func _has_property(object: Object, property_name: String) -> bool:
-	for property in object.get_property_list():
-		if property.get("name", "") == property_name:
-			return true
-
-	return false
+	_weapon_dash_duration = _active_weapon_emitter.dash_duration
+	_weapon_dash_distance = _active_weapon_emitter.dash_distance
+	_weapon_dash_damage = _active_weapon_emitter.dash_damage
+	_weapon_dash_slowdown_power = _active_weapon_emitter.dash_slowdown_power
+	_weapon_dash_bounce_back_distance = _active_weapon_emitter.dash_bounce_back_distance
+	_weapon_dash_bounce_back_duration = _active_weapon_emitter.dash_bounce_back_duration
+	_weapon_dash_bounce_back_slowdown_power = _active_weapon_emitter.dash_bounce_back_slowdown_power
 
 
 func _move_with_collision(displacement: Vector3, delta: float) -> void:
@@ -746,40 +721,27 @@ func _update_attack_animation(delta: float) -> void:
 		_finish_attack()
 
 
-func _update_weapon_shooting(delta: float) -> void:
-	if not _auto_shoot_is_enabled or _is_dashing or _is_super_attacking or _is_dead:
+func _update_weapon_shooting(_delta: float) -> void:
+	if _active_weapon_emitter == null:
 		return
 
-	_weapon_shoot_time_left -= delta
-	if _weapon_burst_projectiles_remaining > 0:
-		_weapon_burst_emit_time_left -= delta
-		_emit_due_weapon_projectiles()
+	if not _auto_shoot_is_enabled or _is_dashing or _is_super_attacking or _is_dead:
+		_active_weapon_emitter.stop_firing()
+		return
 
-	if _weapon_burst_projectiles_remaining <= 0 and _weapon_shoot_time_left <= 0.0:
-		_weapon_burst_projectiles_remaining = _weapon_emit_quantity
-		_weapon_burst_emit_time_left = 0.0
-		_weapon_shoot_time_left += maxf(_weapon_shoot_interval_time, 0.01)
-		_emit_due_weapon_projectiles()
-
-
-func _emit_due_weapon_projectiles() -> void:
-	while _weapon_burst_projectiles_remaining > 0 and _weapon_burst_emit_time_left <= 0.0:
-		_spawn_attack_projectile()
-		_weapon_burst_projectiles_remaining -= 1
-		if _weapon_burst_projectiles_remaining <= 0:
-			return
-		if _weapon_emit_projectile_offset_time > 0.0:
-			_weapon_burst_emit_time_left += _weapon_emit_projectile_offset_time
+	var muzzle_position := _active_weapon_emitter.get_muzzle_global_position()
+	_active_weapon_emitter.set_shoot_direction(_get_shoot_direction(muzzle_position))
+	_active_weapon_emitter.start_firing(self)
 
 
 func _reset_weapon_shooting() -> void:
-	_weapon_shoot_time_left = 0.0
-	_cancel_weapon_burst()
+	if _active_weapon_emitter != null:
+		_active_weapon_emitter.reset_firing()
 
 
 func _cancel_weapon_burst() -> void:
-	_weapon_burst_projectiles_remaining = 0
-	_weapon_burst_emit_time_left = 0.0
+	if _active_weapon_emitter != null:
+		_active_weapon_emitter.stop_firing()
 
 
 func _clear_attack_state(abort_animation: bool) -> void:
@@ -823,10 +785,6 @@ func _resume_auto_shoot(should_resume: bool) -> void:
 	_start_attack()
 
 
-func _spawn_attack_projectile() -> void:
-	_spawn_projectile(attack_projectile_scene)
-
-
 func _spawn_projectile(projectile_scene: PackedScene) -> void:
 	if projectile_scene == null:
 		return
@@ -843,22 +801,29 @@ func _spawn_projectile(projectile_scene: PackedScene) -> void:
 
 	projectile_parent.add_child(projectile)
 	var spawn_transform := global_transform
-	if attack_projectile_spawn != null:
-		spawn_transform = attack_projectile_spawn.global_transform
+	if weapon_socket != null:
+		spawn_transform = weapon_socket.global_transform
 
-	var shoot_direction := global_transform.basis.z.normalized()
-	if _face_control_mode == FaceControlMode.MOUSE_CURSOR and _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
-		shoot_direction = _mouse_world_position - spawn_transform.origin
-		shoot_direction.y = 0.0
-		if shoot_direction == Vector3.ZERO:
-			shoot_direction = global_transform.basis.z.normalized()
-		else:
-			shoot_direction = shoot_direction.normalized()
+	var shoot_direction := _get_shoot_direction(spawn_transform.origin)
 
 	projectile.global_transform = Transform3D(_basis_with_y_axis(shoot_direction), spawn_transform.origin)
 
 	if projectile.has_method("setup"):
 		projectile.call("setup", shoot_direction, self)
+
+
+func _get_shoot_direction(spawn_position: Vector3) -> Vector3:
+	var shoot_direction := global_transform.basis.z.normalized()
+	if _face_control_mode != FaceControlMode.MOUSE_CURSOR:
+		return shoot_direction
+	if not _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
+		return shoot_direction
+
+	shoot_direction = _mouse_world_position - spawn_position
+	shoot_direction.y = 0.0
+	if shoot_direction.is_zero_approx():
+		return global_transform.basis.z.normalized()
+	return shoot_direction.normalized()
 
 
 func _basis_with_y_axis(direction: Vector3) -> Basis:
@@ -965,12 +930,15 @@ func _spawn_dash_hit_spark(target: Node) -> void:
 
 
 func _spawn_super_shoot_hit_spark() -> void:
-	if attack_projectile_spawn == null:
-		return
+	var spawn_position := global_position
+	if _active_weapon_emitter != null:
+		spawn_position = _active_weapon_emitter.get_muzzle_global_position()
+	elif weapon_socket != null:
+		spawn_position = weapon_socket.global_position
 
 	_spawn_hit_spark_at_position(
 		super_attack_shoot_hit_spark_scene,
-		attack_projectile_spawn.global_position
+		spawn_position
 	)
 
 

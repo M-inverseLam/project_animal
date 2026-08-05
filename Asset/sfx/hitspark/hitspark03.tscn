@@ -10,7 +10,7 @@ cull_mode = 2
 no_depth_test = true
 shading_mode = 0
 vertex_color_use_as_albedo = true
-albedo_color = Color(2.03982, 2.03982, 2.03982, 1)
+albedo_color = Color(8.891243, 2.4822042, 0, 1)
 albedo_texture = ExtResource("2_1i75s")
 billboard_keep_scale = true
 

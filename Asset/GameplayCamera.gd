@@ -1,7 +1,10 @@
 extends Camera3D
 
 @export var target_path: NodePath = NodePath("../chicken01")
-@export var follow_offset := Vector3(0.0, 26.121084, 25.622486)
+## X offsets the camera sideways, Y adjusts framing, and Z controls follow distance.
+## A Y value of 0 keeps the target centered for the selected camera angle.
+@export var follow_offset := Vector3(0.0, 0.0, 25.622486)
+@export_range(-89.0, 0.0, 0.5, "degrees") var camera_angle: float = -45.0
 @export var spring_strength: float = 35.0
 @export var spring_damping: float = 10.0
 
@@ -22,9 +25,10 @@ func _ready() -> void:
 	_rng.randomize()
 	_target = get_node_or_null(target_path) as Node3D
 	current = true
+	rotation_degrees.x = camera_angle
 
 	if _target != null:
-		_follow_position = _target.global_position + follow_offset
+		_follow_position = _target.global_position + _get_centered_follow_offset()
 		global_position = _follow_position
 	else:
 		_follow_position = global_position
@@ -34,7 +38,7 @@ func _physics_process(delta: float) -> void:
 	if _target == null:
 		return
 
-	var desired_position := _target.global_position + follow_offset
+	var desired_position := _target.global_position + _get_centered_follow_offset()
 	var displacement := desired_position - _follow_position
 	var acceleration := displacement * spring_strength - _velocity * spring_damping
 
@@ -46,6 +50,11 @@ func _physics_process(delta: float) -> void:
 		shake_offset = _calculate_shake_offset(delta)
 
 	global_position = _follow_position + global_transform.basis * shake_offset
+
+
+func _get_centered_follow_offset() -> Vector3:
+	var centered_height := tan(deg_to_rad(-camera_angle)) * follow_offset.z
+	return Vector3(follow_offset.x, centered_height + follow_offset.y, follow_offset.z)
 
 
 func shake(duration: float, strength: float) -> void:

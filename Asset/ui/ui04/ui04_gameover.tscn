@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bc0m77j50oqvn"]
 
 [ext_resource type="Texture2D" uid="uid://d2iwx2yof22no" path="res://Asset/ui/ui04/ui04_main_gameover.tga" id="1_gameover"]
 
-[node name="GameOver" type="Control"]
+[node name="GameOver" type="Control" unique_id=1424360284]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1748780668]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,9 +21,14 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="GameOverImage" type="TextureRect" parent="CenterContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=431790799]
+layout_mode = 2
+
+[node name="GameOverImage" type="TextureRect" parent="CenterContainer/VBoxContainer" unique_id=1470815128]
 custom_minimum_size = Vector2(400, 156)
 layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -200)
 mouse_filter = 2
 texture = ExtResource("1_gameover")
 expand_mode = 1

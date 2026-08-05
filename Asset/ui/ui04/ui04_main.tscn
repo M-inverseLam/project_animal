@@ -6,7 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://dvflqnufw7t53" path="res://Asset/ui/ui04/ui04_main_icon_gems.tga" id="3_tw8gj"]
 [ext_resource type="Texture2D" uid="uid://drii4836i5lmc" path="res://Asset/ui/ui04/ui04_mousecursor.tga" id="4_cursor"]
 [ext_resource type="PackedScene" uid="uid://bmhxfby7oqfne" path="res://Asset/ui/ui04/ui04_mousecursor.tscn" id="5_ground_cursor"]
-[ext_resource type="PackedScene" path="res://Asset/ui/ui04/ui04_gameover.tscn" id="6_gameover"]
+[ext_resource type="PackedScene" uid="uid://bc0m77j50oqvn" path="res://Asset/ui/ui04/ui04_gameover.tscn" id="6_gameover"]
+[ext_resource type="Texture2D" uid="uid://crnt20yr5u0js" path="res://Asset/ui/ui04/ui04_main_icon_coins.tga" id="7_wncja"]
 
 [sub_resource type="Theme" id="Theme_ycw01"]
 default_font = ExtResource("2_bx36w")
@@ -41,6 +42,18 @@ font_size = 24
 outline_size = 7
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wncja"]
+bg_color = Color(0, 0.45358688, 0.962241, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [node name="ui04_main" type="Control" unique_id=619611884]
 layout_mode = 3
 anchors_preset = 15
@@ -52,7 +65,8 @@ script = ExtResource("1_cursor")
 mouse_cursor_texture = ExtResource("4_cursor")
 ground_cursor_scene = ExtResource("5_ground_cursor")
 
-[node name="GameOver" parent="." instance=ExtResource("6_gameover")]
+[node name="GameOver" parent="." unique_id=1392803852 instance=ExtResource("6_gameover")]
+layout_mode = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1668673301]
 layout_mode = 1
@@ -107,16 +121,71 @@ text = "500"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="space1" type="Control" parent="MarginContainer/HBoxContainer" unique_id=636437864]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="coinsicon" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=860143162]
+custom_minimum_size = Vector2(42, 40)
+layout_mode = 2
+size_flags_vertical = 4
+offset_transform_position = Vector2(8, 0)
+texture = ExtResource("7_wncja")
+stretch_mode = 3
+
+[node name="coinstotal" type="Label" parent="MarginContainer/HBoxContainer/coinsicon" unique_id=794576106]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.1190001
+anchor_top = 0.068
+anchor_right = 1.1190001
+anchor_bottom = 0.068
+offset_left = 3.001995
+offset_top = 0.007999897
+offset_right = 107.002
+offset_bottom = 37.008
+text = "00000"
+label_settings = SubResource("LabelSettings_4kxuq")
+
+[node name="space2" type="Control" parent="MarginContainer/HBoxContainer" unique_id=1694569082]
+custom_minimum_size = Vector2(275, 0)
+layout_mode = 2
+
 [node name="gemsicon" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=939212301]
 custom_minimum_size = Vector2(42, 40)
 layout_mode = 2
 size_flags_vertical = 4
 offset_transform_enabled = true
-offset_transform_position = Vector2(12, 0)
+offset_transform_position = Vector2(10, 0)
 texture = ExtResource("3_tw8gj")
 stretch_mode = 3
 
-[node name="gemstotal" type="Label" parent="MarginContainer/HBoxContainer" unique_id=496747787]
+[node name="gemsbar" type="ProgressBar" parent="MarginContainer/HBoxContainer" unique_id=341940480]
+custom_minimum_size = Vector2(1000, 24)
 layout_mode = 2
-text = "0"
-label_settings = SubResource("LabelSettings_4kxuq")
+size_flags_vertical = 4
+theme = SubResource("Theme_ycw01")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_styles/background = SubResource("StyleBoxFlat_vri65")
+theme_override_styles/fill = SubResource("StyleBoxFlat_wncja")
+max_value = 500.0
+value = 500.0
+rounded = true
+show_percentage = false
+
+[node name="HealthValueLabel" type="Label" parent="MarginContainer/HBoxContainer/gemsbar" unique_id=648233258]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_ycw01")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "500"
+horizontal_alignment = 1
+vertical_alignment = 1

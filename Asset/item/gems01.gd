@@ -11,12 +11,16 @@ extends Node3D
 @export var spin_turns: float = 1.5
 @export var fly_speed: float = 12.0
 @export var collect_distance: float = 0.3
+@export var repel_duration: float = 0.5
+@export var repel_speed: float = 6.0
 
 var _rng := RandomNumberGenerator.new()
 var _motion_tween: Tween
 var _spin_tween: Tween
 var _is_picked_up := false
 var _attraction_target: Area3D
+var _repel_time_left := 0.0
+var _repel_direction := Vector3.ZERO
 
 @onready var pickup_area := get_node_or_null("PickupArea") as Area3D
 
@@ -32,6 +36,12 @@ func _physics_process(delta: float) -> void:
 		return
 	if not is_instance_valid(_attraction_target):
 		_attraction_target = null
+		_repel_time_left = 0.0
+		return
+	if _repel_time_left > 0.0:
+		var repel_delta := minf(delta, _repel_time_left)
+		_repel_time_left -= repel_delta
+		global_position += _repel_direction * maxf(repel_speed, 0.0) * repel_delta
 		return
 
 	global_position = global_position.move_toward(
@@ -85,6 +95,13 @@ func _on_pickup_area_area_entered(area: Area3D) -> void:
 		return
 
 	_attraction_target = area
+	_repel_time_left = maxf(repel_duration, 0.0)
+	_repel_direction = global_position - area.global_position
+	_repel_direction.y = 0.0
+	if _repel_direction.is_zero_approx():
+		_repel_direction = _get_random_ground_direction()
+	else:
+		_repel_direction = _repel_direction.normalized()
 	if _motion_tween != null:
 		_motion_tween.kill()
 	if _spin_tween != null:

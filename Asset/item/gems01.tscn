@@ -17,11 +17,14 @@ pop_height = 4.0
 rise_duration = 0.5
 bounce_height = 1.0
 bounce_duration = 0.5
+fly_speed = 34.0
+repel_duration = 0.2
+repel_speed = 12.0
 
 [node name="gems01" parent="." unique_id=1469226022 instance=ExtResource("1_l6clh")]
 script = ExtResource("4_3pvye")
 
-[node name="gems01" parent="gems01" index="0" unique_id=1657122020]
+[node name="gems01" parent="gems01" index="0" unique_id=1775107948]
 surface_material_override/0 = ExtResource("4_pjb7e")
 
 [node name="PickupArea" type="Area3D" parent="." unique_id=1532142746]

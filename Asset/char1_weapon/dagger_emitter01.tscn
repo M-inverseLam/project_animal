@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://1mugu0pavvj2"]
+
+[ext_resource type="Script" uid="uid://f6lyobsoo47y" path="res://Script/weapon_emitter.gd" id="1_emitter"]
+[ext_resource type="PackedScene" uid="uid://cl5661ghjvers" path="res://Asset/char1_weapon/dagger01.tscn" id="2_projectile"]
+[ext_resource type="Script" uid="uid://b1epr3ybr3gwj" path="res://Script/PingPongMovement.gd" id="3_dwu3a"]
+
+[node name="DaggerEmitter" type="Node3D" unique_id=685627035]
+script = ExtResource("1_emitter")
+projectile_scene = ExtResource("2_projectile")
+emit_quantity = 3
+dash_duration = 0.7
+dash_distance = 9.0
+dash_damage = 4
+
+[node name="Muzzle" type="Marker3D" parent="." unique_id=386932739]
+script = ExtResource("3_dwu3a")
+movement_distance = 0.5
+movement_speed = 20.0
