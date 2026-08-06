@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://8tjuridvtmu3"
-path="res://.godot/imported/lance01.glb-277c03b8e19e37f0b64d620fc187cfcf.scn"
+uid="uid://bwf6lybq83jjq"
+path="res://.godot/imported/giant_axe01.glb-31c4ca6718a6f52a2c4724463febbc7b.scn"
 
 [deps]
 
-source_file="res://Asset/char1_weapon/lance01.glb"
-dest_files=["res://.godot/imported/lance01.glb-277c03b8e19e37f0b64d620fc187cfcf.scn"]
+source_file="res://Asset/char1_weapon/giant_axe/giant_axe01.glb"
+dest_files=["res://.godot/imported/giant_axe01.glb-31c4ca6718a6f52a2c4724463febbc7b.scn"]
 
 [params]
 

@@ -2,7 +2,6 @@ extends Node3D
 
 @export var speed: float = 18.0
 @export var lifetime: float = 2.0
-@export var spawn_delay: float = 0.05
 @export var damage: int = 1
 @export var impact_weight: float = 1.0
 
@@ -22,15 +21,11 @@ var _is_active := false
 
 
 func _ready() -> void:
-	_set_projectile_active(false)
 	if hit_area != null:
 		hit_area.body_entered.connect(_on_hit_body_entered)
 		hit_area.area_entered.connect(_on_hit_area_entered)
 
-	if spawn_delay <= 0.0:
-		_activate_projectile()
-	else:
-		get_tree().create_timer(spawn_delay).timeout.connect(_activate_projectile)
+	_activate_projectile()
 
 
 func setup(direction: Vector3, source: Node = null) -> void:

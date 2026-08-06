@@ -42,7 +42,7 @@ shader_parameter/emission_multiplier = 1.0
 
 [node name="mushroom01_bullet01" type="Node3D" unique_id=78531415 groups=["enemy_projectile"]]
 script = ExtResource("1_wl0h3")
-speed = 16.0
+speed = 12.0
 lifetime = 8.0
 damage = 10
 hit_spark_scene = ExtResource("6_spark")

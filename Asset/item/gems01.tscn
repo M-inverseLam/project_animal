@@ -24,7 +24,7 @@ repel_speed = 12.0
 [node name="gems01" parent="." unique_id=1469226022 instance=ExtResource("1_l6clh")]
 script = ExtResource("4_3pvye")
 
-[node name="gems01" parent="gems01" index="0" unique_id=1775107948]
+[node name="gems01" parent="gems01" index="0" unique_id=1273329828]
 surface_material_override/0 = ExtResource("4_pjb7e")
 
 [node name="PickupArea" type="Area3D" parent="." unique_id=1532142746]

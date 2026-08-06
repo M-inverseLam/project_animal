@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://xe3v4dgrunqy"]
+
+[ext_resource type="PackedScene" uid="uid://bwf6lybq83jjq" path="res://Asset/char1_weapon/giant_axe/giant_axe01.glb" id="1_cw2p0"]
+[ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="1_gr6qm"]
+[ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="2_gr6qm"]
+[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_hqpbx"]
+[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_xt0di"]
+[ext_resource type="Shader" uid="uid://27g0twyfv3ug" path="res://Asset/shader/sfx_slash_uv_scroll_mask.gdshader" id="6_aqee8"]
+[ext_resource type="Texture2D" uid="uid://c5kbjjkucv0wu" path="res://Asset/sfx/weapon_trail01/weapon_trail01.tga" id="7_lb7pi"]
+[ext_resource type="Texture2D" uid="uid://bon3204uy1o05" path="res://Asset/sfx/weapon_trail01/weapon_trail01_mask.tga" id="8_6bpos"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ac08q"]
+render_priority = 0
+shader = ExtResource("6_aqee8")
+shader_parameter/albedo_texture = ExtResource("7_lb7pi")
+shader_parameter/uv_scroll_speed = Vector2(0, -2)
+shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0, 0)
+shader_parameter/albedo_noise_tiling = Vector2(2, 2)
+shader_parameter/albedo_distortion_strength = 0.025
+shader_parameter/mask_texture = ExtResource("8_6bpos")
+shader_parameter/mask_uv_scroll_speed = Vector2(0, 0)
+shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
+shader_parameter/noise_tiling = Vector2(2, 2)
+shader_parameter/mask_distortion_strength = 0.04
+shader_parameter/tint_color = Color(0, 2.2082963, 4.2713842, 1)
+shader_parameter/alpha_multiplier = 1.0
+shader_parameter/emission_multiplier = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_aqee8"]
+radius = 1.4669288
+
+[node name="giant_axe01" type="Node3D" unique_id=1807857860 groups=["weapon"]]
+script = ExtResource("1_gr6qm")
+speed = 8.0
+lifetime = 7.0
+damage = 10
+hit_spark_scene = ExtResource("2_xt0di")
+ignored_groups = PackedStringArray()
+
+[node name="giant_axe01" parent="." unique_id=152758712 instance=ExtResource("1_cw2p0")]
+script = ExtResource("2_gr6qm")
+rotation_axis = Vector3(0, 0, 1)
+rotation_speed_degrees = 800.0
+
+[node name="giant_axe01" parent="giant_axe01" index="0" unique_id=1208849629]
+surface_material_override/0 = ExtResource("2_hqpbx")
+
+[node name="bullet_effect" parent="giant_axe01" index="1" unique_id=1206549790]
+surface_material_override/0 = SubResource("ShaderMaterial_ac08q")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=1708159116]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=845066919]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.19887626, 0)
+shape = SubResource("SphereShape3D_aqee8")
+
+[editable path="giant_axe01"]

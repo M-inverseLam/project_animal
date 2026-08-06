@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cv80cjvfjja6u"
-path="res://.godot/imported/lance01_effect.glb-1ceaf3e9ff2d6f018d7c2b7a0f4d2f9d.scn"
+uid="uid://mtqqchcmvu4d"
+path="res://.godot/imported/dagger01.glb-0cfeca4f01d8105454c75ef6b3ddae57.scn"
 
 [deps]
 
-source_file="res://Asset/char1_weapon/lance01_effect.glb"
-dest_files=["res://.godot/imported/lance01_effect.glb-1ceaf3e9ff2d6f018d7c2b7a0f4d2f9d.scn"]
+source_file="res://Asset/char1_weapon/dagger/dagger01.glb"
+dest_files=["res://.godot/imported/dagger01.glb-0cfeca4f01d8105454c75ef6b3ddae57.scn"]
 
 [params]
 

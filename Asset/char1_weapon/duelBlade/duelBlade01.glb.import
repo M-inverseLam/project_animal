@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bwf6lybq83jjq"
-path="res://.godot/imported/giant_axe01.glb-ea1bd9c2889fecd367a77bda8a22e0c9.scn"
+uid="uid://by4mv180qsn8c"
+path="res://.godot/imported/duelBlade01.glb-e3baaaa1754ae7d18eb58a6ab823f19c.scn"
 
 [deps]
 
-source_file="res://Asset/char1_weapon/giant_axe01.glb"
-dest_files=["res://.godot/imported/giant_axe01.glb-ea1bd9c2889fecd367a77bda8a22e0c9.scn"]
+source_file="res://Asset/char1_weapon/duelBlade/duelBlade01.glb"
+dest_files=["res://.godot/imported/duelBlade01.glb-e3baaaa1754ae7d18eb58a6ab823f19c.scn"]
 
 [params]
 

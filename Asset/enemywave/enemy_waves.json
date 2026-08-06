@@ -9,23 +9,23 @@
 	  "enemies": [
 		{
 		  "scene": "res://Asset/char2_enemy/skeleton/skeleton01.tscn",
-		  "quantity": 20,
+		  "quantity": 40,
 		  "spawn_time_offset": 0.0,
-		  "spawn_interval": 2.0
+		  "spawn_interval": 0.5
 		},
 		{
 		  "scene": "res://Asset/char2_enemy/skeleton/skeleton02.tscn",
-		  "quantity": 20,
+		  "quantity": 40,
 		  "spawn_after_previous_group": true,
 		  "spawn_time_offset": 0.0,
-		  "spawn_interval": 2.0
+		  "spawn_interval": 0.5
 		},
 		{
 		  "scene": "res://Asset/char2_enemy/skeleton/skeleton03.tscn",
-		  "quantity": 20,
+		  "quantity": 40,
 		  "spawn_after_previous_group": true,
 		  "spawn_time_offset": 0.0,
-		  "spawn_interval": 2.0
+		  "spawn_interval": 0.5
 		},
 		{
 		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
@@ -39,7 +39,7 @@
 	{
 	  "name": "Wave 2",
 	  "start_delay": 1.0,
-	  "wait_until_defeated": true,
+	  "wait_until_defeated": false,
 	  "enemies": [
 		{
 		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",

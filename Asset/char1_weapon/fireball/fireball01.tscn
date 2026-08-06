@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://bdr0accdl65vo"]
+
+[ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="1_c52ak"]
+[ext_resource type="PackedScene" uid="uid://blkqluquyljhs" path="res://Asset/char1_weapon/fireball/fireball01.glb" id="1_k1dae"]
+[ext_resource type="Shader" uid="uid://27g0twyfv3ug" path="res://Asset/shader/sfx_slash_uv_scroll_mask.gdshader" id="2_ea3ev"]
+[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_j1xsj"]
+[ext_resource type="Shader" uid="uid://bhtvt2h55bpty" path="res://Asset/shader/sfx_slash_uv_scroll_mask_normal.gdshader" id="2_w55em"]
+[ext_resource type="Texture2D" uid="uid://b51i82ysg8ttv" path="res://Asset/char1_weapon/fireball/fireball01.tga" id="3_ea3ev"]
+[ext_resource type="Texture2D" uid="uid://cre5se3dq08v0" path="res://Asset/sfx/weapon_effect01/weapon_effect01.tga" id="3_w55em"]
+[ext_resource type="Texture2D" uid="uid://bon3204uy1o05" path="res://Asset/sfx/weapon_trail01/weapon_trail01_mask.tga" id="4_c52ak"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_sbnus"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_w55em"]
+render_priority = 0
+shader = ExtResource("2_w55em")
+shader_parameter/albedo_texture = ExtResource("3_ea3ev")
+shader_parameter/albedo_noise_texture = SubResource("NoiseTexture2D_sbnus")
+shader_parameter/uv_scroll_speed = Vector2(0, -2)
+shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0, 0.1)
+shader_parameter/albedo_noise_tiling = Vector2(1, 1)
+shader_parameter/albedo_distortion_strength = 0.050000002375
+shader_parameter/mask_uv_scroll_speed = Vector2(0, 0)
+shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
+shader_parameter/noise_tiling = Vector2(2, 2)
+shader_parameter/mask_distortion_strength = 0.04
+shader_parameter/tint_color = Color(4.415934, 1.2416996, 0.74312884, 1)
+shader_parameter/alpha_multiplier = 1.0
+shader_parameter/emission_multiplier = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_831fh"]
+width = 64
+height = 64
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_j1xsj"]
+render_priority = 0
+shader = ExtResource("2_ea3ev")
+shader_parameter/albedo_texture = ExtResource("3_w55em")
+shader_parameter/albedo_noise_texture = SubResource("NoiseTexture2D_831fh")
+shader_parameter/uv_scroll_speed = Vector2(0, -2)
+shader_parameter/albedo_noise_uv_scroll_speed = Vector2(0.2, -0.1)
+shader_parameter/albedo_noise_tiling = Vector2(2, 2)
+shader_parameter/albedo_distortion_strength = 0.050000002375
+shader_parameter/mask_texture = ExtResource("4_c52ak")
+shader_parameter/mask_uv_scroll_speed = Vector2(1, 0)
+shader_parameter/noise_uv_scroll_speed = Vector2(0.35, 0.15)
+shader_parameter/noise_tiling = Vector2(2, 2)
+shader_parameter/mask_distortion_strength = 0.04
+shader_parameter/tint_color = Color(4.1044984, 0.98129916, 0, 1)
+shader_parameter/alpha_multiplier = 1.0
+shader_parameter/emission_multiplier = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ea3ev"]
+radius = 0.55558515
+
+[node name="fireball01" type="Node3D" unique_id=608154707 groups=["weapon"]]
+script = ExtResource("1_c52ak")
+damage = 5
+hit_spark_scene = ExtResource("2_j1xsj")
+
+[node name="fireball01" parent="." unique_id=1327948139 instance=ExtResource("1_k1dae")]
+
+[node name="firecore" parent="fireball01" index="0" unique_id=286307453]
+surface_material_override/0 = SubResource("ShaderMaterial_w55em")
+
+[node name="fire_surround" parent="fireball01" index="1" unique_id=1230301519]
+surface_material_override/0 = SubResource("ShaderMaterial_j1xsj")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=413529373]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1287781496]
+shape = SubResource("SphereShape3D_ea3ev")
+
+[editable path="fireball01"]

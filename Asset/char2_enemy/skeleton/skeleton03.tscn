@@ -25,6 +25,7 @@ use_weighted_ai = true
 ai_idle_weight = 5.0
 ai_chase_weight = 90.0
 ai_attack_weight = 10.0
+chase_time_range = Vector2(3, 6)
 chase_direction_angle = 45.0
 shoot_projectile_scene = ExtResource("2_bdqeb")
 shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
