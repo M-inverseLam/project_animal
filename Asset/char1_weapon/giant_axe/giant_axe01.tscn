@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://bwf6lybq83jjq" path="res://Asset/char1_weapon/giant_axe/giant_axe01.glb" id="1_cw2p0"]
 [ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="1_gr6qm"]
 [ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="2_gr6qm"]
-[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_hqpbx"]
+[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/color_toon.material" id="2_hqpbx"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_xt0di"]
 [ext_resource type="Shader" uid="uid://27g0twyfv3ug" path="res://Asset/shader/sfx_slash_uv_scroll_mask.gdshader" id="6_aqee8"]
 [ext_resource type="Texture2D" uid="uid://c5kbjjkucv0wu" path="res://Asset/sfx/weapon_trail01/weapon_trail01.tga" id="7_lb7pi"]

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="1_conir"]
 [ext_resource type="PackedScene" uid="uid://mtqqchcmvu4d" path="res://Asset/char1_weapon/dagger/dagger01.glb" id="1_eysqf"]
-[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_conir"]
+[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/color_toon.material" id="2_conir"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_j7ybq"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_j7ybq"]

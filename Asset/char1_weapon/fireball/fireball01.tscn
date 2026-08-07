@@ -56,15 +56,17 @@ radius = 0.55558515
 
 [node name="fireball01" type="Node3D" unique_id=608154707 groups=["weapon"]]
 script = ExtResource("1_c52ak")
+speed = 10.0
+lifetime = 1.4
 damage = 5
 hit_spark_scene = ExtResource("2_j1xsj")
 
 [node name="fireball01" parent="." unique_id=1327948139 instance=ExtResource("1_k1dae")]
 
-[node name="firecore" parent="fireball01" index="0" unique_id=286307453]
+[node name="firecore" parent="fireball01" index="0" unique_id=222779263]
 surface_material_override/0 = SubResource("ShaderMaterial_w55em")
 
-[node name="fire_surround" parent="fireball01" index="1" unique_id=1230301519]
+[node name="fire_surround" parent="fireball01" index="1" unique_id=1903954180]
 surface_material_override/0 = SubResource("ShaderMaterial_j1xsj")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=413529373]

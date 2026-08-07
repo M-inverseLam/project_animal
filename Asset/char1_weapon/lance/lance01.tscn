@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bl1xhcimd7ddn"]
 
 [ext_resource type="PackedScene" uid="uid://8tjuridvtmu3" path="res://Asset/char1_weapon/lance/lance01.glb" id="1_t0dif"]
-[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_sflnl"]
+[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/color_toon.material" id="2_sflnl"]
 [ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="3_4kxuq"]
 [ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="3_udx3m"]
 [ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="4_lance"]

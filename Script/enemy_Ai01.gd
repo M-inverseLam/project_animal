@@ -9,7 +9,7 @@ render_mode unshaded, cull_disabled, depth_test_disabled;
 uniform float fill_ratio : hint_range(0.0, 1.0) = 1.0;
 uniform vec4 background_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 uniform vec4 fill_color : source_color = vec4(0.9, 0.02, 0.02, 1.0);
-uniform vec4 outline_color : source_color = vec4(0.45, 0.45, 0.45, 1.0);
+uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 uniform float outline_width_pixels = 2.0;
 
 void vertex() {
@@ -121,6 +121,8 @@ static var _shared_health_bar_shader: Shader
 
 @export_group("Death Drop")
 @export var death_drop_scene: PackedScene
+@export_range(0, 100, 1) var death_drop_quantity: int = 1
+@export_range(0.1, 10.0, 0.1, "suffix:m") var death_drop_spacing: float = 1.6
 @export var death_drop_ground_offset: float = 0.0
 
 @export_group("")
@@ -766,7 +768,7 @@ func _create_enemy_health_bar() -> void:
 	_health_bar_material.set_shader_parameter("fill_ratio", 1.0)
 	_health_bar_material.set_shader_parameter("background_color", Color.BLACK)
 	_health_bar_material.set_shader_parameter("fill_color", Color(0.9, 0.02, 0.02, 1.0))
-	_health_bar_material.set_shader_parameter("outline_color", Color(0.45, 0.45, 0.45, 1.0))
+	_health_bar_material.set_shader_parameter("outline_color", Color.BLACK)
 	_health_bar_material.set_shader_parameter("outline_width_pixels", 2.0)
 
 	_health_bar = MeshInstance3D.new()
@@ -896,11 +898,7 @@ func _spawn_death_spark() -> void:
 
 
 func _spawn_death_drop() -> void:
-	if death_drop_scene == null:
-		return
-
-	var drop := death_drop_scene.instantiate() as Node3D
-	if drop == null:
+	if death_drop_scene == null or death_drop_quantity <= 0:
 		return
 
 	var drop_parent := get_tree().current_scene
@@ -909,12 +907,30 @@ func _spawn_death_drop() -> void:
 	if drop_parent == null:
 		return
 
+	var drop_origin := global_position + Vector3.UP * death_drop_ground_offset
+	var quantity := maxi(death_drop_quantity, 1)
+	var angle_offset := _rng.randf_range(0.0, TAU)
+	var ring_radius := 0.0
+	if quantity > 1:
+		ring_radius = maxf(death_drop_spacing, 0.1) / (2.0 * sin(PI / float(quantity)))
+
+	for drop_index in quantity:
+		var angle := angle_offset + TAU * float(drop_index) / float(quantity)
+		var drop_direction := Vector3(cos(angle), 0.0, sin(angle))
+		var drop_position := drop_origin + drop_direction * ring_radius
+		_spawn_death_drop_instance(drop_parent, drop_position, drop_direction)
+
+
+func _spawn_death_drop_instance(drop_parent: Node, drop_position: Vector3, drop_direction: Vector3) -> void:
+	var drop := death_drop_scene.instantiate() as Node3D
+	if drop == null:
+		return
+
 	drop_parent.add_child(drop)
-	var drop_position := global_position + Vector3.UP * death_drop_ground_offset
 	drop.global_position = drop_position
 
 	if drop.has_method("pop_from_ground"):
-		drop.call("pop_from_ground", drop_position)
+		drop.call("pop_from_ground", drop_position, drop_direction)
 
 
 func _restart_particles_recursive(node: Node) -> float:

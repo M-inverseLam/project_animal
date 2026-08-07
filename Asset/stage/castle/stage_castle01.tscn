@@ -14,7 +14,8 @@ size = Vector3(95, 1.7055664, 95)
 [sub_resource type="Environment" id="Environment_8six8"]
 background_color = Color(0.043001078, 0.37722728, 0.94637746, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.5346019, 0.6110975, 0.7413434, 1)
+ambient_light_color = Color(0.5418937, 0.617481, 0.7466852, 1)
+tonemap_mode = 1
 ssao_enabled = true
 ssao_intensity = 4.0
 glow_enabled = true
@@ -23,7 +24,8 @@ glow_intensity = 1.32
 glow_strength = 0.16
 glow_bloom = 0.1
 adjustment_enabled = true
-adjustment_saturation = 1.31
+adjustment_brightness = 0.81
+adjustment_contrast = 1.08
 
 [sub_resource type="QuadMesh" id="QuadMesh_4kxuq"]
 size = Vector2(300, 300)
@@ -136,6 +138,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_mm1bc")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="lighting" unique_id=1849942378]
 transform = Transform3D(1, 0, 0, 0, 0.25881907, 0.9659258, 0, -0.9659258, 0.25881907, 0, 6.4843073, 0)
+light_color = Color(0.9160473, 0.9378527, 0.9999991, 1)
 light_indirect_energy = 0.2
 light_specular = 2.0
 shadow_enabled = true

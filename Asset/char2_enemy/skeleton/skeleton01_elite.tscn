@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://1bc8jk3h5lwq"]
+
+[ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Script/enemy_Ai01.gd" id="1_syubc"]
+[ext_resource type="PackedScene" uid="uid://dp4hxqno47h6t" path="res://Asset/char2_enemy/skeleton/skeleton01_bullet01.tscn" id="2_i5844"]
+[ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="3_lkaew"]
+[ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark/hitspark02.tscn" id="4_t7wv8"]
+[ext_resource type="PackedScene" uid="uid://c5svw8lgdf8um" path="res://Asset/item/gems01.tscn" id="5_yr8t8"]
+[ext_resource type="PackedScene" uid="uid://kaf4g0fmog8k" path="res://Asset/char2_enemy/skeleton/skeleton01.glb" id="6_biyoq"]
+[ext_resource type="Material" uid="uid://bh5biewfscx0t" path="res://Asset/char1_hero/01_share_material_texture/color_toon_elite.material" id="7_syubc"]
+[ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Script/enemy_damage_receiver.gd" id="8_48t0m"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4kxuq"]
+radius = 0.7158203
+height = 2.8572388
+
+[node name="skeleton01_elite" type="Node3D" unique_id=308583057 groups=["enemy"]]
+script = ExtResource("1_syubc")
+attack_animation_name = "attack"
+max_health = 10
+health_bar_height = 2.8
+chase_speed = 2.0
+use_weighted_ai = true
+ai_idle_weight = 1.0
+ai_chase_weight = 99.0
+chase_time_range = Vector2(1, 4)
+shoot_projectile_scene = ExtResource("2_i5844")
+shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
+shoot_projectile_spawn_delay = 0.3
+retreat_from_hero_speed = 2.0
+retreat_from_hero_duration = 3.0
+avoid_enemy_overlap = true
+overlap_avoidance_radius = 1.5
+knockback_resistance = 1.5
+face_hit_push_direction = false
+damage_number_duration = 1.0
+damage_number_font = ExtResource("3_lkaew")
+damage_number_font_size = 120
+damage_number_color = Color(1, 0.5294118, 0.2509804, 1)
+death_spark_scene = ExtResource("4_t7wv8")
+death_drop_scene = ExtResource("5_yr8t8")
+death_drop_quantity = 3
+
+[node name="skeleton01" parent="." unique_id=879256556 instance=ExtResource("6_biyoq")]
+
+[node name="skeleton" parent="skeleton01/rig/Skeleton3D" parent_id_path=PackedInt32Array(879256556, 1928400613) index="0" unique_id=1108595456]
+surface_material_override/0 = ExtResource("7_syubc")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=968430789]
+script = ExtResource("8_48t0m")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=231967262]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4352696, 0)
+shape = SubResource("CapsuleShape3D_4kxuq")
+
+[node name="shootposition" type="Marker3D" parent="." unique_id=793973734]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4518143, 2.0015814)
+
+[editable path="skeleton01"]

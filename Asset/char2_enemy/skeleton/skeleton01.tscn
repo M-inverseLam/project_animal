@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://kaf4g0fmog8k" path="res://Asset/char2_enemy/skeleton/skeleton01.glb" id="1_ckke8"]
 [ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Script/enemy_Ai01.gd" id="1_ksosr"]
-[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/colorWheel_toon.material" id="2_ksosr"]
+[ext_resource type="Material" uid="uid://d2f58uquqwxs4" path="res://Asset/char1_hero/01_share_material_texture/color_toon.material" id="2_ksosr"]
 [ext_resource type="PackedScene" uid="uid://dp4hxqno47h6t" path="res://Asset/char2_enemy/skeleton/skeleton01_bullet01.tscn" id="2_um600"]
 [ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="3_awyqy"]
 [ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Script/enemy_damage_receiver.gd" id="4_jlht6"]

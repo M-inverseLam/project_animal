@@ -52,7 +52,7 @@ func _physics_process(delta: float) -> void:
 		_collect_gem()
 
 
-func pop_from_ground(spawn_position: Vector3) -> void:
+func pop_from_ground(spawn_position: Vector3, pop_direction: Vector3 = Vector3.ZERO) -> void:
 	global_position = spawn_position
 
 	if _motion_tween != null:
@@ -60,7 +60,12 @@ func pop_from_ground(spawn_position: Vector3) -> void:
 	if _spin_tween != null:
 		_spin_tween.kill()
 
-	var direction := _get_random_ground_direction()
+	var direction := pop_direction
+	direction.y = 0.0
+	if direction.is_zero_approx():
+		direction = _get_random_ground_direction()
+	else:
+		direction = direction.normalized()
 	var start_position := global_position
 	var land_position := start_position + direction * pop_distance
 	var peak_position := start_position.lerp(land_position, 0.45) + Vector3.UP * pop_height
