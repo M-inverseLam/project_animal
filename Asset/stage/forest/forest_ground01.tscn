@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://p7nndlvja376"]
+
+[ext_resource type="Texture2D" uid="uid://dw01f1mjno76y" path="res://Asset/stage/forest/forest_ground01.tga" id="1_5cq0a"]
+[ext_resource type="Script" uid="uid://bjsjsp1xtte1f" path="res://Asset/stage/forest/forest_ground_infinite.gd" id="2_infinite"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mti6b"]
+albedo_texture = ExtResource("1_5cq0a")
+
+[sub_resource type="QuadMesh" id="QuadMesh_4kxuq"]
+size = Vector2(20, 30)
+orientation = 1
+
+[node name="forest_ground" type="Node3D" unique_id=1425251553]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+script = ExtResource("2_infinite")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=954328929]
+material_override = SubResource("StandardMaterial3D_mti6b")
+mesh = SubResource("QuadMesh_4kxuq")

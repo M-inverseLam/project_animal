@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://flk36qjidqax"]
+
+[ext_resource type="Texture2D" uid="uid://k07i57am3ads" path="res://Asset/stage/forest/forest_ground_decal04.tga" id="1_y1wl7"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_4kxuq"]
+size = Vector2(10, 10)
+orientation = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mti6b"]
+transparency = 1
+albedo_texture = ExtResource("1_y1wl7")
+
+[node name="MeshInstance3D" type="MeshInstance3D" unique_id=212715731]
+mesh = SubResource("QuadMesh_4kxuq")
+surface_material_override/0 = SubResource("StandardMaterial3D_mti6b")

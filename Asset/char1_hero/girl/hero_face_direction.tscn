@@ -5,6 +5,7 @@
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_apjeo"]
 transparency = 1
+shading_mode = 0
 albedo_texture = ExtResource("2_aq1s0")
 disable_receive_shadows = true
 
@@ -12,7 +13,7 @@ disable_receive_shadows = true
 
 [node name="hero_face_direction" parent="." unique_id=390151321 instance=ExtResource("1_ako30")]
 
-[node name="hero_direction" parent="hero_face_direction" index="0" unique_id=1007121237]
+[node name="hero_direction" parent="hero_face_direction" index="0" unique_id=704254527]
 surface_material_override/0 = SubResource("StandardMaterial3D_apjeo")
 
 [editable path="hero_face_direction"]

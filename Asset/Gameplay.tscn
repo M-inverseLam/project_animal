@@ -1,10 +1,26 @@
 [gd_scene format=3 uid="uid://gy2nqvfermwd"]
 
 [ext_resource type="Script" uid="uid://bbcc5d0litwvb" path="res://Asset/GameplayCamera.gd" id="3_nhh1a"]
-[ext_resource type="PackedScene" uid="uid://ml5v4gxkx6fm" path="res://Asset/stage/castle/stage_castle01.tscn" id="4_cscit"]
 [ext_resource type="PackedScene" uid="uid://qvtqchh8es53" path="res://Asset/ui/ui04/ui04_main.tscn" id="5_7nfr3"]
 [ext_resource type="Script" uid="uid://3e6eh4j2be4v" path="res://Script/enemy_wave_spawner.gd" id="5_njwhd"]
 [ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/char1_hero/girl/hero_girl01.tscn" id="5_s8hmd"]
+[ext_resource type="PackedScene" uid="uid://p7nndlvja376" path="res://Asset/stage/forest/forest_ground01.tscn" id="6_s8hmd"]
+
+[sub_resource type="Environment" id="Environment_7nfr3"]
+background_color = Color(0.043001078, 0.37722728, 0.94637746, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.5418937, 0.617481, 0.7466852, 1)
+ssao_enabled = true
+ssao_intensity = 4.0
+glow_enabled = true
+glow_normalized = true
+glow_intensity = 1.32
+glow_strength = 0.16
+glow_bloom = 0.1
+adjustment_enabled = true
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7nfr3"]
+size = Vector3(95, 1.7055664, 95)
 
 [node name="Node3D" type="Node3D" unique_id=129724868]
 
@@ -17,19 +33,42 @@ layer = 10
 
 [node name="Camera3D" type="Camera3D" parent="world" unique_id=1915048110]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.70710677, 0, 26.15118, 25.622486)
-fov = 30.0
+fov = 5.0
+far = 1714.94
 script = ExtResource("3_nhh1a")
 target_path = NodePath("../../hero_girl01")
-follow_offset = Vector3(0, 0, 35)
-camera_angle = -30.0
+follow_offset = Vector3(0, 0, 200)
+camera_angle = -40.0
 spring_strength = 20.0
 camera_shake_duration = 0.7
 camera_shake_strength = 0.07
-
-[node name="stage_castle01" parent="." unique_id=465259332 instance=ExtResource("4_cscit")]
 
 [node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]
 collision_layer = 17
 
 [node name="EnemyWaveSpawner" type="Node" parent="." unique_id=1774927294]
 script = ExtResource("5_njwhd")
+
+[node name="forest_ground" parent="." unique_id=1425251553 instance=ExtResource("6_s8hmd")]
+camera_path = NodePath("../world/Camera3D")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1930421311]
+environment = SubResource("Environment_7nfr3")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=93572690]
+transform = Transform3D(1, 0, 0, 0, 0.25881907, 0.9659258, 0, -0.9659258, 0.25881907, 0, 6.4843073, 0)
+light_color = Color(0.76641256, 0.81978786, 1, 1)
+light_indirect_energy = 0.2
+light_specular = 2.0
+shadow_enabled = true
+directional_shadow_max_distance = 400.0
+
+[node name="spawnArea" type="Area3D" parent="." unique_id=751402983]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="spawnArea" unique_id=1257432671]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3527832, 0)
+shape = SubResource("BoxShape3D_7nfr3")
