@@ -31,9 +31,11 @@ radius = 1.4669288
 
 [node name="giant_axe01" type="Node3D" unique_id=1807857860 groups=["weapon"]]
 script = ExtResource("1_gr6qm")
-speed = 8.0
+speed = 6.0
 lifetime = 7.0
-damage = 10
+damage = 3
+weapon_health = 10
+collision_cooldown_time = 0.2
 hit_spark_scene = ExtResource("2_xt0di")
 ignored_groups = PackedStringArray()
 
@@ -42,10 +44,10 @@ script = ExtResource("2_gr6qm")
 rotation_axis = Vector3(0, 0, 1)
 rotation_speed_degrees = 800.0
 
-[node name="giant_axe01" parent="giant_axe01" index="0" unique_id=1208849629]
+[node name="giant_axe01" parent="giant_axe01" index="0" unique_id=882636806]
 surface_material_override/0 = ExtResource("2_hqpbx")
 
-[node name="bullet_effect" parent="giant_axe01" index="1" unique_id=1206549790]
+[node name="bullet_effect" parent="giant_axe01" index="1" unique_id=1946089577]
 surface_material_override/0 = SubResource("ShaderMaterial_ac08q")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1708159116]

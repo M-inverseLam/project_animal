@@ -9,13 +9,18 @@ extends Control
 @export var face_control_node_name: String = "hero_girl01"
 
 @onready var game_over: Control = get_node_or_null("GameOver") as Control
+@onready var time_label: Label = get_node_or_null("MarginContainer/HBoxContainer/timesicon/time") as Label
 
 var _ground_cursor: Node3D
 var _face_control_node: Node
 var _is_system_cursor_hidden := false
+var _elapsed_time := 0.0
+var _displayed_second := -1
+var _game_timer_is_running := true
 
 
 func _ready() -> void:
+	_update_time_label(true)
 	if ground_cursor_scene != null:
 		_spawn_ground_cursor.call_deferred()
 		return
@@ -33,11 +38,13 @@ func _exit_tree() -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_game_timer(delta)
 	_update_ground_cursor_position()
 
 
 func show_game_over() -> void:
+	_game_timer_is_running = false
 	if game_over != null:
 		game_over.visible = true
 
@@ -45,6 +52,35 @@ func show_game_over() -> void:
 func hide_game_over() -> void:
 	if game_over != null:
 		game_over.visible = false
+
+
+func reset_game_timer() -> void:
+	_elapsed_time = 0.0
+	_displayed_second = -1
+	_game_timer_is_running = true
+	_update_time_label(true)
+
+
+func _update_game_timer(delta: float) -> void:
+	if not _game_timer_is_running:
+		return
+
+	_elapsed_time += maxf(delta, 0.0)
+	_update_time_label()
+
+
+func _update_time_label(force_update: bool = false) -> void:
+	if time_label == null:
+		return
+
+	var total_seconds := floori(_elapsed_time)
+	if not force_update and total_seconds == _displayed_second:
+		return
+
+	_displayed_second = total_seconds
+	var minutes := floori(float(total_seconds) / 60.0)
+	var seconds := total_seconds % 60
+	time_label.text = "%02d:%02d" % [minutes, seconds]
 
 
 func _spawn_ground_cursor() -> void:

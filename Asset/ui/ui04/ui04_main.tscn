@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bmhxfby7oqfne" path="res://Asset/ui/ui04/ui04_mousecursor.tscn" id="5_ground_cursor"]
 [ext_resource type="PackedScene" uid="uid://bc0m77j50oqvn" path="res://Asset/ui/ui04/ui04_gameover.tscn" id="6_gameover"]
 [ext_resource type="Texture2D" uid="uid://crnt20yr5u0js" path="res://Asset/ui/ui04/ui04_main_icon_coins.tga" id="7_wncja"]
+[ext_resource type="Texture2D" uid="uid://bl7tupiqh385c" path="res://Asset/ui/ui04/ui04_main_icon_time.tga" id="8_w2ctx"]
 
 [sub_resource type="Theme" id="Theme_ycw01"]
 default_font = ExtResource("2_bx36w")
@@ -148,7 +149,33 @@ text = "00000"
 label_settings = SubResource("LabelSettings_4kxuq")
 
 [node name="space2" type="Control" parent="MarginContainer/HBoxContainer" unique_id=1694569082]
-custom_minimum_size = Vector2(275, 0)
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="timesicon" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=765660624]
+custom_minimum_size = Vector2(42, 40)
+layout_mode = 2
+size_flags_vertical = 4
+offset_transform_position = Vector2(8, 0)
+texture = ExtResource("8_w2ctx")
+stretch_mode = 3
+
+[node name="time" type="Label" parent="MarginContainer/HBoxContainer/timesicon" unique_id=2067717778]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.1190001
+anchor_top = 0.068
+anchor_right = 1.1190001
+anchor_bottom = 0.068
+offset_left = 3.001995
+offset_top = 0.007999897
+offset_right = 107.002
+offset_bottom = 37.008
+text = "00:00"
+label_settings = SubResource("LabelSettings_4kxuq")
+
+[node name="space3" type="Control" parent="MarginContainer/HBoxContainer" unique_id=733876432]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
 [node name="gemsicon" type="TextureRect" parent="MarginContainer/HBoxContainer" unique_id=939212301]

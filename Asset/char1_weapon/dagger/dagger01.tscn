@@ -11,15 +11,15 @@ radius = 0.22167969
 
 [node name="dagger01" type="Node3D" unique_id=1150611158 groups=["weapon"]]
 script = ExtResource("1_conir")
-speed = 25.0
+speed = 12.0
 lifetime = 0.7
-damage = 2
+weapon_health = 5
 hit_spark_scene = ExtResource("2_j7ybq")
 hit_spark_height = 0.4
 
 [node name="dagger01" parent="." unique_id=1088331907 instance=ExtResource("1_eysqf")]
 
-[node name="dagger01" parent="dagger01" index="0" unique_id=1938629363]
+[node name="dagger01" parent="dagger01" index="0" unique_id=1664191504]
 surface_material_override/0 = ExtResource("2_conir")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=1421229616]

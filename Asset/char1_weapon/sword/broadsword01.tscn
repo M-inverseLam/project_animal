@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://dbdpjrx6urim0"]
+
+[ext_resource type="PackedScene" uid="uid://d1hulquddn0r7" path="res://Asset/char1_weapon/sword/broadsword01.glb" id="1_7yect"]
+[ext_resource type="Texture2D" uid="uid://bpljvmgxemut7" path="res://Asset/char1_weapon/sword/broadsword01.tga" id="2_4umt6"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ina5d"]
+cull_mode = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 1)
+disable_receive_shadows = true
+grow = true
+grow_amount = 0.03
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wnksc"]
+next_pass = SubResource("StandardMaterial3D_ina5d")
+diffuse_mode = 3
+specular_mode = 1
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("2_4umt6")
+roughness = 0.05
+rim_enabled = true
+rim = 0.97
+rim_tint = 1.0
+backlight = Color(0.35560384, 0.45013386, 0.77877706, 1)
+grow_amount = 0.02
+stencil_flags = 2
+
+[node name="broadsword01" type="Node3D" unique_id=290055262]
+
+[node name="broadsword01" parent="." unique_id=104483883 instance=ExtResource("1_7yect")]
+
+[node name="broadsword01" parent="broadsword01" index="0" unique_id=764581640]
+surface_material_override/0 = SubResource("StandardMaterial3D_wnksc")
+
+[editable path="broadsword01"]

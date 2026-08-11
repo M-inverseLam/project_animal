@@ -9,22 +9,22 @@
 	  "enemies": [
 		{
 		  "scene": "res://Asset/char2_enemy/bat/bat01.tscn",
-		  "quantity": 40,
+		  "quantity": 30,
 		  "spawn_time_offset": 0.0,
-		  "spawn_interval": 0.5
-		},
-		{
-		  "scene": "res://Asset/char2_enemy/skeleton/skeleton01_elite.tscn",
-		  "quantity": 40,
-		  "spawn_after_previous_group": true,
-		  "spawn_time_offset": 0.0,
-		  "spawn_interval": 0.5
+		  "spawn_interval": 1.0
 		},
 		{
 		  "scene": "res://Asset/char2_enemy/skeleton/skeleton01.tscn",
-		  "quantity": 80,
-		  "spawn_after_previous_group": true,
-		  "spawn_time_offset": 0.0,
+		  "quantity": 30,
+		  "spawn_after_previous_group": false,
+		  "spawn_time_offset": 30.0,
+		  "spawn_interval": 1.0
+		},
+		{
+		  "scene": "res://Asset/char2_enemy/bat/bat01.tscn",
+		  "quantity": 30,
+		  "spawn_after_previous_group": false,
+		  "spawn_time_offset": 60.0,
 		  "spawn_interval": 0.5
 		},
 		{

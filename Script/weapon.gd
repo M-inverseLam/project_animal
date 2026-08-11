@@ -5,6 +5,11 @@ extends Node3D
 @export var damage: int = 1
 @export var impact_weight: float = 1.0
 
+@export_group("Weapon Health")
+@export_range(1, 100, 1) var weapon_health: int = 1
+@export_range(0.0, 10.0, 0.01, "suffix:s") var collision_cooldown_time: float = 0.1
+
+@export_group("")
 @export var hit_spark_scene: PackedScene
 @export var hit_spark_height: float = 0.8
 @export var ignored_groups: PackedStringArray = PackedStringArray(["enemy_projectile"])
@@ -16,11 +21,13 @@ extends Node3D
 
 var _direction := Vector3.FORWARD
 var _source: Node
-var _hit_targets: Array[Node] = []
 var _is_active := false
+var _collision_is_enabled := false
+var _current_health := 0
 
 
 func _ready() -> void:
+	_current_health = maxi(weapon_health, 1)
 	if hit_area != null:
 		hit_area.body_entered.connect(_on_hit_body_entered)
 		hit_area.area_entered.connect(_on_hit_area_entered)
@@ -51,7 +58,7 @@ func _on_hit_area_entered(area: Area3D) -> void:
 
 
 func _apply_hit(target: Node) -> void:
-	if not _is_active:
+	if not _is_active or not _collision_is_enabled:
 		return
 	if target == null:
 		return
@@ -61,20 +68,41 @@ func _apply_hit(target: Node) -> void:
 		return
 	if _is_ignored_target(target):
 		return
-	if _hit_targets.has(target):
-		return
 
-	_hit_targets.append(target)
+	var hit_was_applied := false
 	if target.has_method("take_attack_hit"):
 		target.call("take_attack_hit", _direction, damage, impact_weight)
-		_spawn_hit_spark(target)
-		_shake_camera_on_hit()
-		queue_free()
+		hit_was_applied = true
 	elif target.has_method("take_damage"):
 		target.call("take_damage", damage)
-		_spawn_hit_spark(target)
-		_shake_camera_on_hit()
+		hit_was_applied = true
+
+	if not hit_was_applied:
+		return
+
+	_spawn_hit_spark(target)
+	_shake_camera_on_hit()
+	_consume_weapon_health()
+
+
+func _consume_weapon_health() -> void:
+	_current_health = maxi(_current_health - 1, 0)
+	_set_collision_enabled(false)
+	if _current_health <= 0:
 		queue_free()
+		return
+
+	if collision_cooldown_time <= 0.0:
+		call_deferred("_restore_collision")
+		return
+
+	get_tree().create_timer(collision_cooldown_time).timeout.connect(_restore_collision)
+
+
+func _restore_collision() -> void:
+	if not _is_active or _current_health <= 0:
+		return
+	_set_collision_enabled(true)
 
 
 func _is_ignored_target(target: Node) -> bool:
@@ -98,8 +126,13 @@ func _activate_projectile() -> void:
 func _set_projectile_active(is_active: bool) -> void:
 	_is_active = is_active
 	visible = is_active
+	_set_collision_enabled(is_active)
+
+
+func _set_collision_enabled(is_enabled: bool) -> void:
+	_collision_is_enabled = is_enabled
 	if hit_area != null:
-		hit_area.monitoring = is_active
+		hit_area.set_deferred("monitoring", is_enabled)
 
 
 func _spawn_hit_spark(target: Node) -> void:
