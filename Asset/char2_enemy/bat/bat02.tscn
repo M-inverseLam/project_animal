@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://cecnb1n1lveiy"]
+
+[ext_resource type="PackedScene" uid="uid://86f4clyhml1r" path="res://Asset/char2_enemy/bat/bat02.glb" id="1_0uf3g"]
+[ext_resource type="Script" uid="uid://dig8cqa4e6ln0" path="res://Script/enemy_Ai01.gd" id="1_2c6k2"]
+[ext_resource type="Texture2D" uid="uid://bvvhjsy4m0w2k" path="res://Asset/char2_enemy/bat/bat02.tga" id="2_byx25"]
+[ext_resource type="PackedScene" uid="uid://blni847ylfhaf" path="res://Asset/char2_enemy/bees/bee01_bullet01.tscn" id="2_vkfh7"]
+[ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Script/enemy_damage_receiver.gd" id="3_byx25"]
+[ext_resource type="FontFile" uid="uid://b70j2kew6344" path="res://Asset/ui/font/Anton-Regular.ttf" id="3_do3ci"]
+[ext_resource type="PackedScene" uid="uid://b4t37gb6ddnns" path="res://Asset/sfx/hitspark/hitspark02.tscn" id="4_b1kwd"]
+[ext_resource type="PackedScene" uid="uid://c5svw8lgdf8um" path="res://Asset/item/gems01.tscn" id="5_j2vs4"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ina5d"]
+cull_mode = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 1)
+disable_receive_shadows = true
+grow = true
+grow_amount = 0.03
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2c6k2"]
+next_pass = SubResource("StandardMaterial3D_ina5d")
+diffuse_mode = 3
+specular_mode = 1
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("2_byx25")
+roughness = 0.05
+rim_enabled = true
+rim = 0.97
+rim_tint = 1.0
+backlight = Color(0.35560384, 0.45013386, 0.77877706, 1)
+grow_amount = 0.02
+stencil_flags = 2
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_2c6k2"]
+radius = 0.61037946
+
+[node name="bat02" type="Node3D" unique_id=1537850043 groups=["enemy"]]
+script = ExtResource("1_2c6k2")
+idle_animation_name = "walk"
+attack_animation_name = "walk"
+spawn_height = 0.9
+max_health = 50
+walk_speed = 2.8
+chase_speed = 2.8
+use_weighted_ai = true
+ai_idle_weight = 0.0
+ai_chase_weight = 100.0
+ai_attack_weight = 2.0
+shoot_projectile_scene = ExtResource("2_vkfh7")
+shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
+avoid_enemy_overlap = true
+overlap_avoidance_radius = 2.5
+damage_number_font = ExtResource("3_do3ci")
+damage_number_font_size = 120
+damage_number_color = Color(1, 0.5294118, 0.2509804, 1)
+death_spark_scene = ExtResource("4_b1kwd")
+death_drop_scene = ExtResource("5_j2vs4")
+death_drop_quantity = 2
+
+[node name="bat02" parent="." unique_id=1023263387 instance=ExtResource("1_0uf3g")]
+
+[node name="body" parent="bat02/Armature/Skeleton3D" parent_id_path=PackedInt32Array(1023263387, 345067182) index="0" unique_id=1454100669]
+surface_material_override/0 = SubResource("StandardMaterial3D_2c6k2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=850042481]
+script = ExtResource("3_byx25")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1176852656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.063412905, 0)
+shape = SubResource("SphereShape3D_2c6k2")
+
+[node name="shootposition" type="Marker3D" parent="." unique_id=1823432644]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.8546848)
+
+[editable path="bat02"]

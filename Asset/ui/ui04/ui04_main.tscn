@@ -55,6 +55,13 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="LabelSettings" id="LabelSettings_mti6b"]
+font = ExtResource("2_bx36w")
+font_size = 30
+font_color = Color(0.9962633, 0.8014959, 0.14574215, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
 [node name="ui04_main" type="Control" unique_id=619611884]
 layout_mode = 3
 anchors_preset = 15
@@ -216,3 +223,23 @@ theme_override_constants/outline_size = 4
 text = "500"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="wave_number" type="Label" parent="." unique_id=112586058]
+layout_mode = 0
+offset_left = 663.0
+offset_top = 59.0
+offset_right = 813.0
+offset_bottom = 128.0
+text = "Wave 0"
+label_settings = SubResource("LabelSettings_mti6b")
+horizontal_alignment = 1
+
+[node name="enemy_number" type="Label" parent="." unique_id=963454088]
+layout_mode = 0
+offset_left = 850.0
+offset_top = 59.0
+offset_right = 1000.0
+offset_bottom = 128.0
+text = "enemy 0"
+label_settings = SubResource("LabelSettings_mti6b")
+horizontal_alignment = 1

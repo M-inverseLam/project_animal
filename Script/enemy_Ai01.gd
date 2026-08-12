@@ -64,6 +64,7 @@ static var _shared_health_bar_shader: Shader
 @export var idle_time_range: Vector2 = Vector2(2.0, 4.0)
 @export var walk_time_range: Vector2 = Vector2(2.0, 4.0)
 @export var run_away_speed: float = 5.0
+@export_range(1.0, 10.0, 0.1) var offscreen_speed_multiplier: float = 2.0
 
 @export_group("AI Decision")
 @export var use_weighted_ai: bool = false
@@ -224,7 +225,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if _state == "walk":
-		global_position += _walk_direction * walk_speed * delta
+		global_position += _walk_direction * walk_speed * _get_offscreen_speed_multiplier() * delta
 		_face_direction(_walk_direction, delta)
 
 		if _state_time_left <= 0.0:
@@ -265,7 +266,7 @@ func _process_retreat_from_hero(delta: float) -> void:
 		retreat_direction = global_transform.basis.z
 	retreat_direction = retreat_direction.normalized()
 
-	global_position += retreat_direction * maxf(retreat_from_hero_speed, 0.0) * delta
+	global_position += retreat_direction * maxf(retreat_from_hero_speed, 0.0) * _get_offscreen_speed_multiplier() * delta
 	_face_direction(retreat_direction, delta)
 	_state_time_left -= delta
 	if _state_time_left <= 0.0:
@@ -300,7 +301,7 @@ func _process_run_away(delta: float) -> void:
 		run_direction = global_transform.basis.z
 
 	run_direction = run_direction.normalized()
-	global_position += run_direction * run_away_speed * delta
+	global_position += run_direction * run_away_speed * _get_offscreen_speed_multiplier() * delta
 	_face_direction(run_direction, delta)
 
 
@@ -331,7 +332,7 @@ func _process_chase(delta: float) -> void:
 			Vector3.UP,
 			_chase_direction_angle_offset
 		)
-		global_position += chase_direction * chase_speed * delta
+		global_position += chase_direction * chase_speed * _get_offscreen_speed_multiplier() * delta
 		_face_direction(chase_direction, delta)
 
 	if _state_time_left <= 0.0:
@@ -354,6 +355,20 @@ func _randomize_chase_direction() -> void:
 		minimum_change_time,
 		maximum_change_time
 	)
+
+
+func _get_offscreen_speed_multiplier() -> float:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return 1.0
+	if camera.is_position_behind(global_position):
+		return maxf(offscreen_speed_multiplier, 1.0)
+
+	var screen_position := camera.unproject_position(global_position)
+	if not get_viewport().get_visible_rect().has_point(screen_position):
+		return maxf(offscreen_speed_multiplier, 1.0)
+
+	return 1.0
 
 
 func _start_attack(player: Node3D) -> void:
@@ -871,6 +886,7 @@ func _show_damage_number(damage: int) -> void:
 	tween.set_parallel(true)
 	tween.tween_property(label, "global_position", label.global_position + Vector3.UP * damage_number_rise, damage_number_duration)
 	tween.tween_property(label, "modulate:a", 0.0, damage_number_duration)
+	tween.tween_property(label, "outline_modulate:a", 0.0, damage_number_duration)
 	tween.set_parallel(false)
 	tween.tween_callback(label.queue_free)
 

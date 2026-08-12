@@ -25,14 +25,15 @@
 		  "quantity": 30,
 		  "spawn_after_previous_group": false,
 		  "spawn_time_offset": 60.0,
-		  "spawn_interval": 0.5
+		  "spawn_interval": 1.0
 		},
 		{
-		  "scene": "res://Asset/char2_enemy/mushroom01/mushroom01.tscn",
-		  "quantity": 2,
-		  "spawn_after_previous_group": true,
+		  "scene": "res://Asset/char2_enemy/bat/bat02.tscn",
+		  "quantity": 30,
+		  "spawn_after_previous_group": false,
+		  "spawn_time_offset": 60.0,
 		  "spawn_delay": 3.0,
-		  "spawn_interval": 2.0
+		  "spawn_interval": 1.0
 		}
 	  ]
 	},

@@ -10,6 +10,8 @@ extends Control
 
 @onready var game_over: Control = get_node_or_null("GameOver") as Control
 @onready var time_label: Label = get_node_or_null("MarginContainer/HBoxContainer/timesicon/time") as Label
+@onready var wave_number_label: Label = get_node_or_null("wave_number") as Label
+@onready var enemy_number_label: Label = get_node_or_null("enemy_number") as Label
 
 var _ground_cursor: Node3D
 var _face_control_node: Node
@@ -17,10 +19,14 @@ var _is_system_cursor_hidden := false
 var _elapsed_time := 0.0
 var _displayed_second := -1
 var _game_timer_is_running := true
+var _enemy_wave_spawner: Node
 
 
 func _ready() -> void:
 	_update_time_label(true)
+	_update_wave_name("Wave 1")
+	_update_enemy_number(0)
+	_connect_enemy_wave_spawner()
 	if ground_cursor_scene != null:
 		_spawn_ground_cursor.call_deferred()
 		return
@@ -81,6 +87,45 @@ func _update_time_label(force_update: bool = false) -> void:
 	var minutes := floori(float(total_seconds) / 60.0)
 	var seconds := total_seconds % 60
 	time_label.text = "%02d:%02d" % [minutes, seconds]
+
+
+func _connect_enemy_wave_spawner() -> void:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+
+	_enemy_wave_spawner = scene_root.get_node_or_null("EnemyWaveSpawner")
+	if _enemy_wave_spawner == null:
+		_enemy_wave_spawner = scene_root.find_child("EnemyWaveSpawner", true, false)
+	if _enemy_wave_spawner == null or not _enemy_wave_spawner.has_signal("wave_started"):
+		return
+
+	var wave_started_callback := Callable(self, "_on_wave_started")
+	if not _enemy_wave_spawner.is_connected("wave_started", wave_started_callback):
+		_enemy_wave_spawner.connect("wave_started", wave_started_callback)
+	var enemy_count_callback := Callable(self, "_on_active_enemy_count_changed")
+	if _enemy_wave_spawner.has_signal("active_enemy_count_changed") and not _enemy_wave_spawner.is_connected("active_enemy_count_changed", enemy_count_callback):
+		_enemy_wave_spawner.connect("active_enemy_count_changed", enemy_count_callback)
+	if _enemy_wave_spawner.has_method("get_active_enemy_count"):
+		_update_enemy_number(int(_enemy_wave_spawner.call("get_active_enemy_count")))
+
+
+func _on_wave_started(_wave_index: int, wave_name: String) -> void:
+	_update_wave_name(wave_name)
+
+
+func _update_wave_name(wave_name: String) -> void:
+	if wave_number_label != null:
+		wave_number_label.text = wave_name
+
+
+func _on_active_enemy_count_changed(enemy_count: int) -> void:
+	_update_enemy_number(enemy_count)
+
+
+func _update_enemy_number(enemy_count: int) -> void:
+	if enemy_number_label != null:
+		enemy_number_label.text = "enemy %d" % maxi(enemy_count, 0)
 
 
 func _spawn_ground_cursor() -> void:

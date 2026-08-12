@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cl5661ghjvers"]
+[gd_scene format=3 uid="uid://cwwplpyhhyrgt"]
 
 [ext_resource type="Script" uid="uid://6jxoruh7khfd" path="res://Script/weapon.gd" id="1_conir"]
 [ext_resource type="PackedScene" uid="uid://mtqqchcmvu4d" path="res://Asset/char1_weapon/dagger/dagger01.glb" id="1_eysqf"]

@@ -2,10 +2,11 @@ extends Node
 
 signal wave_started(wave_index: int, wave_name: String)
 signal enemy_spawned(enemy: Node3D, wave_index: int, enemy_index: int)
+signal active_enemy_count_changed(enemy_count: int)
 signal wave_completed(wave_index: int, wave_name: String)
 signal all_waves_completed
 
-const WAVE_CONFIG_PATH := "res://Asset/enemywave/enemy_waves.json"
+const WAVE_CONFIG_PATH := "res://Asset/enemywave/enemy_wave_forest.csv"
 const SPAWN_PARENT_PATH := NodePath("..")
 const SPAWN_AREA_NAME := "spawnArea"
 const SPAWN_POSITION_ATTEMPTS := 64
@@ -31,6 +32,7 @@ var _enemy_scene_cache: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _spawn_area: Area3D
 var _spawn_area_shape: CollisionShape3D
+var _wave_sequence_started_at_msec := 0
 
 
 func _ready() -> void:
@@ -48,6 +50,7 @@ func start_waves() -> void:
 		return
 
 	_is_running = true
+	_wave_sequence_started_at_msec = Time.get_ticks_msec()
 	for wave_index in range(_waves.size()):
 		if not _is_running:
 			break
@@ -69,10 +72,9 @@ func stop_waves() -> void:
 
 
 func _run_wave(wave_index: int, wave: WaveData) -> void:
-	wave_started.emit(wave_index, wave.wave_name)
 	var spawn_entries: Array[SpawnEntry] = wave.enemy_list.duplicate()
 	spawn_entries.sort_custom(_sort_spawn_entries)
-	var previous_offset := 0.0
+	var wave_has_started := false
 
 	for enemy_index in range(spawn_entries.size()):
 		if not _is_running:
@@ -80,14 +82,17 @@ func _run_wave(wave_index: int, wave: WaveData) -> void:
 
 		var spawn_entry: SpawnEntry = spawn_entries[enemy_index]
 		var spawn_offset := maxf(spawn_entry.spawn_time_offset, 0.0)
-		var delay := maxf(spawn_offset - previous_offset, 0.0)
+		var elapsed := float(Time.get_ticks_msec() - _wave_sequence_started_at_msec) / 1000.0
+		var delay := maxf(spawn_offset - elapsed, 0.0)
 		if delay > 0.0:
 			await get_tree().create_timer(delay).timeout
 			if not _is_running:
 				return
 
+		if not wave_has_started:
+			wave_has_started = true
+			wave_started.emit(wave_index, wave.wave_name)
 		_spawn_enemy(spawn_entry, wave_index, enemy_index)
-		previous_offset = spawn_offset
 
 	if wave.wait_until_defeated:
 		while _is_running and _has_active_enemies():
@@ -121,6 +126,7 @@ func _spawn_enemy(spawn_entry: SpawnEntry, wave_index: int, enemy_index: int) ->
 	enemy.global_transform = spawn_transform
 	_active_enemies.append(enemy)
 	enemy.tree_exited.connect(_on_enemy_tree_exited.bind(enemy), CONNECT_ONE_SHOT)
+	active_enemy_count_changed.emit(_active_enemies.size())
 	enemy_spawned.emit(enemy, wave_index, enemy_index)
 
 
@@ -136,69 +142,89 @@ func _load_wave_config() -> bool:
 		push_error("Could not open enemy wave file: " + WAVE_CONFIG_PATH)
 		return false
 
-	var json := JSON.new()
-	var parse_error := json.parse(file.get_as_text())
-	if parse_error != OK:
-		push_error(
-			"Enemy wave JSON error at line %d: %s"
-			% [json.get_error_line(), json.get_error_message()]
-		)
+	if file.eof_reached():
+		push_error("Enemy wave CSV is empty: " + WAVE_CONFIG_PATH)
 		return false
 
-	var root_value: Variant = json.data
-	if not root_value is Dictionary:
-		push_error("Enemy wave file root must be a JSON object.")
-		return false
+	var headers := file.get_csv_line()
+	var column_indexes := _get_csv_column_indexes(headers)
+	var required_columns := PackedStringArray([
+		"wave",
+		"name",
+		"start_delay",
+		"wait_until_defeated",
+		"enemy_scene",
+		"quantity",
+		"spawn_time_offset",
+		"spawn_interval",
+		"spawn_after_previous_group",
+		"spawn_delay",
+	])
+	for column_name in required_columns:
+		if not column_indexes.has(column_name):
+			push_error("Enemy wave CSV is missing column: " + column_name)
+			return false
 
-	var root_data: Dictionary = root_value
-	_auto_start = bool(root_data.get("auto_start", true))
-	_outside_camera_margin_pixels = maxf(
-		float(root_data.get("outside_camera_margin_pixels", 80.0)),
-		0.0
-	)
-	var raw_waves_value: Variant = root_data.get("waves", [])
-	if not raw_waves_value is Array:
-		push_error("Enemy wave file 'waves' must be an array.")
-		return false
-
-	var raw_waves: Array = raw_waves_value
-	for wave_index in range(raw_waves.size()):
-		var raw_wave_value: Variant = raw_waves[wave_index]
-		if not raw_wave_value is Dictionary:
-			push_warning("Skipping invalid wave at index %d." % wave_index)
+	var waves_by_id: Dictionary = {}
+	var enemy_groups_by_wave: Dictionary = {}
+	var row_number := 1
+	while not file.eof_reached():
+		var row := file.get_csv_line()
+		row_number += 1
+		if row.is_empty() or _csv_row_is_empty(row):
 			continue
 
-		var raw_wave: Dictionary = raw_wave_value
-		var wave := WaveData.new()
-		wave.wave_name = String(raw_wave.get("name", "Wave %d" % (wave_index + 1)))
-		wave.start_delay = maxf(float(raw_wave.get("start_delay", 0.0)), 0.0)
-		wave.wait_until_defeated = bool(raw_wave.get("wait_until_defeated", true))
-		_load_enemy_list(wave, raw_wave, wave_index)
-		_waves.append(wave)
+		var wave_id := _get_csv_value(row, column_indexes, "wave")
+		if wave_id.is_empty():
+			push_warning("Skipping enemy wave CSV row %d with no wave value." % row_number)
+			continue
+
+		if not waves_by_id.has(wave_id):
+			var wave := WaveData.new()
+			wave.wave_name = _get_csv_value(row, column_indexes, "name", "Wave " + wave_id)
+			wave.start_delay = maxf(_get_csv_float(row, column_indexes, "start_delay"), 0.0)
+			wave.wait_until_defeated = _get_csv_bool(row, column_indexes, "wait_until_defeated", true)
+			waves_by_id[wave_id] = wave
+			enemy_groups_by_wave[wave_id] = []
+			_waves.append(wave)
+
+		var scene_path := _get_csv_value(row, column_indexes, "enemy_scene")
+		if scene_path.is_empty():
+			push_warning("Skipping enemy wave CSV row %d with no enemy scene." % row_number)
+			continue
+
+		var enemy_group := {
+			"scene": scene_path,
+			"quantity": maxi(_get_csv_int(row, column_indexes, "quantity", 1), 1),
+			"spawn_time_offset": maxf(_get_csv_float(row, column_indexes, "spawn_time_offset"), 0.0),
+			"spawn_interval": maxf(_get_csv_float(row, column_indexes, "spawn_interval"), 0.0),
+			"spawn_after_previous_group": _get_csv_bool(row, column_indexes, "spawn_after_previous_group", false),
+			"spawn_delay": maxf(_get_csv_float(row, column_indexes, "spawn_delay"), 0.0),
+		}
+		(enemy_groups_by_wave[wave_id] as Array).append(enemy_group)
+
+		var auto_start_value := _get_csv_value(row, column_indexes, "auto_start")
+		if not auto_start_value.is_empty():
+			_auto_start = _parse_csv_bool(auto_start_value, true)
+		var margin_value := _get_csv_value(row, column_indexes, "outside_camera_margin_pixels")
+		if not margin_value.is_empty():
+			_outside_camera_margin_pixels = maxf(margin_value.to_float(), 0.0)
+
+	for wave_id in waves_by_id:
+		_load_enemy_groups(waves_by_id[wave_id] as WaveData, enemy_groups_by_wave[wave_id] as Array)
+
+	if _waves.is_empty():
+		push_error("Enemy wave CSV contains no valid waves.")
+		return false
 
 	return true
 
 
-func _load_enemy_list(wave: WaveData, raw_wave: Dictionary, wave_index: int) -> void:
-	var raw_enemies_value: Variant = raw_wave.get("enemies", [])
-	if not raw_enemies_value is Array:
-		push_warning("Wave %d 'enemies' must be an array." % (wave_index + 1))
-		return
-
-	var raw_enemies: Array = raw_enemies_value
+func _load_enemy_groups(wave: WaveData, raw_enemies: Array) -> void:
 	var previous_group_last_spawn_offset := 0.0
-	for enemy_index in range(raw_enemies.size()):
-		var raw_enemy_value: Variant = raw_enemies[enemy_index]
-		if not raw_enemy_value is Dictionary:
-			push_warning("Skipping invalid enemy %d in wave %d." % [enemy_index, wave_index])
-			continue
-
-		var raw_enemy: Dictionary = raw_enemy_value
+	for raw_enemy_value in raw_enemies:
+		var raw_enemy: Dictionary = raw_enemy_value as Dictionary
 		var scene_path := String(raw_enemy.get("scene", ""))
-		if scene_path.is_empty():
-			push_warning("Skipping enemy with no scene path in wave %d." % (wave_index + 1))
-			continue
-
 		var quantity := maxi(int(raw_enemy.get("quantity", 1)), 1)
 		var first_spawn_offset := maxf(float(raw_enemy.get("spawn_time_offset", 0.0)), 0.0)
 		var spawn_interval := maxf(float(raw_enemy.get("spawn_interval", 0.0)), 0.0)
@@ -213,6 +239,76 @@ func _load_enemy_list(wave: WaveData, raw_wave: Dictionary, wave_index: int) -> 
 			wave.enemy_list.append(spawn_entry)
 
 		previous_group_last_spawn_offset = first_spawn_offset + spawn_interval * (quantity - 1)
+
+
+func _get_csv_column_indexes(headers: PackedStringArray) -> Dictionary:
+	var column_indexes := {}
+	for index in range(headers.size()):
+		var column_name := headers[index].strip_edges().to_lower().replace(" ", "_")
+		if not column_name.is_empty():
+			column_indexes[column_name] = index
+	return column_indexes
+
+
+func _get_csv_value(
+	row: PackedStringArray,
+	column_indexes: Dictionary,
+	column_name: String,
+	fallback: String = ""
+) -> String:
+	if not column_indexes.has(column_name):
+		return fallback
+	var column_index := int(column_indexes[column_name])
+	if column_index < 0 or column_index >= row.size():
+		return fallback
+	var value := row[column_index].strip_edges()
+	return fallback if value.is_empty() else value
+
+
+func _get_csv_float(
+	row: PackedStringArray,
+	column_indexes: Dictionary,
+	column_name: String,
+	fallback: float = 0.0
+) -> float:
+	var value := _get_csv_value(row, column_indexes, column_name)
+	return fallback if value.is_empty() else value.to_float()
+
+
+func _get_csv_int(
+	row: PackedStringArray,
+	column_indexes: Dictionary,
+	column_name: String,
+	fallback: int = 0
+) -> int:
+	var value := _get_csv_value(row, column_indexes, column_name)
+	return fallback if value.is_empty() else value.to_int()
+
+
+func _get_csv_bool(
+	row: PackedStringArray,
+	column_indexes: Dictionary,
+	column_name: String,
+	fallback: bool
+) -> bool:
+	var value := _get_csv_value(row, column_indexes, column_name)
+	return fallback if value.is_empty() else _parse_csv_bool(value, fallback)
+
+
+func _parse_csv_bool(value: String, fallback: bool) -> bool:
+	match value.strip_edges().to_lower():
+		"true", "yes", "1", "on":
+			return true
+		"false", "no", "0", "off":
+			return false
+	return fallback
+
+
+func _csv_row_is_empty(row: PackedStringArray) -> bool:
+	for value in row:
+		if not value.strip_edges().is_empty():
+			return false
+	return true
 
 
 func _get_enemy_scene(scene_path: String) -> PackedScene:
@@ -239,6 +335,12 @@ func _has_active_enemies() -> bool:
 
 func _on_enemy_tree_exited(enemy: Node3D) -> void:
 	_active_enemies.erase(enemy)
+	active_enemy_count_changed.emit(_active_enemies.size())
+
+
+func get_active_enemy_count() -> int:
+	_has_active_enemies()
+	return _active_enemies.size()
 
 
 func _sort_spawn_entries(first: SpawnEntry, second: SpawnEntry) -> bool:

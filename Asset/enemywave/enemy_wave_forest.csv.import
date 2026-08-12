@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://drrqklno6g2rv"
+valid=false
+
+[deps]
+
+source_file="res://Asset/enemywave/enemy_wave_forest.csv"
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true
