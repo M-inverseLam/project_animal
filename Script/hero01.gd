@@ -328,7 +328,7 @@ func _start_dash() -> void:
 		return
 
 	_resume_auto_shoot_after_dash = _auto_shoot_is_enabled
-	_cancel_weapon_burst()
+	_pause_weapon_firing()
 	_clear_attack_state(true)
 	_is_dashing = true
 	_dash_time_left = _weapon_dash_duration
@@ -402,7 +402,7 @@ func _stop_dash() -> void:
 	_stop_dash_dust()
 	_dash_cooldown_time_left = dash_cooldown
 	_current_animation = ""
-	_resume_auto_shoot(_resume_auto_shoot_after_dash)
+	_resume_auto_shoot(_resume_auto_shoot_after_dash, false)
 	_resume_auto_shoot_after_dash = false
 
 
@@ -725,7 +725,10 @@ func _update_weapon_shooting(_delta: float) -> void:
 	if _active_weapon_emitter == null:
 		return
 
-	if not _auto_shoot_is_enabled or _is_dashing or _is_super_attacking or _is_dead:
+	if _is_dashing:
+		_pause_weapon_firing()
+		return
+	if not _auto_shoot_is_enabled or _is_super_attacking or _is_dead:
 		_active_weapon_emitter.stop_firing()
 		return
 
@@ -742,6 +745,11 @@ func _reset_weapon_shooting() -> void:
 func _cancel_weapon_burst() -> void:
 	if _active_weapon_emitter != null:
 		_active_weapon_emitter.stop_firing()
+
+
+func _pause_weapon_firing() -> void:
+	if _active_weapon_emitter != null:
+		_active_weapon_emitter.pause_firing()
 
 
 func _clear_attack_state(abort_animation: bool) -> void:
@@ -776,12 +784,13 @@ func _finish_attack() -> void:
 	_current_animation = ""
 
 
-func _resume_auto_shoot(should_resume: bool) -> void:
+func _resume_auto_shoot(should_resume: bool, reset_weapon_timing: bool = true) -> void:
 	if not should_resume:
 		return
 
 	_auto_shoot_is_enabled = true
-	_reset_weapon_shooting()
+	if reset_weapon_timing:
+		_reset_weapon_shooting()
 	_start_attack()
 
 

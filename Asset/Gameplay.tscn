@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://gy2nqvfermwd"]
 
 [ext_resource type="Script" uid="uid://bbcc5d0litwvb" path="res://Asset/GameplayCamera.gd" id="3_nhh1a"]
-[ext_resource type="PackedScene" uid="uid://c6mbra8griqbc" path="res://Asset/char1_weapon/sword/broadsword_emitter01.tscn" id="4_s8hmd"]
 [ext_resource type="PackedScene" uid="uid://qvtqchh8es53" path="res://Asset/ui/ui04/ui04_main.tscn" id="5_7nfr3"]
 [ext_resource type="Script" uid="uid://3e6eh4j2be4v" path="res://Script/enemy_wave_spawner.gd" id="5_njwhd"]
 [ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/char1_hero/girl/hero_girl01.tscn" id="5_s8hmd"]
@@ -46,7 +45,6 @@ camera_shake_strength = 0.07
 
 [node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]
 collision_layer = 17
-weapon_emitter_scene = ExtResource("4_s8hmd")
 
 [node name="EnemyWaveSpawner" type="Node" parent="." unique_id=1774927294]
 script = ExtResource("5_njwhd")

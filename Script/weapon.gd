@@ -1,6 +1,22 @@
 extends Node3D
 
+enum MovementMode {
+	STRAIGHT,
+	EXPANDING_SPIRAL,
+}
+
+@export_group("Movement")
+@export var movement_mode: MovementMode = MovementMode.STRAIGHT
 @export var speed: float = 18.0
+
+@export_subgroup("Expanding Spiral")
+@export_range(0.0, 100.0, 0.01, "suffix:m") var spiral_initial_radius: float = 0.0
+@export_range(0.0, 100.0, 0.01, "suffix:m/s") var spiral_radius_growth_speed: float = 3.0
+@export_range(0.0, 3600.0, 1.0, "suffix:deg/s") var spiral_angular_speed_degrees: float = 360.0
+@export var spiral_clockwise: bool = false
+@export var spiral_follow_hero_position: bool = false
+
+@export_group("")
 @export var lifetime: float = 2.0
 @export var damage: int = 1
 @export var impact_weight: float = 1.0
@@ -24,6 +40,11 @@ var _source: Node
 var _is_active := false
 var _collision_is_enabled := false
 var _current_health := 0
+var _spiral_center := Vector3.ZERO
+var _spiral_radial_direction := Vector3.FORWARD
+var _spiral_elapsed := 0.0
+var _spiral_previous_source_position := Vector3.ZERO
+var _spiral_has_source_position := false
 
 
 func _ready() -> void:
@@ -40,13 +61,63 @@ func setup(direction: Vector3, source: Node = null) -> void:
 		_direction = direction.normalized()
 	_source = source
 	global_transform = Transform3D(_basis_with_y_axis(_direction), global_position)
+	_initialize_spiral_motion()
 
 
 func _physics_process(delta: float) -> void:
 	if not _is_active:
 		return
 
-	global_position += _direction * speed * delta
+	if movement_mode == MovementMode.EXPANDING_SPIRAL:
+		_process_expanding_spiral(delta)
+	else:
+		global_position += _direction * speed * delta
+
+
+func _initialize_spiral_motion() -> void:
+	_spiral_elapsed = 0.0
+	_spiral_radial_direction = Vector3(_direction.x, 0.0, _direction.z)
+	if _spiral_radial_direction.is_zero_approx():
+		_spiral_radial_direction = Vector3.FORWARD
+	else:
+		_spiral_radial_direction = _spiral_radial_direction.normalized()
+
+	var initial_radius := maxf(spiral_initial_radius, 0.0)
+	_spiral_center = global_position - _spiral_radial_direction * initial_radius
+	_spiral_has_source_position = spiral_follow_hero_position and _source is Node3D and is_instance_valid(_source)
+	if _spiral_has_source_position:
+		_spiral_previous_source_position = (_source as Node3D).global_position
+
+
+func _process_expanding_spiral(delta: float) -> void:
+	_update_spiral_center_from_source()
+	_spiral_elapsed += maxf(delta, 0.0)
+	var turn_direction := -1.0 if spiral_clockwise else 1.0
+	var angle := deg_to_rad(spiral_angular_speed_degrees) * _spiral_elapsed * turn_direction
+	var radius := maxf(spiral_initial_radius, 0.0) + maxf(spiral_radius_growth_speed, 0.0) * _spiral_elapsed
+	var radial_direction := _spiral_radial_direction.rotated(Vector3.UP, angle)
+	var next_position := _spiral_center + radial_direction * radius
+	var frame_direction := next_position - global_position
+
+	global_position = next_position
+	if not frame_direction.is_zero_approx():
+		_direction = frame_direction.normalized()
+		global_transform = Transform3D(_basis_with_y_axis(_direction), global_position)
+
+
+func _update_spiral_center_from_source() -> void:
+	if not spiral_follow_hero_position:
+		_spiral_has_source_position = false
+		return
+	if not (_source is Node3D) or not is_instance_valid(_source):
+		_spiral_has_source_position = false
+		return
+
+	var source_position := (_source as Node3D).global_position
+	if _spiral_has_source_position:
+		_spiral_center += source_position - _spiral_previous_source_position
+	_spiral_previous_source_position = source_position
+	_spiral_has_source_position = true
 
 
 func _on_hit_body_entered(body: Node3D) -> void:

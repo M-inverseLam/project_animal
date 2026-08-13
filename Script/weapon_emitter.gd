@@ -58,6 +58,10 @@ func stop_firing() -> void:
 	reset_firing()
 
 
+func pause_firing() -> void:
+	_is_firing = false
+
+
 func reset_firing() -> void:
 	_shoot_time_left = 0.0
 	_burst_projectiles_remaining = 0

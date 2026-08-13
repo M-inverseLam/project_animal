@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://be1ob6dg7xel2"]
+
+[ext_resource type="Script" uid="uid://f6lyobsoo47y" path="res://Script/weapon_emitter.gd" id="1_acb26"]
+[ext_resource type="PackedScene" uid="uid://b8v3op7htfug5" path="res://Asset/char1_weapon/magicbook/magicbook01.tscn" id="2_leav0"]
+
+[node name="magicBookEmitter" type="Node3D" unique_id=685627035]
+script = ExtResource("1_acb26")
+projectile_scene = ExtResource("2_leav0")
+shoot_interval_time = 7.2
+dash_duration = 1.0
+dash_distance = 10.0
+dash_damage = 4
+
+[node name="Muzzle" type="Marker3D" parent="." unique_id=386932739]

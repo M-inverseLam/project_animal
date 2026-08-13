@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cjyxvufqglx7r" path="res://Script/hero01.gd" id="1_b2opn"]
 [ext_resource type="PackedScene" uid="uid://dpsr7yntks1cs" path="res://Asset/char1_hero/girl/hero_girl01.glb" id="1_oxnaq"]
-[ext_resource type="PackedScene" uid="uid://1mugu0pavvj2" path="res://Asset/char1_weapon/dagger/dagger_emitter01.tscn" id="2_2hsuf"]
+[ext_resource type="PackedScene" uid="uid://be1ob6dg7xel2" path="res://Asset/char1_weapon/magicbook/magicbook_emitter01.tscn" id="2_2hsuf"]
 [ext_resource type="Material" uid="uid://bfsm7cnmkpd71" path="res://Asset/char1_hero/girl/hero_girl_body.material" id="3_5dmvc"]
 [ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/char1_hero/girl/hero_girl_hair.material" id="4_b2opn"]
 [ext_resource type="PackedScene" uid="uid://dcl60mrlnabym" path="res://Asset/sfx/hitspark/hitspark_superattack_shoot.tscn" id="5_2hsuf"]
