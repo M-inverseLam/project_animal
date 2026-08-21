@@ -1,0 +1,131 @@
+[gd_scene format=3 uid="uid://0gtgxp71p58u"]
+
+[ext_resource type="PackedScene" uid="uid://cgtbyf3cppreg" path="res://Asset/sfx/trail01/sfx_trail01.glb" id="1_2wtc5"]
+[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_ni8nj"]
+[ext_resource type="Material" uid="uid://dovjr8n3627rl" path="res://Asset/sfx/trail01/trail01.material" id="3_n5p27"]
+[ext_resource type="PackedScene" uid="uid://d1hulquddn0r7" path="res://Asset/char1_weapon/sword/broadsword01.glb" id="5_fm81v"]
+[ext_resource type="Material" uid="uid://dtukltf1uaerq" path="res://Asset/char1_weapon/sword/broadsword01.material" id="6_n3w6q"]
+[ext_resource type="Script" uid="uid://caowvembpy8ia" path="res://Script/melee_combo_weapon.gd" id="7_melee"]
+
+[sub_resource type="Animation" id="Animation_wuwc5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [-1.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/DissolveValue")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("weapon:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_u8nmy"]
+resource_name = "slash"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-1.0, 4.7499999933364734e-08, 4.7499999933364734e-08]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("sfx_trail01/sfx_trail01:surface_material_override/0:shader_parameter/DissolveValue")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.19999997, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, 0.0, 1.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("weapon:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.04040277, 0.082731724, 0.12460828, 0.20019035),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0.1080833), Vector3(0, 0, -0.81181127), Vector3(0, 0, -2.1496828), Vector3(0, 0, -3.4208453), Vector3(0, 0, -5.7595863)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_gvwnr"]
+_data = {
+&"RESET": SubResource("Animation_wuwc5"),
+&"slash": SubResource("Animation_u8nmy")
+}
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ni8nj"]
+height = 2.7492676
+radius = 1.0
+
+[node name="broadsword01_combo2" type="Node3D" unique_id=49673345]
+transform = Transform3D(0.9659259, 0, -0.25881886, 0.25881886, -4.371139e-08, 0.9659259, -1.1313332e-08, -1, -4.222196e-08, 0, 0, 0)
+script = ExtResource("7_melee")
+damage = 8
+hit_spark_scene = ExtResource("2_ni8nj")
+
+[node name="sfx_trail01" parent="." unique_id=492285075 instance=ExtResource("1_2wtc5")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, -0.06658089)
+
+[node name="sfx_trail01" parent="sfx_trail01" index="0" unique_id=1053173608]
+surface_material_override/0 = ExtResource("3_n5p27")
+
+[node name="trail01_AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1257623467]
+libraries/ = SubResource("AnimationLibrary_gvwnr")
+
+[node name="weapon" type="Node3D" parent="." unique_id=41704777]
+transform = Transform3D(0.9999999, 0, 0, 0, 0.9999999, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="broadsword01" parent="weapon" unique_id=1020970324 instance=ExtResource("5_fm81v")]
+transform = Transform3D(-4.3711378e-08, -0.99999976, 0, 0.99999976, -4.3711378e-08, 0, 0, 0, 1, -1.095, 0, 0)
+
+[node name="broadsword01" parent="weapon/broadsword01" index="0" unique_id=1234263258]
+surface_material_override/0 = ExtResource("6_n3w6q")
+
+[node name="Area3D" type="Area3D" parent="weapon" unique_id=1317698333]
+transform = Transform3D(-4.371138e-08, -0.9999999, 4.77671e-16, 0.9999999, -4.3711385e-08, -7.1054274e-15, 7.1054274e-15, -2.323251e-15, 1, -2.0319157, -0.021045603, -6.0493235e-08)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="weapon/Area3D" unique_id=204160894]
+transform = Transform3D(-4.371142e-08, 4.3711488e-08, 1.0000033, 8.9406974e-08, 1.0000033, -4.3711488e-08, -1.0000011, -1.4901161e-07, -4.3711477e-08, -0.03344728, -0.048706174, -1.4122037e-09)
+shape = SubResource("CylinderShape3D_ni8nj")
+
+[editable path="sfx_trail01"]
+[editable path="weapon/broadsword01"]

@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://c6mbra8griqbc"]
+
+[ext_resource type="Script" uid="uid://dmk65ai281okt" path="res://Script/melee_combo_emitter.gd" id="1_emitter"]
+[ext_resource type="Script" uid="uid://nf6hlcwi0qwn" path="res://Script/hero_combo_attack.gd" id="4_combo_data"]
+[ext_resource type="PackedScene" uid="uid://ck4fcar682ew2" path="res://Asset/char1_weapon/sword/broadsword01_combo1.tscn" id="5_combo1"]
+[ext_resource type="PackedScene" uid="uid://0gtgxp71p58u" path="res://Asset/char1_weapon/sword/broadsword01_combo2.tscn" id="6_combo2"]
+[ext_resource type="PackedScene" uid="uid://ddfnx3j80bd54" path="res://Asset/char1_weapon/sword/broadsword01_combo3.tscn" id="7_combo3"]
+
+[sub_resource type="Curve" id="Curve_combo1_movement"]
+_data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="Resource_combo1"]
+script = ExtResource("4_combo_data")
+animation_name = &"attack01a"
+weapon_scene = ExtResource("5_combo1")
+move_speed = 3.0
+move_time = 0.25
+movement_speed_curve = SubResource("Curve_combo1_movement")
+
+[sub_resource type="Curve" id="Curve_combo2_movement"]
+_data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="Resource_combo2"]
+script = ExtResource("4_combo_data")
+animation_name = &"attack01b"
+weapon_scene = ExtResource("6_combo2")
+move_speed = 3.0
+move_time = 0.35
+movement_speed_curve = SubResource("Curve_combo2_movement")
+
+[sub_resource type="Curve" id="Curve_combo3_movement"]
+_data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="Resource_combo3"]
+script = ExtResource("4_combo_data")
+animation_name = &"attack01c"
+weapon_scene = ExtResource("7_combo3")
+move_speed = 4.0
+move_time = 0.35
+movement_speed_curve = SubResource("Curve_combo3_movement")
+
+[sub_resource type="Curve" id="Curve_dash_speed"]
+_data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
+point_count = 2
+
+[node name="broadsword01_emitter01" type="Node3D" unique_id=343553208]
+script = ExtResource("1_emitter")
+combo_attacks = Array[ExtResource("4_combo_data")]([SubResource("Resource_combo1"), SubResource("Resource_combo2"), SubResource("Resource_combo3")])
+combo_continue_time = 0.5
+dash_speed = 8.0
+dash_time = 0.75
+dash_speed_curve = SubResource("Curve_dash_speed")

@@ -45,10 +45,10 @@ dash_hit_spark_scene = ExtResource("7_hleqf")
 
 [node name="hero_girl01" parent="." unique_id=827222378 instance=ExtResource("1_oxnaq")]
 
-[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1852272799) index="0" unique_id=189658047]
+[node name="body" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1126931614) index="0" unique_id=409787508]
 surface_material_override/0 = ExtResource("3_5dmvc")
 
-[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1852272799) index="1" unique_id=673943302]
+[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1126931614) index="1" unique_id=673943302]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43512607, -0.075978085)
 setting_count = 2
 settings/0/root_bone_name = "hairtail1.L"
@@ -101,7 +101,7 @@ settings/1/exclude_collision_count = 0
 [node name="HeadSpringBoneCollision" type="SpringBoneCollisionSphere3D" parent="hero_girl01/rig/Skeleton3D/SpringBoneSimulator3D" unique_id=1307076970]
 radius = 0.25
 
-[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1852272799) index="2" unique_id=416469824]
+[node name="head" parent="hero_girl01/rig/Skeleton3D" parent_id_path=PackedInt32Array(827222378, 1126931614) index="2" unique_id=700563771]
 surface_material_override/0 = ExtResource("3_5dmvc")
 surface_material_override/1 = ExtResource("4_b2opn")
 

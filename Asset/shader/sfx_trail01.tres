@@ -72,7 +72,7 @@ operator = 2
 [sub_resource type="VisualShaderNodeClamp" id="VisualShaderNodeClamp_17nv0"]
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_p6gsd"]
-size = Vector2(1084.0004, 637)
+size = Vector2(1098, 636.99994)
 title = "disssolve"
 attached_nodes = PackedInt32Array(18, 19, 21, 22, 20)
 
@@ -105,7 +105,7 @@ default_input_values = [0, Quaternion(0, 0, 0, 0)]
 op_type = 2
 
 [resource]
-modes/blend = 1
+modes/cull = 2
 flags/unshaded = true
 nodes/fragment/0/position = Vector2(2160, 60)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_p6gsd")

@@ -833,7 +833,11 @@ func _cache_hit_flash_meshes() -> void:
 
 
 func _play_white_hit_flash() -> void:
-	if hit_flash_duration <= 0.0 or _hit_flash_meshes.is_empty():
+	play_hit_overlay(Color.WHITE, hit_flash_duration, hit_flash_power)
+
+
+func play_hit_overlay(color: Color, duration: float, power: float) -> void:
+	if duration <= 0.0 or _hit_flash_meshes.is_empty():
 		return
 
 	if _hit_flash_material == null:
@@ -846,13 +850,14 @@ func _play_white_hit_flash() -> void:
 	if _hit_flash_tween != null:
 		_hit_flash_tween.kill()
 
-	_hit_flash_material.albedo_color = Color(1.0, 1.0, 1.0, clampf(hit_flash_power, 0.0, 1.0))
+	color.a = clampf(power, 0.0, 1.0)
+	_hit_flash_material.albedo_color = color
 	for mesh_instance in _hit_flash_meshes:
 		if is_instance_valid(mesh_instance):
 			mesh_instance.material_overlay = _hit_flash_material
 
 	_hit_flash_tween = create_tween()
-	_hit_flash_tween.tween_property(_hit_flash_material, "albedo_color:a", 0.0, hit_flash_duration)
+	_hit_flash_tween.tween_property(_hit_flash_material, "albedo_color:a", 0.0, duration)
 	_hit_flash_tween.tween_callback(_clear_white_hit_flash)
 
 

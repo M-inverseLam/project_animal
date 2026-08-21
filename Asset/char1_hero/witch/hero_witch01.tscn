@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://bf4sud4m1rux6"]
+
+[ext_resource type="PackedScene" uid="uid://dqgu7lk6wcyvk" path="res://Asset/char1_hero/witch/hero_witch01.glb" id="1_0yhgf"]
+[ext_resource type="Script" uid="uid://cd1o5g4728neb" path="res://Script/hero01_melee.gd" id="1_g2xt5"]
+[ext_resource type="Material" uid="uid://bxn7mqcg22a0w" path="res://Asset/char1_hero/witch/hero_witch_cloth.material" id="2_g2xt5"]
+[ext_resource type="PackedScene" uid="uid://c6mbra8griqbc" path="res://Asset/char1_weapon/sword/broadsword01_emitter01.tscn" id="2_u0jn3"]
+[ext_resource type="Material" uid="uid://bvwb7lq82t2t7" path="res://Asset/char1_hero/girl/hero_girl_hair.material" id="3_5pwcs"]
+[ext_resource type="Material" uid="uid://3h18l3vribox" path="res://Asset/char1_hero/witch/hero_witch_body.material" id="4_u0jn3"]
+[ext_resource type="PackedScene" uid="uid://bb351ruxwngbu" path="res://Asset/char1_hero/girl/hero_face_direction.tscn" id="6_5pwcs"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_5pwcs"]
+radius = 0.6303711
+height = 1.7294922
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_u0jn3"]
+radius = 1.6945281
+
+[node name="hero_witch01" type="CharacterBody3D" unique_id=1920137253]
+script = ExtResource("1_g2xt5")
+animation_blend_time = 0.1
+slide_duration = 0.0
+weapon_emitter_scene = ExtResource("2_u0jn3")
+
+[node name="hero_witch01" parent="." unique_id=429408375 instance=ExtResource("1_0yhgf")]
+
+[node name="arm_cloth" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="0" unique_id=1360356143]
+surface_material_override/0 = ExtResource("2_g2xt5")
+
+[node name="head" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="1" unique_id=1137992509]
+surface_material_override/0 = ExtResource("2_g2xt5")
+surface_material_override/1 = ExtResource("3_5pwcs")
+
+[node name="body" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="2" unique_id=1453677046]
+surface_material_override/0 = ExtResource("4_u0jn3")
+
+[node name="body_belt" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="3" unique_id=492067221]
+surface_material_override/0 = ExtResource("4_u0jn3")
+
+[node name="belt_lock" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="4" unique_id=2097035867]
+surface_material_override/0 = ExtResource("4_u0jn3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1650851297]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8652938, 0)
+shape = SubResource("CapsuleShape3D_5pwcs")
+
+[node name="GemAttractionArea" type="Area3D" parent="." unique_id=1785398067 groups=["gem_attractor"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GemAttractionArea" unique_id=119150709]
+shape = SubResource("SphereShape3D_u0jn3")
+
+[node name="shootposition" type="Marker3D" parent="." unique_id=1845186242]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0217115, 0.7478901)
+
+[node name="hero_face_direction" parent="." unique_id=1811262639 instance=ExtResource("6_5pwcs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2989754, 0)
+
+[editable path="hero_witch01"]

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://w6mxk5ll5q1i"]
 
 [ext_resource type="PackedScene" uid="uid://cgtbyf3cppreg" path="res://Asset/sfx/trail01/sfx_trail01.glb" id="1_r3f3l"]
-[ext_resource type="Shader" uid="uid://bitswbtkl4yxo" path="res://Asset/sfx/trail01/sfx_trail01.tres" id="2_4b6s2"]
+[ext_resource type="Shader" uid="uid://bitswbtkl4yxo" path="res://Asset/shader/sfx_trail01.tres" id="2_4b6s2"]
 [ext_resource type="Texture2D" uid="uid://b0dhphxvihyju" path="res://Asset/sfx/trail01/sfx_trail01.tga" id="3_u8nmy"]
 [ext_resource type="Texture2D" uid="uid://b6wcmo2yahilx" path="res://Asset/sfx/trail01/sfx_trail01_highlight.tga" id="3_wuwc5"]
 
@@ -13,7 +13,7 @@ noise = SubResource("FastNoiseLite_u8nmy")
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r3f3l"]
 render_priority = 0
 shader = ExtResource("2_4b6s2")
-shader_parameter/BaseColor = Color(0, 0.72509617, 1.353256, 1)
+shader_parameter/BaseColor = Color(0, 0.50501215, 0.955735, 1)
 shader_parameter/progress = -1.0
 shader_parameter/Texture = ExtResource("3_u8nmy")
 shader_parameter/HighlightColor = Color(0.30665916, 2.0463703, 2.8493137, 1)
@@ -50,7 +50,7 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_u8nmy"]
 resource_name = "slash"
-length = 0.4
+length = 0.39999999999999997
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -85,8 +85,9 @@ _data = {
 [node name="sfx_trail01" type="Node3D" unique_id=993554698]
 
 [node name="sfx_trail01" parent="." unique_id=1939423181 instance=ExtResource("1_r3f3l")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 
-[node name="sfx_trail01" parent="sfx_trail01" index="0" unique_id=1671191248]
+[node name="sfx_trail01" parent="sfx_trail01" index="0" unique_id=1762785659]
 surface_material_override/0 = SubResource("ShaderMaterial_r3f3l")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1179991917]

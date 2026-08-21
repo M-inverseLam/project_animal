@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bbcc5d0litwvb" path="res://Asset/GameplayCamera.gd" id="3_nhh1a"]
 [ext_resource type="PackedScene" uid="uid://qvtqchh8es53" path="res://Asset/ui/ui04/ui04_main.tscn" id="5_7nfr3"]
 [ext_resource type="Script" uid="uid://3e6eh4j2be4v" path="res://Script/enemy_wave_spawner.gd" id="5_njwhd"]
-[ext_resource type="PackedScene" uid="uid://dfvcg21i8p2t6" path="res://Asset/char1_hero/girl/hero_girl01.tscn" id="5_s8hmd"]
+[ext_resource type="PackedScene" uid="uid://bf4sud4m1rux6" path="res://Asset/char1_hero/witch/hero_witch01.tscn" id="6_in5ka"]
 [ext_resource type="PackedScene" uid="uid://p7nndlvja376" path="res://Asset/stage/forest/forest_ground01.tscn" id="6_s8hmd"]
 
 [sub_resource type="Environment" id="Environment_7nfr3"]
@@ -36,15 +36,12 @@ transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.7071
 fov = 5.0
 far = 1714.94
 script = ExtResource("3_nhh1a")
-target_path = NodePath("../../hero_girl01")
+target_path = NodePath("../../hero_witch01")
 follow_offset = Vector3(0, 0, 200)
 camera_angle = -40.0
 spring_strength = 20.0
 camera_shake_duration = 0.7
 camera_shake_strength = 0.07
-
-[node name="hero_girl01" parent="." unique_id=2135685820 instance=ExtResource("5_s8hmd")]
-collision_layer = 17
 
 [node name="EnemyWaveSpawner" type="Node" parent="." unique_id=1774927294]
 script = ExtResource("5_njwhd")
@@ -72,3 +69,5 @@ monitorable = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="spawnArea" unique_id=1257432671]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3527832, 0)
 shape = SubResource("BoxShape3D_7nfr3")
+
+[node name="hero_witch01" parent="." unique_id=1920137253 instance=ExtResource("6_in5ka")]
