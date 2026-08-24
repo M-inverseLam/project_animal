@@ -38,7 +38,7 @@ point_count = 2
 script = ExtResource("4_combo_data")
 animation_name = &"attack01c"
 weapon_scene = ExtResource("7_combo3")
-move_speed = 4.0
+move_speed = 8.0
 move_time = 0.35
 movement_speed_curve = SubResource("Curve_combo3_movement")
 
@@ -50,6 +50,5 @@ point_count = 2
 script = ExtResource("1_emitter")
 combo_attacks = Array[ExtResource("4_combo_data")]([SubResource("Resource_combo1"), SubResource("Resource_combo2"), SubResource("Resource_combo3")])
 combo_continue_time = 0.5
-dash_speed = 8.0
-dash_time = 0.75
+hit_stop_time = 0.05
 dash_speed_curve = SubResource("Curve_dash_speed")

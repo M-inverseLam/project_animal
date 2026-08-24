@@ -7,7 +7,6 @@ extends Node3D
 @export var ignored_groups: PackedStringArray = PackedStringArray(["enemy_projectile"])
 @export var hit_spark_scene: PackedScene
 @export_range(-10.0, 10.0, 0.1, "suffix:m") var hit_spark_height: float = 0.8
-@export_range(0.0, 1.0, 0.01, "suffix:s") var hit_stop_time: float = 0.1
 
 @export_group("Hit Overlay")
 @export var hit_overlay_enabled: bool = true
@@ -22,9 +21,12 @@ extends Node3D
 
 var _source: Node
 var _attack_direction := Vector3.FORWARD
+var _hit_stop_duration := 0.1
 var _hit_targets: Dictionary = {}
 var _hit_stop_time_left := 0.0
 var _animation_was_playing_before_hit_stop := false
+var _paused_animation_name := StringName()
+var _paused_animation_position := 0.0
 
 
 func _ready() -> void:
@@ -39,8 +41,9 @@ func _ready() -> void:
 		get_tree().create_timer(maxf(fallback_lifetime, 0.01)).timeout.connect(queue_free)
 
 
-func setup(source: Node, attack_direction: Vector3) -> void:
+func setup(source: Node, attack_direction: Vector3, hit_stop_duration: float = 0.1) -> void:
 	_source = source
+	_hit_stop_duration = maxf(hit_stop_duration, 0.0)
 	if not attack_direction.is_zero_approx():
 		_attack_direction = attack_direction.normalized()
 
@@ -53,7 +56,10 @@ func _process(delta: float) -> void:
 	if _hit_stop_time_left <= 0.0 and _animation_was_playing_before_hit_stop:
 		_animation_was_playing_before_hit_stop = false
 		if animation_player != null:
-			animation_player.play()
+			animation_player.play(_paused_animation_name)
+			animation_player.seek(_paused_animation_position, true)
+		_paused_animation_name = StringName()
+		_paused_animation_position = 0.0
 
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
@@ -105,13 +111,15 @@ func _apply_hit_overlay(damage_target: Node) -> void:
 
 
 func _start_hit_stop() -> void:
-	var duration := maxf(hit_stop_time, 0.0)
+	var duration := _hit_stop_duration
 	if duration <= 0.0:
 		return
 
 	_hit_stop_time_left = maxf(_hit_stop_time_left, duration)
-	if animation_player != null and animation_player.is_playing():
+	if animation_player != null and animation_player.is_playing() and not _animation_was_playing_before_hit_stop:
 		_animation_was_playing_before_hit_stop = true
+		_paused_animation_name = animation_player.current_animation
+		_paused_animation_position = animation_player.current_animation_position
 		animation_player.pause()
 	if _source != null and _source.has_method("start_melee_hit_stop"):
 		_source.call("start_melee_hit_stop", duration)

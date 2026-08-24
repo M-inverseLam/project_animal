@@ -3,17 +3,13 @@
 [ext_resource type="Texture2D" uid="uid://dfwb0iddwh3q" path="res://Asset/sfx/hitspark/hitspark02a.tga" id="1_lyww6"]
 [ext_resource type="Script" uid="uid://csxqxjwn4ghtk" path="res://Script/hitspark01_random_rotation.gd" id="2_2xrer"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mtrak"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_045xd"]
 transparency = 1
 blend_mode = 1
-cull_mode = 2
-no_depth_test = true
-shading_mode = 0
 vertex_color_use_as_albedo = true
-albedo_color = Color(0, 1.2996969, 2.9317632, 1)
+albedo_color = Color(0.81072044, 2.7850735, 5.912981, 1)
 albedo_texture = ExtResource("1_lyww6")
-billboard_keep_scale = true
-grow_amount = -4.465
+albedo_texture_force_srgb = true
 
 [sub_resource type="Curve" id="Curve_pvq37"]
 _data = [Vector2(0, 0), 0.0, 8.68631, 0, 0, Vector2(0.21122113, 1), -1.339804, -1.339804, 0, 0, Vector2(1, 0), -0.19021758, 0.0, 0, 0]
@@ -63,7 +59,7 @@ size = Vector2(4.5, 4.5)
 script = ExtResource("2_2xrer")
 
 [node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=293211926]
-material_override = SubResource("StandardMaterial3D_mtrak")
+material_override = SubResource("StandardMaterial3D_045xd")
 cast_shadow = 0
 emitting = false
 amount = 1

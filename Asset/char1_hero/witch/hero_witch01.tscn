@@ -17,27 +17,79 @@ radius = 1.6945281
 
 [node name="hero_witch01" type="CharacterBody3D" unique_id=1920137253]
 script = ExtResource("1_g2xt5")
+move_speed = 5.5
+face_turn_speed = 8.0
 animation_blend_time = 0.1
 slide_duration = 0.0
 weapon_emitter_scene = ExtResource("2_u0jn3")
 
 [node name="hero_witch01" parent="." unique_id=429408375 instance=ExtResource("1_0yhgf")]
 
-[node name="arm_cloth" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="0" unique_id=1360356143]
+[node name="arm_cloth" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="0" unique_id=1534727292]
 surface_material_override/0 = ExtResource("2_g2xt5")
 
-[node name="head" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="1" unique_id=1137992509]
+[node name="head" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="1" unique_id=592042872]
 surface_material_override/0 = ExtResource("2_g2xt5")
 surface_material_override/1 = ExtResource("3_5pwcs")
 
-[node name="body" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="2" unique_id=1453677046]
+[node name="body" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="2" unique_id=1860317822]
 surface_material_override/0 = ExtResource("4_u0jn3")
 
-[node name="body_belt" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="3" unique_id=492067221]
+[node name="body_belt" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="3" unique_id=873774630]
 surface_material_override/0 = ExtResource("4_u0jn3")
 
-[node name="belt_lock" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 447928271) index="4" unique_id=2097035867]
+[node name="belt_lock" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="4" unique_id=88085501]
 surface_material_override/0 = ExtResource("4_u0jn3")
+
+[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="5" unique_id=186338045]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43512607, -0.075978085)
+setting_count = 2
+settings/0/root_bone_name = "hairtail1.L"
+settings/0/root_bone = 5
+settings/0/end_bone_name = "hairtail2.L"
+settings/0/end_bone = 6
+settings/0/extend_end_bone = false
+settings/0/center_from = 0
+settings/0/individual_config = false
+settings/0/rotation_axis = 3
+settings/0/radius/value = 0.15
+settings/0/radius/damping_curve = null
+settings/0/stiffness/value = 2.0
+settings/0/stiffness/damping_curve = null
+settings/0/drag/value = 1.0
+settings/0/drag/damping_curve = null
+settings/0/gravity/value = 1.0
+settings/0/gravity/damping_curve = null
+settings/0/gravity/direction = Vector3(0, -1, 0)
+settings/0/joints/0/bone_name = "hairtail1.L"
+settings/0/joints/0/bone = 5
+settings/0/joints/1/bone_name = "hairtail2.L"
+settings/0/joints/1/bone = 6
+settings/0/enable_all_child_collisions = true
+settings/0/exclude_collision_count = 0
+settings/1/root_bone_name = "hairtail1.R"
+settings/1/root_bone = 7
+settings/1/end_bone_name = "hairtail2.R"
+settings/1/end_bone = 8
+settings/1/extend_end_bone = false
+settings/1/center_from = 0
+settings/1/individual_config = false
+settings/1/rotation_axis = 3
+settings/1/radius/value = 0.15
+settings/1/radius/damping_curve = null
+settings/1/stiffness/value = 2.0
+settings/1/stiffness/damping_curve = null
+settings/1/drag/value = 1.0
+settings/1/drag/damping_curve = null
+settings/1/gravity/value = 1.0
+settings/1/gravity/damping_curve = null
+settings/1/gravity/direction = Vector3(0, -1, 0)
+settings/1/joints/0/bone_name = "hairtail1.R"
+settings/1/joints/0/bone = 7
+settings/1/joints/1/bone_name = "hairtail2.R"
+settings/1/joints/1/bone = 8
+settings/1/enable_all_child_collisions = true
+settings/1/exclude_collision_count = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1650851297]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8652938, 0)

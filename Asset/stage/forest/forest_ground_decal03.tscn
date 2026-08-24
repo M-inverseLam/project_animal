@@ -6,6 +6,7 @@
 size = Vector2(20, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mti6b"]
+render_priority = -1
 transparency = 1
 albedo_texture = ExtResource("1_ms0qv")
 

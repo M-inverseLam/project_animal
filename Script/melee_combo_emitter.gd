@@ -4,6 +4,7 @@ extends Node3D
 @export_group("Melee Combo")
 @export var combo_attacks: Array[HeroComboAttack] = []
 @export_range(0.0, 2.0, 0.01, "suffix:s") var combo_continue_time: float = 0.3
+@export_range(0.0, 1.0, 0.01, "suffix:s") var hit_stop_time: float = 0.1
 
 @export_group("Dash")
 @export_range(0.0, 100.0, 0.1, "suffix:m/s") var dash_speed: float = 10.0
@@ -78,7 +79,7 @@ func spawn_combo_weapon(combo: HeroComboAttack, source: Node, attack_direction: 
 
 	add_child(weapon)
 	if weapon.has_method("setup"):
-		weapon.call("setup", source, attack_direction)
+		weapon.call("setup", source, attack_direction, hit_stop_time)
 	return weapon
 
 

@@ -33,11 +33,11 @@ layer = 10
 
 [node name="Camera3D" type="Camera3D" parent="world" unique_id=1915048110]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.7071068, 0, -0.7071068, 0.70710677, 0, 26.15118, 25.622486)
-fov = 5.0
+fov = 20.0
 far = 1714.94
 script = ExtResource("3_nhh1a")
 target_path = NodePath("../../hero_witch01")
-follow_offset = Vector3(0, 0, 200)
+follow_offset = Vector3(0, 0, 50)
 camera_angle = -40.0
 spring_strength = 20.0
 camera_shake_duration = 0.7

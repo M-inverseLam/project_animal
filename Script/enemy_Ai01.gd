@@ -68,7 +68,7 @@ static var _shared_health_bar_shader: Shader
 
 @export_group("AI Decision")
 @export var use_weighted_ai: bool = false
-@export var target_node_name: String = "hero_girl01"
+@export var target_node_name: String = "hero_witch01"
 @export var ai_idle_weight: float = 10.0
 @export var ai_chase_weight: float = 70.0
 @export var ai_attack_weight: float = 30.0

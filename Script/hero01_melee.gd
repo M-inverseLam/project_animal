@@ -1,15 +1,7 @@
 extends CharacterBody3D
 
-const MOUSE_AIM_PLANE_Y := 0.0
-
-enum FaceControlMode {
-	KEY_MOVEMENT,
-	MOUSE_CURSOR,
-}
-
 @export var move_speed: float = 4.0
-@export var mouse_turn_speed: float = 12.0
-@export var arrow_face_turn_speed: float = 4.0
+@export var face_turn_speed: float = 4.0
 @export var animation_blend_time: float = 0.2
 @export var slide_duration: float = 0.3
 
@@ -116,13 +108,9 @@ var _weapon_dash_time := 0.5
 var _weapon_dash_speed := 10.0
 var _weapon_dash_speed_curve: Curve
 var _active_weapon_emitter: MeleeComboEmitter
-var _mouse_world_position := Vector3.ZERO
-var _face_control_mode: int = FaceControlMode.KEY_MOVEMENT
-var _face_control_toggle_was_pressed := false
 
 
 func _ready() -> void:
-	_face_control_mode = FaceControlMode.KEY_MOVEMENT
 	_current_health = max_health
 	_update_health_ui()
 	_update_gem_attraction_radius()
@@ -170,7 +158,7 @@ func _physics_process(delta: float) -> void:
 		_process_combo_movement(delta)
 		return
 
-	_update_face_direction_input(delta)
+	_face_keyboard_movement(delta)
 
 	_update_dash_input()
 
@@ -193,7 +181,8 @@ func start_melee_hit_stop(duration: float) -> void:
 
 	if _animation_tree != null:
 		_animation_tree_was_active_before_hit_stop = _animation_tree.active
-		_animation_tree.active = false
+		if _animation_tree_was_active_before_hit_stop:
+			_animation_tree.set("parameters/AttackTimeScale/scale", 0.0)
 	elif animation_player != null and animation_player.is_playing():
 		_animation_player_was_playing_before_hit_stop = true
 		animation_player.pause()
@@ -213,7 +202,7 @@ func _process_melee_hit_stop(delta: float) -> bool:
 func _finish_melee_hit_stop() -> void:
 	_melee_hit_stop_time_left = 0.0
 	if not _is_dead and _animation_tree != null and _animation_tree_was_active_before_hit_stop:
-		_animation_tree.active = true
+		_animation_tree.set("parameters/AttackTimeScale/scale", 1.0)
 	if not _is_dead and animation_player != null and _animation_player_was_playing_before_hit_stop:
 		animation_player.play()
 	_animation_tree_was_active_before_hit_stop = false
@@ -671,7 +660,7 @@ func _process_super_attack(delta: float) -> void:
 
 func _process_super_attack_locomotion(delta: float) -> void:
 	_update_animation_tree_blends(delta)
-	_update_face_direction_input(delta)
+	_face_keyboard_movement(delta)
 	_process_locomotion(delta)
 
 
@@ -809,7 +798,7 @@ func _spawn_projectile(projectile_scene: PackedScene) -> void:
 	if weapon_socket != null:
 		spawn_transform = weapon_socket.global_transform
 
-	var shoot_direction := _get_shoot_direction(spawn_transform.origin)
+	var shoot_direction := _get_shoot_direction()
 
 	projectile.global_transform = Transform3D(_basis_with_y_axis(shoot_direction), spawn_transform.origin)
 
@@ -817,18 +806,8 @@ func _spawn_projectile(projectile_scene: PackedScene) -> void:
 		projectile.call("setup", shoot_direction, self)
 
 
-func _get_shoot_direction(spawn_position: Vector3) -> Vector3:
-	var shoot_direction := global_transform.basis.z.normalized()
-	if _face_control_mode != FaceControlMode.MOUSE_CURSOR:
-		return shoot_direction
-	if not _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
-		return shoot_direction
-
-	shoot_direction = _mouse_world_position - spawn_position
-	shoot_direction.y = 0.0
-	if shoot_direction.is_zero_approx():
-		return global_transform.basis.z.normalized()
-	return shoot_direction.normalized()
+func _get_shoot_direction() -> Vector3:
+	return global_transform.basis.z.normalized()
 
 
 func _basis_with_y_axis(direction: Vector3) -> Basis:
@@ -987,7 +966,7 @@ func _stop_particles_recursive(node: Node) -> float:
 	return longest_lifetime
 
 
-func _face_direction(direction: Vector3, delta: float, face_turn_speed: float = -1.0) -> void:
+func _face_direction(direction: Vector3, delta: float, turn_speed: float) -> void:
 	if direction == Vector3.ZERO:
 		return
 
@@ -1004,67 +983,15 @@ func _face_direction(direction: Vector3, delta: float, face_turn_speed: float = 
 
 	var current_yaw := atan2(current_direction.x, current_direction.z)
 	var target_yaw := atan2(target_direction.x, target_direction.z)
-	var rotation_speed := mouse_turn_speed
-	if face_turn_speed >= 0.0:
-		rotation_speed = face_turn_speed
-
-	var next_yaw := rotate_toward(current_yaw, target_yaw, rotation_speed * delta)
+	var next_yaw := rotate_toward(current_yaw, target_yaw, maxf(turn_speed, 0.0) * delta)
 	var next_direction := Vector3(sin(next_yaw), 0.0, cos(next_yaw)).normalized()
 	global_transform = global_transform.looking_at(global_position - next_direction, Vector3.UP)
-
-
-func _update_face_direction_input(delta: float) -> void:
-	var toggle_is_pressed := Input.is_physical_key_pressed(KEY_Q)
-	if toggle_is_pressed and not _face_control_toggle_was_pressed:
-		if _face_control_mode == FaceControlMode.KEY_MOVEMENT:
-			_face_control_mode = FaceControlMode.MOUSE_CURSOR
-		else:
-			_face_control_mode = FaceControlMode.KEY_MOVEMENT
-
-	_face_control_toggle_was_pressed = toggle_is_pressed
-
-	if _face_control_mode == FaceControlMode.MOUSE_CURSOR:
-		_face_mouse_cursor(delta)
-	else:
-		_face_keyboard_movement(delta)
 
 
 func _face_keyboard_movement(delta: float) -> void:
 	var movement_direction := _get_keyboard_movement()
 	if not movement_direction.is_zero_approx():
-		_face_direction(movement_direction, delta, arrow_face_turn_speed)
-
-
-func _face_mouse_cursor(delta: float) -> void:
-	if not _update_mouse_world_position_on_plane(MOUSE_AIM_PLANE_Y):
-		return
-
-	var face_direction := _mouse_world_position - global_position
-	face_direction.y = 0.0
-	_face_direction(face_direction.normalized(), delta, mouse_turn_speed)
-
-
-func is_mouse_face_control_enabled() -> bool:
-	return _face_control_mode == FaceControlMode.MOUSE_CURSOR
-
-
-func _update_mouse_world_position_on_plane(plane_y: float) -> bool:
-	var camera := get_viewport().get_camera_3d()
-	if camera == null:
-		return false
-
-	var mouse_position := get_viewport().get_mouse_position()
-	var ray_origin := camera.project_ray_origin(mouse_position)
-	var ray_direction := camera.project_ray_normal(mouse_position)
-	if absf(ray_direction.y) <= 0.001:
-		return false
-
-	var distance_to_plane := (plane_y - ray_origin.y) / ray_direction.y
-	if distance_to_plane <= 0.0:
-		return false
-
-	_mouse_world_position = ray_origin + ray_direction * distance_to_plane
-	return true
+		_face_direction(movement_direction, delta, face_turn_speed)
 
 
 func _on_animation_finished(animation_name: StringName) -> void:
@@ -1124,15 +1051,23 @@ func _setup_animation_tree() -> void:
 
 	var attack_blend := AnimationNodeBlend2.new()
 	attack_blend.filter_enabled = false
-	tree_root.add_node("AttackBlend", attack_blend, Vector2(840.0, 120.0))
-	tree_root.connect_node("AttackBlend", 0, "AttackA")
-	tree_root.connect_node("AttackBlend", 1, "AttackB")
+	tree_root.add_node("AttackSeekA", AnimationNodeTimeSeek.new(), Vector2(820.0, 80.0))
+	tree_root.connect_node("AttackSeekA", 0, "AttackA")
+	tree_root.add_node("AttackSeekB", AnimationNodeTimeSeek.new(), Vector2(820.0, 200.0))
+	tree_root.connect_node("AttackSeekB", 0, "AttackB")
+	tree_root.add_node("AttackBlend", attack_blend, Vector2(1040.0, 120.0))
+	tree_root.connect_node("AttackBlend", 0, "AttackSeekA")
+	tree_root.connect_node("AttackBlend", 1, "AttackSeekB")
+
+	var attack_time_scale := AnimationNodeTimeScale.new()
+	tree_root.add_node("AttackTimeScale", attack_time_scale, Vector2(1280.0, 120.0))
+	tree_root.connect_node("AttackTimeScale", 0, "AttackBlend")
 
 	var attack_layer_blend := AnimationNodeBlend2.new()
 	attack_layer_blend.filter_enabled = false
-	tree_root.add_node("AttackLayerBlend", attack_layer_blend, Vector2(1120.0, 0.0))
+	tree_root.add_node("AttackLayerBlend", attack_layer_blend, Vector2(1520.0, 0.0))
 	tree_root.connect_node("AttackLayerBlend", 0, "DashBlend")
-	tree_root.connect_node("AttackLayerBlend", 1, "AttackBlend")
+	tree_root.connect_node("AttackLayerBlend", 1, "AttackTimeScale")
 	tree_root.connect_node("output", 0, "AttackLayerBlend")
 
 	_animation_tree.active = true
@@ -1140,6 +1075,7 @@ func _setup_animation_tree() -> void:
 	_animation_tree.set("parameters/LocomotionBlend/blend_amount", _locomotion_blend_amount)
 	_animation_tree.set("parameters/DashBlend/blend_amount", _dash_blend_amount)
 	_animation_tree.set("parameters/AttackBlend/blend_amount", _attack_blend_amount)
+	_animation_tree.set("parameters/AttackTimeScale/scale", 1.0)
 	_animation_tree.set("parameters/AttackLayerBlend/blend_amount", _attack_layer_blend_amount)
 	_set_locomotion_animation("idle")
 
@@ -1238,11 +1174,13 @@ func _play_full_body_attack(animation_name: String) -> void:
 	if _active_attack_blend_slot == 0:
 		if _attack_animation_node_b != null:
 			_attack_animation_node_b.animation = runtime_animation_name
+		_animation_tree.set("parameters/AttackSeekB/seek_request", 0.0)
 		_active_attack_blend_slot = 1
 		_target_attack_blend_amount = 1.0
 	else:
 		if _attack_animation_node_a != null:
 			_attack_animation_node_a.animation = runtime_animation_name
+		_animation_tree.set("parameters/AttackSeekA/seek_request", 0.0)
 		_active_attack_blend_slot = 0
 		_target_attack_blend_amount = 0.0
 
