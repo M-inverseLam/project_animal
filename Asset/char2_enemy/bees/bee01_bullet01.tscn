@@ -3,8 +3,31 @@
 [ext_resource type="Script" uid="uid://3jfr3h4j5qdk" path="res://Script/projectile_bullet01.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://do3kvb2e7ojta" path="res://Asset/char2_enemy/bees/resource/bee01_bullet01.glb" id="2_2c8tb"]
 [ext_resource type="Script" uid="uid://04kj85x2r58d" path="res://Script/PingPongRotation.gd" id="3_1lbdq"]
-[ext_resource type="Material" uid="uid://c70rjp222jt72" path="res://Asset/char2_enemy/bees/resource/bee01.material" id="3_iwa12"]
 [ext_resource type="PackedScene" uid="uid://c1ol733kky3xl" path="res://Asset/sfx/hitspark/hitspark03.tscn" id="4_spark"]
+[ext_resource type="Texture2D" uid="uid://5wx8ig08iyv" path="res://Asset/char2_enemy/bees/resource/bee01.tga" id="5_1h8pr"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ina5d"]
+cull_mode = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 1)
+disable_receive_shadows = true
+grow = true
+grow_amount = 0.03
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_75h8h"]
+next_pass = SubResource("StandardMaterial3D_ina5d")
+diffuse_mode = 3
+specular_mode = 1
+vertex_color_use_as_albedo = true
+albedo_color = Color(2.2794397, 2.2794397, 2.2794397, 1)
+albedo_texture = ExtResource("5_1h8pr")
+roughness = 0.05
+rim_enabled = true
+rim = 0.97
+rim_tint = 1.0
+backlight = Color(0.35560384, 0.45013386, 0.77877706, 1)
+grow_amount = 0.02
+stencil_flags = 2
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_f16bk"]
 radius = 0.28883234
@@ -21,7 +44,7 @@ script = ExtResource("3_1lbdq")
 rotation_axis = Vector3(1, 1, 0)
 
 [node name="bee_bullet01" parent="bee01_bullet01" index="0" unique_id=163714505]
-surface_material_override/0 = ExtResource("3_iwa12")
+surface_material_override/0 = SubResource("StandardMaterial3D_75h8h")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=116655872]
 monitorable = false

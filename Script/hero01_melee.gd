@@ -12,6 +12,7 @@ extends CharacterBody3D
 @export var hit_flash_duration: float = 0.25
 @export var hit_flash_power: float = 0.5
 @export var hit_flash_color: Color = Color(1.0, 0.0, 0.0, 1.0)
+@export var damage_camera_shake_enabled: bool = false
 @export var damage_camera_shake_duration: float = 0.2
 @export var damage_camera_shake_strength: float = 0.15
 
@@ -179,6 +180,7 @@ func start_melee_hit_stop(duration: float) -> void:
 	if hit_stop_was_active:
 		return
 
+	_stabilize_camera_after_melee_hit()
 	if _animation_tree != null:
 		_animation_tree_was_active_before_hit_stop = _animation_tree.active
 		if _animation_tree_was_active_before_hit_stop:
@@ -186,6 +188,12 @@ func start_melee_hit_stop(duration: float) -> void:
 	elif animation_player != null and animation_player.is_playing():
 		_animation_player_was_playing_before_hit_stop = true
 		animation_player.pause()
+
+
+func _stabilize_camera_after_melee_hit() -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera != null and camera.has_method("stabilize_follow_motion"):
+		camera.call("stabilize_follow_motion")
 
 
 func _process_melee_hit_stop(delta: float) -> bool:
@@ -246,18 +254,27 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _get_keyboard_movement() -> Vector3:
-	var direction := Vector3.ZERO
+	var input_direction := Vector2(
+		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
+		float(Input.is_physical_key_pressed(KEY_W)) - float(Input.is_physical_key_pressed(KEY_S))
+	)
+	if input_direction.is_zero_approx():
+		return Vector3.ZERO
 
-	if Input.is_physical_key_pressed(KEY_W):
-		direction.z -= 1.0
-	if Input.is_physical_key_pressed(KEY_S):
-		direction.z += 1.0
-	if Input.is_physical_key_pressed(KEY_A):
-		direction.x -= 1.0
-	if Input.is_physical_key_pressed(KEY_D):
-		direction.x += 1.0
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return Vector3(input_direction.x, 0.0, -input_direction.y).normalized()
 
-	return direction.normalized()
+	var camera_forward := -camera.global_transform.basis.z
+	camera_forward.y = 0.0
+	var camera_right := camera.global_transform.basis.x
+	camera_right.y = 0.0
+	if camera_forward.is_zero_approx() or camera_right.is_zero_approx():
+		return Vector3(input_direction.x, 0.0, -input_direction.y).normalized()
+
+	camera_forward = camera_forward.normalized()
+	camera_right = camera_right.normalized()
+	return (camera_right * input_direction.x + camera_forward * input_direction.y).normalized()
 
 
 func _update_attack_input() -> void:
@@ -540,6 +557,9 @@ func _clear_hit_flash() -> void:
 
 
 func _shake_camera_on_damage() -> void:
+	if not damage_camera_shake_enabled:
+		return
+
 	var camera := get_viewport().get_camera_3d()
 	if camera != null and camera.has_method("shake"):
 		camera.call("shake", damage_camera_shake_duration, damage_camera_shake_strength)

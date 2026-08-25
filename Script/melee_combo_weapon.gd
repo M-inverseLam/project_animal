@@ -8,6 +8,9 @@ extends Node3D
 @export var hit_spark_scene: PackedScene
 @export_range(-10.0, 10.0, 0.1, "suffix:m") var hit_spark_height: float = 0.8
 
+@export_group("Hit Collision")
+@export_range(0.0, 1.0, 0.01, "suffix:s") var collision_cooldown_time: float = 0.05
+
 @export_group("Hit Overlay")
 @export var hit_overlay_enabled: bool = true
 @export var hit_overlay_color: Color = Color.WHITE
@@ -22,6 +25,8 @@ extends Node3D
 var _source: Node
 var _attack_direction := Vector3.FORWARD
 var _hit_stop_duration := 0.1
+var _collision_is_enabled := true
+var _collision_cooldown_time_left := 0.0
 var _hit_targets: Dictionary = {}
 var _hit_stop_time_left := 0.0
 var _animation_was_playing_before_hit_stop := false
@@ -49,6 +54,8 @@ func setup(source: Node, attack_direction: Vector3, hit_stop_duration: float = 0
 
 
 func _process(delta: float) -> void:
+	_update_collision_cooldown(maxf(delta, 0.0))
+
 	if _hit_stop_time_left <= 0.0:
 		return
 
@@ -75,6 +82,8 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 
 
 func _on_hit_target(target: Node) -> void:
+	if not _collision_is_enabled:
+		return
 	if target == null or target == self or target == _source:
 		return
 	if _source != null and (target.is_ancestor_of(_source) or _source.is_ancestor_of(target)):
@@ -94,9 +103,34 @@ func _on_hit_target(target: Node) -> void:
 		damage_target.call("take_attack_hit", _attack_direction, damage, impact_weight)
 	else:
 		damage_target.call("take_damage", damage)
+	if damage_target.has_method("start_melee_hit_stop"):
+		damage_target.call("start_melee_hit_stop", _hit_stop_duration)
 	_apply_hit_overlay(damage_target)
 	_spawn_hit_spark(target)
 	_start_hit_stop()
+	_start_collision_cooldown()
+
+
+func _start_collision_cooldown() -> void:
+	_set_hit_collision_enabled(false)
+	_collision_cooldown_time_left = maxf(collision_cooldown_time, 0.0)
+	if _collision_cooldown_time_left <= 0.0:
+		call_deferred("_set_hit_collision_enabled", true)
+
+
+func _update_collision_cooldown(delta: float) -> void:
+	if _collision_is_enabled or _collision_cooldown_time_left <= 0.0:
+		return
+
+	_collision_cooldown_time_left = maxf(_collision_cooldown_time_left - delta, 0.0)
+	if _collision_cooldown_time_left <= 0.0:
+		_set_hit_collision_enabled(true)
+
+
+func _set_hit_collision_enabled(is_enabled: bool) -> void:
+	_collision_is_enabled = is_enabled
+	if hit_area != null:
+		hit_area.set_deferred("monitoring", is_enabled)
 
 
 func _apply_hit_overlay(damage_target: Node) -> void:

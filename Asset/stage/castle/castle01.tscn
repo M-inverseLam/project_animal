@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://27dbmplqek24"]
+
+[ext_resource type="PackedScene" uid="uid://cbovseo1e5dyf" path="res://Asset/stage/castle/castle_floor01.glb" id="1_3pvqf"]
+[ext_resource type="Texture2D" uid="uid://d0pyf0x6iw28b" path="res://Asset/stage/castle/stage_castle01.tga" id="2_3pvqf"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cxkj7"]
+albedo_texture = ExtResource("2_3pvqf")
+
+[node name="castlefloor01" type="Node3D" unique_id=1187278167]
+
+[node name="castlefloor01" parent="." unique_id=1987132927 instance=ExtResource("1_3pvqf")]
+
+[node name="castlefloor01" parent="castlefloor01" index="0" unique_id=213167775]
+surface_material_override/0 = SubResource("StandardMaterial3D_cxkj7")
+
+[editable path="castlefloor01"]

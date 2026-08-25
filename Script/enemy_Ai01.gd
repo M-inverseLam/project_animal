@@ -83,12 +83,6 @@ static var _shared_health_bar_shader: Shader
 @export var shoot_projectile_spawn_delay: float = 0.15
 @export var shoot_along_face_direction: bool = false
 
-@export_group("Hero Spacing")
-@export var avoid_hero_when_too_close: bool = true
-@export var minimum_hero_distance: float = 2.0
-@export var retreat_from_hero_speed: float = 4.0
-@export var retreat_from_hero_duration: float = 0.5
-
 @export_group("Overlap Avoidance")
 @export var avoid_enemy_overlap: bool = false
 @export var overlap_avoidance_radius: float = 1.2
@@ -102,11 +96,6 @@ static var _shared_health_bar_shader: Shader
 @export var attack_hit_push_slowdown_power: float = 2.0
 @export var hit_flash_duration: float = 0.25
 @export var hit_flash_power: float = 0.5
-@export var face_hit_push_direction: bool = true
-@export var dash_hit_push_distance: float = 3.0
-@export var dash_hit_push_duration: float = 0.5
-@export var dash_hit_push_slowdown_power: float = 3.0
-@export var dash_hit_damage_duration: float = 1.0
 
 @export_group("Damage Number")
 @export var damage_number_height: float = 1.6
@@ -149,14 +138,6 @@ var _chase_direction_angle_offset := 0.0
 var _chase_direction_change_time_left := 0.0
 var _current_animation := ""
 var _detected_player: Node3D
-var _damage_state_time_left := 0.0
-var _damage_push_direction := Vector3.ZERO
-var _damage_push_elapsed := 0.0
-var _damage_push_distance_ratio := 0.0
-var _damage_push_distance := 0.0
-var _damage_push_duration := 0.0
-var _damage_push_slowdown_power := 1.0
-var _damage_hold_duration := 0.0
 var _attack_hit_push_direction := Vector3.ZERO
 var _attack_hit_push_elapsed := 0.0
 var _attack_hit_push_distance_ratio := 0.0
@@ -167,7 +148,10 @@ var _is_dead := false
 var _attack_elapsed := 0.0
 var _attack_projectile_was_spawned := false
 var _shoot_projectile_spawns: Array[Node3D] = []
-var _retreat_target: Node3D
+var _melee_hit_stop_time_left := 0.0
+var _melee_hit_stop_animation_was_playing := false
+var _melee_hit_stop_animation_name := StringName()
+var _melee_hit_stop_animation_position := 0.0
 
 
 func _ready() -> void:
@@ -190,20 +174,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _state == "dash_damage_push":
-		_process_dash_damage_push(delta)
-		return
-	if _state == "dash_damage_hold":
-		_process_dash_damage_hold(delta)
+	if _process_melee_hit_stop(delta):
 		return
 	_process_attack_hit_push(delta)
 	_apply_overlap_avoidance(delta)
-	if _state == "retreat_from_hero":
-		_process_retreat_from_hero(delta)
-		return
-	if _try_start_retreat_from_hero():
-		_process_retreat_from_hero(delta)
-		return
 	if _state == "run_away":
 		_process_run_away(delta)
 		return
@@ -235,50 +209,53 @@ func _physics_process(delta: float) -> void:
 				_start_idle()
 
 
-func _try_start_retreat_from_hero() -> bool:
-	if not avoid_hero_when_too_close or minimum_hero_distance <= 0.0:
+func start_melee_hit_stop(duration: float) -> void:
+	if _is_dead:
+		return
+
+	duration = maxf(duration, 0.0)
+	if duration <= 0.0:
+		return
+
+	var hit_stop_was_active := _melee_hit_stop_time_left > 0.0
+	_melee_hit_stop_time_left = maxf(_melee_hit_stop_time_left, duration)
+	if hit_stop_was_active:
+		return
+
+	_play_animation(damage_animation_name, true)
+	if animation_player != null and animation_player.is_playing():
+		_melee_hit_stop_animation_was_playing = true
+		_melee_hit_stop_animation_name = animation_player.current_animation
+		_melee_hit_stop_animation_position = animation_player.current_animation_position
+		animation_player.pause()
+
+
+func _process_melee_hit_stop(delta: float) -> bool:
+	if _melee_hit_stop_time_left <= 0.0:
 		return false
 
-	var hero: Node3D = _find_ai_target()
-	if hero == null:
-		return false
-
-	var offset: Vector3 = global_position - hero.global_position
-	offset.y = 0.0
-	if offset.length_squared() >= minimum_hero_distance * minimum_hero_distance:
-		return false
-
-	_retreat_target = hero
-	_state = "retreat_from_hero"
-	_state_time_left = maxf(retreat_from_hero_duration, 0.0)
-	_play_animation(walk_animation_name)
+	_melee_hit_stop_time_left = maxf(_melee_hit_stop_time_left - maxf(delta, 0.0), 0.0)
+	if _melee_hit_stop_time_left <= 0.0:
+		_finish_melee_hit_stop()
 	return true
 
 
-func _process_retreat_from_hero(delta: float) -> void:
-	if _retreat_target == null or not is_instance_valid(_retreat_target):
-		_finish_retreat_from_hero()
+func _finish_melee_hit_stop() -> void:
+	_melee_hit_stop_time_left = 0.0
+	if _is_dead or not _melee_hit_stop_animation_was_playing:
+		_clear_melee_hit_stop_animation_state()
 		return
 
-	var retreat_direction: Vector3 = global_position - _retreat_target.global_position
-	retreat_direction.y = 0.0
-	if retreat_direction == Vector3.ZERO:
-		retreat_direction = global_transform.basis.z
-	retreat_direction = retreat_direction.normalized()
-
-	global_position += retreat_direction * maxf(retreat_from_hero_speed, 0.0) * _get_offscreen_speed_multiplier() * delta
-	_face_direction(retreat_direction, delta)
-	_state_time_left -= delta
-	if _state_time_left <= 0.0:
-		_finish_retreat_from_hero()
+	if animation_player != null and animation_player.has_animation(_melee_hit_stop_animation_name):
+		animation_player.play(_melee_hit_stop_animation_name)
+		animation_player.seek(_melee_hit_stop_animation_position, true)
+	_clear_melee_hit_stop_animation_state()
 
 
-func _finish_retreat_from_hero() -> void:
-	_retreat_target = null
-	if use_weighted_ai:
-		_start_weighted_decision()
-	else:
-		_start_idle()
+func _clear_melee_hit_stop_animation_state() -> void:
+	_melee_hit_stop_animation_was_playing = false
+	_melee_hit_stop_animation_name = StringName()
+	_melee_hit_stop_animation_position = 0.0
 
 
 func _start_run_away(player: Node3D) -> void:
@@ -447,24 +424,6 @@ func _stop_run_away(player: Node3D) -> void:
 	_resume_idle_or_run_away()
 
 
-func _start_hit_damage(push_direction: Vector3, push_distance: float, push_duration: float, slowdown_power: float, hold_duration: float) -> void:
-	_clear_attack_hit_push()
-	if push_direction == Vector3.ZERO:
-		push_direction = global_transform.basis.z
-
-	_detected_player = null
-	_state = "dash_damage_push"
-	_damage_state_time_left = push_duration
-	_damage_push_direction = push_direction.normalized()
-	_damage_push_elapsed = 0.0
-	_damage_push_distance_ratio = 0.0
-	_damage_push_distance = push_distance
-	_damage_push_duration = push_duration
-	_damage_push_slowdown_power = slowdown_power
-	_damage_hold_duration = hold_duration
-	_play_animation(damage_animation_name, true)
-
-
 func _start_attack_hit_push(push_direction: Vector3, push_distance: float, push_duration: float, slowdown_power: float) -> void:
 	if push_direction == Vector3.ZERO:
 		push_direction = global_transform.basis.z
@@ -498,43 +457,6 @@ func _clear_attack_hit_push() -> void:
 	_attack_hit_push_distance_ratio = 0.0
 	_attack_hit_push_distance = 0.0
 	_attack_hit_push_duration = 0.0
-
-
-func _process_dash_damage_push(delta: float) -> void:
-	if _damage_push_duration <= 0.0 or _damage_push_distance <= 0.0:
-		_start_dash_damage_hold()
-		return
-
-	_damage_push_elapsed = minf(_damage_push_elapsed + delta, _damage_push_duration)
-	var progress := _damage_push_elapsed / _damage_push_duration
-	var slowdown_power := maxf(_damage_push_slowdown_power, 1.0)
-	var distance_ratio := 1.0 - pow(1.0 - progress, slowdown_power)
-	var frame_distance := (distance_ratio - _damage_push_distance_ratio) * _damage_push_distance
-
-	global_position += _damage_push_direction * frame_distance
-	if face_hit_push_direction:
-		_face_direction(_damage_push_direction, delta)
-	_damage_push_distance_ratio = distance_ratio
-	_damage_state_time_left -= delta
-
-	if _damage_state_time_left <= 0.0:
-		_start_dash_damage_hold()
-
-
-func _start_dash_damage_hold() -> void:
-	_state = "dash_damage_hold"
-	_damage_state_time_left = _damage_hold_duration
-	_damage_push_direction = Vector3.ZERO
-	_damage_push_elapsed = 0.0
-	_damage_push_distance_ratio = 0.0
-	_play_animation(damage_animation_name, true)
-
-
-func _process_dash_damage_hold(delta: float) -> void:
-	_damage_state_time_left -= delta
-
-	if _damage_state_time_left <= 0.0:
-		_resume_idle_or_run_away()
 
 
 func _resume_idle_or_run_away() -> void:
@@ -615,9 +537,6 @@ func _face_direction(direction: Vector3, delta: float) -> void:
 func _on_player_detection_body_entered(body: Node3D) -> void:
 	if use_weighted_ai:
 		return
-	if _state == "dash_damage_push" or _state == "dash_damage_hold":
-		return
-
 	var player := _get_detected_chicken(body)
 	if player != null:
 		_start_run_away(player)
@@ -744,12 +663,6 @@ func take_attack_hit(direction: Vector3, damage: int, impact_weight: float = 1.0
 		var push_multiplier: float = maxf(impact_weight, 0.0) / maxf(knockback_resistance, 0.1)
 		var push_distance: float = attack_hit_push_distance * push_multiplier
 		_start_attack_hit_push(direction, push_distance, attack_hit_push_duration, attack_hit_push_slowdown_power)
-
-
-func take_dash_hit(direction: Vector3, damage: int) -> void:
-	_apply_damage(damage)
-	if health > 0:
-		_start_hit_damage(direction, dash_hit_push_distance, dash_hit_push_duration, dash_hit_push_slowdown_power, dash_hit_damage_duration)
 
 
 func _apply_damage(damage: int) -> void:

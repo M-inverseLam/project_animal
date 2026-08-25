@@ -33,7 +33,6 @@ overlap_avoidance_radius = 2.0
 knockback_resistance = 4.0
 attack_hit_push_duration = 0.8
 hit_flash_power = 0.2
-face_hit_push_direction = false
 damage_number_font = ExtResource("2_a8hjb")
 damage_number_font_size = 120
 damage_number_color = Color(1, 1, 1, 1)

@@ -15,6 +15,11 @@ func take_attack_hit(direction: Vector3, damage: int, impact_weight: float = 1.0
 		damage_target.call("take_attack_hit", direction, damage, impact_weight)
 
 
+func start_melee_hit_stop(duration: float) -> void:
+	if damage_target != null and damage_target.has_method("start_melee_hit_stop"):
+		damage_target.call("start_melee_hit_stop", duration)
+
+
 func take_dash_hit(direction: Vector3, damage: int) -> void:
 	if damage_target != null and damage_target.has_method("take_dash_hit"):
 		damage_target.call("take_dash_hit", direction, damage)

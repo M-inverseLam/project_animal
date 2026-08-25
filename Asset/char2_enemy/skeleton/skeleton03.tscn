@@ -33,7 +33,6 @@ shoot_projectile_spawn_delay = 0.3
 avoid_enemy_overlap = true
 overlap_avoidance_radius = 2.5
 attack_hit_push_distance = 0.5
-face_hit_push_direction = false
 damage_number_duration = 1.0
 damage_number_font = ExtResource("3_k4tsv")
 damage_number_font_size = 120

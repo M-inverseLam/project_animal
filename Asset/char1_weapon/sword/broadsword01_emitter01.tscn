@@ -50,5 +50,4 @@ point_count = 2
 script = ExtResource("1_emitter")
 combo_attacks = Array[ExtResource("4_combo_data")]([SubResource("Resource_combo1"), SubResource("Resource_combo2"), SubResource("Resource_combo3")])
 combo_continue_time = 0.5
-hit_stop_time = 0.05
 dash_speed_curve = SubResource("Curve_dash_speed")

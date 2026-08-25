@@ -31,7 +31,6 @@ shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
 shoot_projectile_spawn_delay = 0.35
 avoid_enemy_overlap = true
 overlap_avoidance_radius = 2.5
-face_hit_push_direction = false
 damage_number_font = ExtResource("2_2l4vn")
 damage_number_font_size = 120
 damage_number_color = Color(1, 0.5294118, 0.2509804, 1)

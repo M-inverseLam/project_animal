@@ -101,6 +101,8 @@ transform = Transform3D(-1, 0, -8.742278e-08, 8.742278e-08, -4.371139e-08, -1, -
 script = ExtResource("7_melee")
 damage = 4
 hit_spark_scene = ExtResource("8_hitspark")
+collision_cooldown_time = 0.2
+hit_overlay_duration = 0.2
 
 [node name="sfx_trail01" parent="." unique_id=492285075 instance=ExtResource("1_vxk7h")]
 transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, -0.06658089)

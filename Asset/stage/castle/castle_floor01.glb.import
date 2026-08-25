@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cbovseo1e5dyf"
-path="res://.godot/imported/floor01.glb-7344600eaf2bdf751bacfc595c94e6ff.scn"
+path="res://.godot/imported/castle_floor01.glb-bf29057719dd8d470e423e9ce7dea138.scn"
 
 [deps]
 
-source_file="res://Asset/stage/castle/floor01.glb"
-dest_files=["res://.godot/imported/floor01.glb-7344600eaf2bdf751bacfc595c94e6ff.scn"]
+source_file="res://Asset/stage/castle/castle_floor01.glb"
+dest_files=["res://.godot/imported/castle_floor01.glb-bf29057719dd8d470e423e9ce7dea138.scn"]
 
 [params]
 

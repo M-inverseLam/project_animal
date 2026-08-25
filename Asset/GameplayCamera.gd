@@ -5,6 +5,7 @@ extends Camera3D
 ## A Y value of 0 keeps the target centered for the selected camera angle.
 @export var follow_offset := Vector3(0.0, 0.0, 25.622486)
 @export_range(-89.0, 0.0, 0.5, "degrees") var camera_angle: float = -45.0
+@export_range(-180.0, 180.0, 0.5, "degrees") var camera_yaw: float = 45.0
 @export var spring_strength: float = 35.0
 @export var spring_damping: float = 10.0
 
@@ -25,7 +26,7 @@ func _ready() -> void:
 	_rng.randomize()
 	_target = get_node_or_null(target_path) as Node3D
 	current = true
-	rotation_degrees.x = camera_angle
+	rotation_degrees = Vector3(camera_angle, camera_yaw, 0.0)
 
 	if _target != null:
 		_follow_position = _target.global_position + _get_centered_follow_offset()
@@ -54,7 +55,9 @@ func _physics_process(delta: float) -> void:
 
 func _get_centered_follow_offset() -> Vector3:
 	var centered_height := tan(deg_to_rad(-camera_angle)) * follow_offset.z
-	return Vector3(follow_offset.x, centered_height + follow_offset.y, follow_offset.z)
+	var yaw_rotation := Basis(Vector3.UP, deg_to_rad(camera_yaw))
+	var horizontal_offset := yaw_rotation * Vector3(follow_offset.x, 0.0, follow_offset.z)
+	return horizontal_offset + Vector3.UP * (centered_height + follow_offset.y)
 
 
 func shake(duration: float, strength: float) -> void:
@@ -74,6 +77,10 @@ func shake(duration: float, strength: float) -> void:
 
 func shake_camera() -> void:
 	shake(camera_shake_duration, camera_shake_strength)
+
+
+func stabilize_follow_motion() -> void:
+	_velocity = Vector3.ZERO
 
 
 func _calculate_shake_offset(delta: float) -> Vector3:
