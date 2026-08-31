@@ -3,6 +3,8 @@ extends Resource
 
 @export var animation_name: StringName
 @export var weapon_scene: PackedScene
+@export_range(0.0, 1.0, 0.01, "suffix:s") var hit_stop_time: float = 0.1
+@export_range(0.0, 100.0, 0.1) var knockback_power: float = 1.0
 @export_range(0.0, 100.0, 0.1, "suffix:m/s") var move_speed: float = 5.0
 @export_range(0.0, 10.0, 0.01, "suffix:s") var move_time: float = 0.2
 ## X is normalized movement time and Y is movement speed. The curve is normalized

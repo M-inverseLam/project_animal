@@ -24,6 +24,7 @@ script = ExtResource("3_nhh1a")
 target_path = NodePath("../../hero_witch01")
 follow_offset = Vector3(0, 0, 50)
 camera_angle = -40.0
+spring_damping = 40.0
 camera_shake_duration = 0.7
 camera_shake_strength = 0.07
 

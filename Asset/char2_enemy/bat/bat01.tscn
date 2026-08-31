@@ -9,8 +9,16 @@
 [ext_resource type="PackedScene" uid="uid://c5svw8lgdf8um" path="res://Asset/item/gems01.tscn" id="4_4612p"]
 [ext_resource type="Script" uid="uid://b1ojnhxl6n76k" path="res://Script/enemy_damage_receiver.gd" id="6_ybxyf"]
 
+[sub_resource type="Curve" id="Curve_728op"]
+_data = [Vector2(0, 1), 0.0, -1.0, 0, 1, Vector2(1, 0), -1.0, 0.0, 1, 0]
+point_count = 2
+
 [sub_resource type="SphereShape3D" id="SphereShape3D_4612p"]
 radius = 0.61037946
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_c55nt"]
+height = 3.2700195
+radius = 2.854004
 
 [node name="bat01" type="Node3D" unique_id=735882526 groups=["enemy"]]
 script = ExtResource("1_tqs77")
@@ -23,12 +31,16 @@ chase_speed = 2.8
 use_weighted_ai = true
 ai_idle_weight = 40.0
 ai_chase_weight = 40.0
-ai_attack_weight = 0.0
+ai_attack_weight = 40.0
+detect_hero_chase_weight = 0.0
+detect_hero_attack_weight = 80.0
 shoot_projectile_scene = ExtResource("2_hqtwy")
 shoot_projectile_spawn_paths = Array[NodePath]([NodePath("shootposition")])
 shoot_along_face_direction = true
 avoid_enemy_overlap = true
 overlap_avoidance_radius = 2.5
+knockback_resistance = 0.25
+knockback_speed_curve = SubResource("Curve_728op")
 damage_number_font = ExtResource("3_c55nt")
 damage_number_font_size = 120
 damage_number_color = Color(1, 0.5294118, 0.2509804, 1)
@@ -37,7 +49,7 @@ death_drop_scene = ExtResource("4_4612p")
 
 [node name="bat01" parent="." unique_id=250050164 instance=ExtResource("1_njgib")]
 
-[node name="body" parent="bat01/Armature/Skeleton3D" parent_id_path=PackedInt32Array(250050164, 1523361326) index="0" unique_id=126147477]
+[node name="body" parent="bat01/Armature/Skeleton3D" parent_id_path=PackedInt32Array(250050164, 933112530) index="0" unique_id=151995000]
 surface_material_override/0 = ExtResource("2_tqs77")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=485845199]
@@ -49,5 +61,15 @@ shape = SubResource("SphereShape3D_4612p")
 
 [node name="shootposition" type="Marker3D" parent="." unique_id=1551695331]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.8546848)
+
+[node name="DetectHero" type="Area3D" parent="." unique_id=1508976860]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DetectHero" unique_id=1760654200]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.63500977, 0)
+shape = SubResource("CylinderShape3D_c55nt")
 
 [editable path="bat01"]

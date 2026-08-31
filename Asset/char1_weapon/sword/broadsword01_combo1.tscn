@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://ck4fcar682ew2"]
 
 [ext_resource type="PackedScene" uid="uid://cgtbyf3cppreg" path="res://Asset/sfx/trail01/sfx_trail01.glb" id="1_vxk7h"]
+[ext_resource type="PackedScene" uid="uid://dfudrwogre5so" path="res://Asset/sfx/hitspark/hitspark_sword01.tscn" id="2_3god8"]
 [ext_resource type="Material" uid="uid://dovjr8n3627rl" path="res://Asset/sfx/trail01/trail01.material" id="3_f8yhy"]
 [ext_resource type="PackedScene" uid="uid://d1hulquddn0r7" path="res://Asset/char1_weapon/sword/broadsword01.glb" id="5_3god8"]
 [ext_resource type="Material" uid="uid://dtukltf1uaerq" path="res://Asset/char1_weapon/sword/broadsword01.material" id="6_hro2a"]
 [ext_resource type="Script" uid="uid://caowvembpy8ia" path="res://Script/melee_combo_weapon.gd" id="7_melee"]
-[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="8_hitspark"]
 
 [sub_resource type="Animation" id="Animation_wuwc5"]
 length = 0.001
@@ -100,7 +100,7 @@ radius = 1.0
 transform = Transform3D(-1, 0, -8.742278e-08, 8.742278e-08, -4.371139e-08, -1, -3.821371e-15, -1, 4.371139e-08, 0, 0, 0)
 script = ExtResource("7_melee")
 damage = 4
-hit_spark_scene = ExtResource("8_hitspark")
+hit_spark_scene = ExtResource("2_3god8")
 collision_cooldown_time = 0.2
 hit_overlay_duration = 0.2
 

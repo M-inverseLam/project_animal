@@ -1,0 +1,70 @@
+[gd_scene format=3 uid="uid://dfudrwogre5so"]
+
+[ext_resource type="Script" uid="uid://csxqxjwn4ghtk" path="res://Script/hitspark01_random_rotation.gd" id="1_w71f3"]
+[ext_resource type="Texture2D" uid="uid://cjmukda843r2n" path="res://Asset/sfx/hitspark/hitspark_sword01.tga" id="2_w71f3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_045xd"]
+transparency = 1
+blend_mode = 1
+vertex_color_use_as_albedo = true
+albedo_color = Color(3.40468, 6.3697457, 11.375001, 1)
+albedo_texture = ExtResource("2_w71f3")
+albedo_texture_force_srgb = true
+proximity_fade_enabled = true
+
+[sub_resource type="Curve" id="Curve_pvq37"]
+_data = [Vector2(0, 0), 0.0, 8.68631, 0, 0, Vector2(0.21122113, 1), -1.339804, -1.339804, 0, 0, Vector2(1, 0), -0.19021758, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_77ytl"]
+curve = SubResource("Curve_pvq37")
+
+[sub_resource type="Curve" id="Curve_angle"]
+_limits = [-360.0, 360.0, 0.0, 1.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_045xd"]
+curve = SubResource("Curve_angle")
+
+[sub_resource type="Gradient" id="Gradient_72e4x"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_72e4x"]
+gradient = SubResource("Gradient_72e4x")
+
+[sub_resource type="Curve" id="Curve_bmp2w"]
+_data = [Vector2(0.0030030012, 0.015037537), 0.0, 3.5767996, 0, 0, Vector2(0.24624625, 0.66917294), 0.62087697, 0.62087697, 0, 0, Vector2(1, 1), 0.4292154, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_krbaf"]
+curve = SubResource("Curve_bmp2w")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bmp2w"]
+angle_min = -180.0
+angle_max = 180.0
+angle_curve = SubResource("CurveTexture_045xd")
+use_rotation_3d = true
+rotation_3d_min = Vector3(0, 0, -180)
+rotation_3d_max = Vector3(0, 0, 180)
+gravity = Vector3(0, 0, 0)
+scale_max = 1.5
+scale_curve = SubResource("CurveTexture_krbaf")
+color_ramp = SubResource("GradientTexture1D_72e4x")
+alpha_curve = SubResource("CurveTexture_77ytl")
+
+[sub_resource type="QuadMesh" id="QuadMesh_svfu8"]
+size = Vector2(15, 15)
+
+[node name="Node3D" type="Node3D" unique_id=822129534]
+script = ExtResource("1_w71f3")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=293211926]
+material_override = SubResource("StandardMaterial3D_045xd")
+cast_shadow = 0
+emitting = false
+amount = 1
+lifetime = 0.7
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_bmp2w")
+draw_pass_1 = SubResource("QuadMesh_svfu8")

@@ -25,23 +25,23 @@ weapon_emitter_scene = ExtResource("2_u0jn3")
 
 [node name="hero_witch01" parent="." unique_id=429408375 instance=ExtResource("1_0yhgf")]
 
-[node name="arm_cloth" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="0" unique_id=1534727292]
+[node name="arm_cloth" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1363117177) index="0" unique_id=2099872639]
 surface_material_override/0 = ExtResource("2_g2xt5")
 
-[node name="head" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="1" unique_id=592042872]
+[node name="head" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1363117177) index="1" unique_id=733519266]
 surface_material_override/0 = ExtResource("2_g2xt5")
 surface_material_override/1 = ExtResource("3_5pwcs")
 
-[node name="body" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="2" unique_id=1860317822]
+[node name="body" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1363117177) index="2" unique_id=1828981058]
 surface_material_override/0 = ExtResource("4_u0jn3")
 
-[node name="body_belt" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="3" unique_id=873774630]
+[node name="body_belt" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1363117177) index="3" unique_id=262189748]
 surface_material_override/0 = ExtResource("4_u0jn3")
 
-[node name="belt_lock" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="4" unique_id=88085501]
+[node name="belt_lock" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1363117177) index="4" unique_id=2049285136]
 surface_material_override/0 = ExtResource("4_u0jn3")
 
-[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1125385531) index="5" unique_id=186338045]
+[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="hero_witch01/rig/Skeleton3D" parent_id_path=PackedInt32Array(429408375, 1363117177) index="5" unique_id=186338045]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43512607, -0.075978085)
 setting_count = 2
 settings/0/root_bone_name = "hairtail1.L"

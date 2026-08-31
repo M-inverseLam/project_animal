@@ -76,6 +76,10 @@ static var _shared_health_bar_shader: Shader
 @export_range(0.0, 45.0, 0.1, "suffix:deg") var chase_direction_angle: float = 12.0
 @export var chase_direction_change_time_range: Vector2 = Vector2(0.4, 0.9)
 
+@export_group("Detect Hero")
+@export var detect_hero_chase_weight: float = 0.0
+@export var detect_hero_attack_weight: float = 80.0
+
 @export_group("Attack State")
 @export var attack_time_range: Vector2 = Vector2(0.5, 0.8)
 @export var shoot_projectile_scene: PackedScene
@@ -91,9 +95,10 @@ static var _shared_health_bar_shader: Shader
 
 @export_group("Hit Reaction")
 @export var knockback_resistance: float = 1.0
-@export var attack_hit_push_distance: float = 1.0
-@export var attack_hit_push_duration: float = 0.25
-@export var attack_hit_push_slowdown_power: float = 2.0
+@export_range(0.0, 100.0, 0.1, "suffix:m/s") var knockback_speed: float = 4.0
+@export_range(0.0, 10.0, 0.01, "suffix:s") var knockback_time: float = 0.25
+## X is normalized knockback time and Y is normalized speed from 0 to 1.
+@export var knockback_speed_curve: Curve = _create_default_knockback_speed_curve()
 @export var hit_flash_duration: float = 0.25
 @export var hit_flash_power: float = 0.5
 
@@ -120,6 +125,7 @@ static var _shared_health_bar_shader: Shader
 @onready var visual_root := get_node_or_null("mouse01") as Node3D
 @onready var animation_player := find_child("AnimationPlayer", true, false) as AnimationPlayer
 @onready var player_detection := get_node_or_null("playerdetection") as Area3D
+@onready var detect_hero := get_node_or_null("DetectHero") as Area3D
 
 var health := 0
 var _health_bar: MeshInstance3D
@@ -138,12 +144,12 @@ var _chase_direction_angle_offset := 0.0
 var _chase_direction_change_time_left := 0.0
 var _current_animation := ""
 var _detected_player: Node3D
-var _attack_hit_push_direction := Vector3.ZERO
-var _attack_hit_push_elapsed := 0.0
-var _attack_hit_push_distance_ratio := 0.0
-var _attack_hit_push_distance := 0.0
-var _attack_hit_push_duration := 0.0
-var _attack_hit_push_slowdown_power := 1.0
+var _knockback_direction := Vector3.ZERO
+var _knockback_elapsed := 0.0
+var _knockback_distance_ratio := 0.0
+var _knockback_total_distance := 0.0
+var _knockback_duration := 0.0
+var _active_knockback_speed_curve: Curve
 var _is_dead := false
 var _attack_elapsed := 0.0
 var _attack_projectile_was_spawned := false
@@ -152,10 +158,17 @@ var _melee_hit_stop_time_left := 0.0
 var _melee_hit_stop_animation_was_playing := false
 var _melee_hit_stop_animation_name := StringName()
 var _melee_hit_stop_animation_position := 0.0
+var _is_playing_melee_damage_animation := false
+var _melee_damage_animation_time_left := 0.0
+var _default_ai_chase_weight := 0.0
+var _default_ai_attack_weight := 0.0
+var _hero_is_inside_detect_area := false
 
 
 func _ready() -> void:
 	_rng.randomize()
+	_default_ai_chase_weight = ai_chase_weight
+	_default_ai_attack_weight = ai_attack_weight
 	health = max_health
 	_create_enemy_health_bar()
 	if visual_root != null:
@@ -164,6 +177,11 @@ func _ready() -> void:
 	if player_detection != null:
 		player_detection.body_entered.connect(_on_player_detection_body_entered)
 		player_detection.body_exited.connect(_on_player_detection_body_exited)
+	if detect_hero != null:
+		detect_hero.body_entered.connect(_on_detect_hero_body_entered)
+		detect_hero.body_exited.connect(_on_detect_hero_body_exited)
+	if animation_player != null:
+		animation_player.animation_finished.connect(_on_enemy_animation_finished)
 	_cache_shoot_projectile_spawns()
 	if avoid_enemy_overlap:
 		add_to_group(OVERLAP_AVOIDANCE_GROUP)
@@ -174,9 +192,13 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _process_melee_hit_stop(delta):
+	var melee_hit_stop_is_active := _process_melee_hit_stop(delta)
+	_process_hit_knockback(delta)
+	if melee_hit_stop_is_active:
 		return
-	_process_attack_hit_push(delta)
+	if _is_playing_melee_damage_animation:
+		_process_melee_damage_animation(delta)
+		return
 	_apply_overlap_avoidance(delta)
 	if _state == "run_away":
 		_process_run_away(delta)
@@ -214,15 +236,21 @@ func start_melee_hit_stop(duration: float) -> void:
 		return
 
 	duration = maxf(duration, 0.0)
-	if duration <= 0.0:
-		return
-
 	var hit_stop_was_active := _melee_hit_stop_time_left > 0.0
 	_melee_hit_stop_time_left = maxf(_melee_hit_stop_time_left, duration)
 	if hit_stop_was_active:
 		return
 
-	_play_animation(damage_animation_name, true)
+	if animation_player != null and animation_player.has_animation(damage_animation_name):
+		_is_playing_melee_damage_animation = true
+		_melee_damage_animation_time_left = maxf(
+			animation_player.get_animation(damage_animation_name).length,
+			0.0
+		)
+		_play_animation(damage_animation_name, true)
+	if duration <= 0.0:
+		return
+
 	if animation_player != null and animation_player.is_playing():
 		_melee_hit_stop_animation_was_playing = true
 		_melee_hit_stop_animation_name = animation_player.current_animation
@@ -256,6 +284,46 @@ func _clear_melee_hit_stop_animation_state() -> void:
 	_melee_hit_stop_animation_was_playing = false
 	_melee_hit_stop_animation_name = StringName()
 	_melee_hit_stop_animation_position = 0.0
+
+
+func _on_enemy_animation_finished(animation_name: StringName) -> void:
+	if not _is_playing_melee_damage_animation:
+		return
+	if animation_name != StringName(damage_animation_name):
+		return
+
+	_finish_melee_damage_animation()
+
+
+func _process_melee_damage_animation(delta: float) -> void:
+	_melee_damage_animation_time_left = maxf(
+		_melee_damage_animation_time_left - maxf(delta, 0.0),
+		0.0
+	)
+	if _melee_damage_animation_time_left <= 0.0:
+		_finish_melee_damage_animation()
+
+
+func _finish_melee_damage_animation() -> void:
+	if not _is_playing_melee_damage_animation:
+		return
+
+	_is_playing_melee_damage_animation = false
+	_melee_damage_animation_time_left = 0.0
+	_resume_current_state_animation()
+
+
+func _resume_current_state_animation() -> void:
+	if _is_dead:
+		return
+
+	match _state:
+		"walk", "chase", "run_away":
+			_play_animation(walk_animation_name)
+		"attack":
+			_play_animation(attack_animation_name)
+		_:
+			_play_animation(idle_animation_name)
 
 
 func _start_run_away(player: Node3D) -> void:
@@ -424,39 +492,72 @@ func _stop_run_away(player: Node3D) -> void:
 	_resume_idle_or_run_away()
 
 
-func _start_attack_hit_push(push_direction: Vector3, push_distance: float, push_duration: float, slowdown_power: float) -> void:
-	if push_direction == Vector3.ZERO:
-		push_direction = global_transform.basis.z
+func _start_hit_knockback(direction: Vector3, speed: float, duration: float, speed_curve: Curve) -> void:
+	if direction == Vector3.ZERO:
+		direction = global_transform.basis.z
 
-	_attack_hit_push_direction = push_direction.normalized()
-	_attack_hit_push_elapsed = 0.0
-	_attack_hit_push_distance_ratio = 0.0
-	_attack_hit_push_distance = maxf(push_distance, 0.0)
-	_attack_hit_push_duration = maxf(push_duration, 0.0)
-	_attack_hit_push_slowdown_power = maxf(slowdown_power, 1.0)
+	_knockback_direction = direction.normalized()
+	_knockback_elapsed = 0.0
+	_knockback_distance_ratio = 0.0
+	_knockback_duration = maxf(duration, 0.0)
+	_knockback_total_distance = maxf(speed, 0.0) * _knockback_duration
+	_active_knockback_speed_curve = speed_curve
 
 
-func _process_attack_hit_push(delta: float) -> void:
-	if _attack_hit_push_duration <= 0.0 or _attack_hit_push_distance <= 0.0:
+func _process_hit_knockback(delta: float) -> void:
+	if _knockback_duration <= 0.0 or _knockback_total_distance <= 0.0:
 		return
 
-	_attack_hit_push_elapsed = minf(_attack_hit_push_elapsed + delta, _attack_hit_push_duration)
-	var progress: float = _attack_hit_push_elapsed / _attack_hit_push_duration
-	var distance_ratio: float = 1.0 - pow(1.0 - progress, _attack_hit_push_slowdown_power)
-	var frame_distance: float = (distance_ratio - _attack_hit_push_distance_ratio) * _attack_hit_push_distance
+	_knockback_elapsed = minf(_knockback_elapsed + maxf(delta, 0.0), _knockback_duration)
+	var progress := _knockback_elapsed / _knockback_duration
+	var distance_ratio := _sample_speed_curve_distance_ratio(_active_knockback_speed_curve, progress)
+	distance_ratio = maxf(distance_ratio, _knockback_distance_ratio)
+	var frame_distance := maxf(distance_ratio - _knockback_distance_ratio, 0.0) * _knockback_total_distance
 
-	global_position += _attack_hit_push_direction * frame_distance
-	_attack_hit_push_distance_ratio = distance_ratio
-	if _attack_hit_push_elapsed >= _attack_hit_push_duration:
-		_clear_attack_hit_push()
+	global_position += _knockback_direction * frame_distance
+	_knockback_distance_ratio = distance_ratio
+	if _knockback_elapsed >= _knockback_duration:
+		_clear_hit_knockback()
 
 
-func _clear_attack_hit_push() -> void:
-	_attack_hit_push_direction = Vector3.ZERO
-	_attack_hit_push_elapsed = 0.0
-	_attack_hit_push_distance_ratio = 0.0
-	_attack_hit_push_distance = 0.0
-	_attack_hit_push_duration = 0.0
+func _sample_speed_curve_distance_ratio(speed_curve: Curve, progress: float) -> float:
+	progress = clampf(progress, 0.0, 1.0)
+	if speed_curve == null:
+		return progress
+
+	const INTEGRATION_STEPS := 32
+	var total_area := 0.0
+	var traveled_area := 0.0
+	var previous_time := 0.0
+	var previous_speed := maxf(speed_curve.sample_baked(0.0), 0.0)
+	for step in range(1, INTEGRATION_STEPS + 1):
+		var current_time := float(step) / float(INTEGRATION_STEPS)
+		var current_speed := maxf(speed_curve.sample_baked(current_time), 0.0)
+		var step_area := (previous_speed + current_speed) * 0.5 * (current_time - previous_time)
+		total_area += step_area
+
+		if progress >= current_time:
+			traveled_area += step_area
+		elif progress > previous_time:
+			var step_progress := (progress - previous_time) / (current_time - previous_time)
+			var speed_at_progress := lerpf(previous_speed, current_speed, step_progress)
+			traveled_area += (previous_speed + speed_at_progress) * 0.5 * (progress - previous_time)
+
+		previous_time = current_time
+		previous_speed = current_speed
+
+	if total_area <= 0.000001:
+		return 0.0
+	return clampf(traveled_area / total_area, 0.0, 1.0)
+
+
+func _clear_hit_knockback() -> void:
+	_knockback_direction = Vector3.ZERO
+	_knockback_elapsed = 0.0
+	_knockback_distance_ratio = 0.0
+	_knockback_total_distance = 0.0
+	_knockback_duration = 0.0
+	_active_knockback_speed_curve = null
 
 
 func _resume_idle_or_run_away() -> void:
@@ -540,6 +641,35 @@ func _on_player_detection_body_entered(body: Node3D) -> void:
 	var player := _get_detected_chicken(body)
 	if player != null:
 		_start_run_away(player)
+
+
+func _on_detect_hero_body_entered(body: Node3D) -> void:
+	if _hero_is_inside_detect_area or not _is_ai_target(body):
+		return
+
+	_hero_is_inside_detect_area = true
+	ai_chase_weight = maxf(detect_hero_chase_weight, 0.0)
+	ai_attack_weight = maxf(detect_hero_attack_weight, 0.0)
+	if use_weighted_ai and _state == "chase":
+		_start_weighted_decision()
+
+
+func _on_detect_hero_body_exited(body: Node3D) -> void:
+	if not _hero_is_inside_detect_area or not _is_ai_target(body):
+		return
+
+	_hero_is_inside_detect_area = false
+	ai_chase_weight = _default_ai_chase_weight
+	ai_attack_weight = _default_ai_attack_weight
+
+
+func _is_ai_target(node: Node) -> bool:
+	var current := node
+	while current != null:
+		if current is Node3D and current.name == target_node_name:
+			return true
+		current = current.get_parent()
+	return false
 
 
 func _on_player_detection_body_exited(body: Node3D) -> void:
@@ -660,9 +790,8 @@ func take_damage(damage: int) -> void:
 func take_attack_hit(direction: Vector3, damage: int, impact_weight: float = 1.0) -> void:
 	_apply_damage(damage)
 	if health > 0:
-		var push_multiplier: float = maxf(impact_weight, 0.0) / maxf(knockback_resistance, 0.1)
-		var push_distance: float = attack_hit_push_distance * push_multiplier
-		_start_attack_hit_push(direction, push_distance, attack_hit_push_duration, attack_hit_push_slowdown_power)
+		var speed_multiplier: float = maxf(impact_weight, 0.0) / maxf(knockback_resistance, 0.1)
+		_start_hit_knockback(direction, knockback_speed * speed_multiplier, knockback_time, knockback_speed_curve)
 
 
 func _apply_damage(damage: int) -> void:
@@ -893,3 +1022,10 @@ func _play_animation(animation_name: String, force_restart := false) -> void:
 
 	animation_player.play(animation_name, animation_blend_time)
 	_current_animation = animation_name
+
+
+static func _create_default_knockback_speed_curve() -> Curve:
+	var curve := Curve.new()
+	curve.add_point(Vector2(0.0, 1.0))
+	curve.add_point(Vector2(1.0, 0.0))
+	return curve

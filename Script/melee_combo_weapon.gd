@@ -46,9 +46,15 @@ func _ready() -> void:
 		get_tree().create_timer(maxf(fallback_lifetime, 0.01)).timeout.connect(queue_free)
 
 
-func setup(source: Node, attack_direction: Vector3, hit_stop_duration: float = 0.1) -> void:
+func setup(
+	source: Node,
+	attack_direction: Vector3,
+	hit_stop_duration: float = 0.1,
+	knockback_power: float = 1.0
+) -> void:
 	_source = source
 	_hit_stop_duration = maxf(hit_stop_duration, 0.0)
+	impact_weight = maxf(knockback_power, 0.0)
 	if not attack_direction.is_zero_approx():
 		_attack_direction = attack_direction.normalized()
 

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://0gtgxp71p58u"]
 
 [ext_resource type="PackedScene" uid="uid://cgtbyf3cppreg" path="res://Asset/sfx/trail01/sfx_trail01.glb" id="1_2wtc5"]
-[ext_resource type="PackedScene" uid="uid://bqbkuf2hbun18" path="res://Asset/sfx/hitspark/hitspark01.tscn" id="2_ni8nj"]
+[ext_resource type="PackedScene" uid="uid://dfudrwogre5so" path="res://Asset/sfx/hitspark/hitspark_sword01.tscn" id="2_ni8nj"]
 [ext_resource type="Material" uid="uid://dovjr8n3627rl" path="res://Asset/sfx/trail01/trail01.material" id="3_n5p27"]
 [ext_resource type="PackedScene" uid="uid://d1hulquddn0r7" path="res://Asset/char1_weapon/sword/broadsword01.glb" id="5_fm81v"]
 [ext_resource type="Material" uid="uid://dtukltf1uaerq" path="res://Asset/char1_weapon/sword/broadsword01.material" id="6_n3w6q"]
